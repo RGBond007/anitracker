@@ -1,6 +1,7 @@
+import asyncio
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -72,7 +73,11 @@ async def list_entries(
 
 @router.post("", response_model=EntryOut, status_code=status.HTTP_201_CREATED)
 async def create_entry(
-    payload: EntryCreate, user: CurrentUser, db: DbSession, registry: Registry
+    payload: EntryCreate,
+    request: Request,
+    user: CurrentUser,
+    db: DbSession,
+    registry: Registry,
 ) -> ListEntry:
     try:
         media = await media_service.get_or_fetch(
@@ -100,7 +105,29 @@ async def create_entry(
     _auto_dates(entry, previous=None)
     db.add(entry)
     await db.commit()
+
+    # Numbering the season chain can cost a provider call per unseen season, so it
+    # runs after the response instead of making the user wait to add one title.
+    _schedule_chain_resolution(request, media.provider, media.provider_id, media.type.value)
+
     return await _load(db, user.id, entry.id)
+
+
+def _schedule_chain_resolution(request: Request, provider: str, provider_id: str, type_: str):
+    async def run() -> None:
+        from app import season_chain
+        from app.db import SessionLocal
+
+        async with SessionLocal() as session:
+            row = await media_service.get_or_fetch(
+                session, request.app.state.registry, provider, provider_id, type_
+            )
+            await season_chain.resolve(session, request.app.state.registry, row)
+            await session.commit()
+
+    task = asyncio.create_task(run())
+    request.app.state.background_tasks.add(task)
+    task.add_done_callback(request.app.state.background_tasks.discard)
 
 
 @router.get("/by-media/{provider}/{provider_id}", response_model=EntryOut | None)

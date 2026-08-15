@@ -87,6 +87,22 @@
   .tabular {
     @apply font-mono tabular-nums;
   }
+
+  .brand-light-only {
+    display: none !important;
+  }
+
+  [data-theme="light"] .brand-dark-only {
+    display: none !important;
+  }
+
+  [data-theme="light"] .brand-light-only {
+    display: block !important;
+  }
+
+  [data-theme="light"] .brand-light-lockup {
+    display: flex !important;
+  }
 }
 
 @layer components {

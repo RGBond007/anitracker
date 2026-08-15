@@ -22,6 +22,7 @@ _MEDIA_FIELDS = """
   chapters
   duration
   seasonYear
+  season
   averageScore
   genres
   synonyms
@@ -29,6 +30,7 @@ _MEDIA_FIELDS = """
   title { romaji english native }
   coverImage { extraLarge large medium color }
   bannerImage
+  relations { edges { relationType node { id type format } } }
 """
 
 SEARCH_QUERY = (
@@ -107,11 +109,34 @@ class AniListProvider(MediaProvider):
             raise ProviderError("; ".join(messages))
         return payload.get("data") or {}
 
+    @staticmethod
+    def _chain_links(node: dict, media_type: str) -> tuple[str | None, str | None]:
+        """
+        The direct prequel and sequel, if they are the same medium and a real season
+        rather than a special. AniList hangs OVAs, movies and recaps off the same
+        `relations` edge, and treating a recap as "Staffel 2" would be worse than
+        showing nothing.
+        """
+        seasonish = {"TV", "TV_SHORT", "ONA"}
+        prequel = sequel = None
+        for edge in (node.get("relations") or {}).get("edges") or []:
+            child = edge.get("node") or {}
+            if (child.get("type") or "").lower() != media_type.upper().lower():
+                continue
+            if child.get("format") not in seasonish:
+                continue
+            if edge.get("relationType") == "PREQUEL" and prequel is None:
+                prequel = str(child["id"])
+            elif edge.get("relationType") == "SEQUEL" and sequel is None:
+                sequel = str(child["id"])
+        return prequel, sequel
+
     def _to_record(self, node: dict) -> MediaRecord:
         media_type = (node.get("type") or "ANIME").lower()
         cover = node.get("coverImage") or {}
         title = node.get("title") or {}
         total = node.get("episodes") if media_type == "anime" else node.get("chapters")
+        prequel, sequel = self._chain_links(node, media_type)
         return MediaRecord(
             provider=self.name,
             provider_id=str(node["id"]),
@@ -132,6 +157,9 @@ class AniListProvider(MediaProvider):
             format=node.get("format"),
             status=node.get("status"),
             season_year=node.get("seasonYear"),
+            season=node.get("season"),
+            prequel_id=prequel,
+            sequel_id=sequel,
             genres=list(node.get("genres") or []),
             average_score=node.get("averageScore"),
             duration=node.get("duration"),

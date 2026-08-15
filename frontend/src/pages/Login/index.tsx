@@ -21,6 +21,9 @@ export function LoginPage() {
 
   const pending = login.isPending || register.isPending;
   const error = login.error ?? register.error;
+  const instanceName = instance?.instance_name ?? "AniTrack";
+  const usesDefaultBrand =
+    !instance?.logo_url && (instanceName === "AniTrack" || instanceName === "AniTracker");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +41,15 @@ export function LoginPage() {
   return (
     <div className="grid min-h-dvh place-items-center px-4 py-10">
       <Panel className="w-full max-w-sm p-6">
-        <h1 className="font-display text-[22px] font-bold tracking-[-0.01em]">
-          {instance?.instance_name ?? "AniTrack"}
+        {usesDefaultBrand && (
+          <img
+            src="/logo.png"
+            alt="AniTracker"
+            className="brand-dark-only h-auto w-full max-w-[260px]"
+          />
+        )}
+        <h1 className={`${usesDefaultBrand ? "brand-light-only " : ""}font-display text-[22px] font-bold tracking-[-0.01em]`}>
+          {instanceName}
         </h1>
         <p className="mt-1 text-sm text-text-dim">{t("auth.subtitle")}</p>
 

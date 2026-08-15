@@ -109,6 +109,12 @@ class MediaOut(ORM):
     format: str | None = None
     status: str | None = None
     season_year: int | None = None
+    season: str | None = None
+    #: Position in its season chain, and the id every season of the show shares.
+    #: Both null until the chain has been resolved, or for a standalone title.
+    season_number: int | None = None
+    root_provider_id: str | None = None
+    sequel_id: str | None = None
     genres: list[str] = []
     average_score: int | None = None
     duration: int | None = None

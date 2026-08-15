@@ -6,10 +6,11 @@ import type { EntryStatus, MediaType } from "../../lib/api-client";
 import { useEntries } from "../../features/media/useMedia";
 import { useUiStore } from "../../stores/uiStore";
 import { useStatusLabel } from "../../components/media/statusLabels";
-import { Poster } from "../../components/media/Poster";
 import { PosterGrid, SectionHead } from "../../components/layout/Rail";
 import { Button, Chip } from "../../components/ui/Button";
 import { PosterRow } from "../../components/media/PosterRow";
+import { FranchiseCard } from "../../components/media/FranchiseCard";
+import { groupByFranchise } from "../../lib/franchise";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { Segmented, Select } from "../../components/ui/Input";
@@ -125,9 +126,11 @@ export function ListViewPage() {
           ))}
         </div>
       ) : (
+        // One card per show. A season that is not part of a chain is a chain of
+        // one, so nothing is lost by always grouping.
         <PosterGrid>
-          {data.map((entry) => (
-            <Poster key={entry.id} media={entry.media} entry={entry} lang={lang} />
+          {groupByFranchise(data).map((franchise) => (
+            <FranchiseCard key={franchise.key} franchise={franchise} lang={lang} />
           ))}
         </PosterGrid>
       )}

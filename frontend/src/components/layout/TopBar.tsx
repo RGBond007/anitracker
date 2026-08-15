@@ -60,6 +60,9 @@ export function TopBar() {
   // count rides the nav rather than only existing on the page itself.
   const { data: friends } = useFriends();
   const pending = friends?.incoming.length ?? 0;
+  const instanceName = instance?.instance_name ?? "AniTrack";
+  const usesDefaultBrand =
+    !instance?.logo_url && (instanceName === "AniTrack" || instanceName === "AniTracker");
 
   const links = [
     { to: "/", label: t("nav.dashboard"), end: true, badge: 0 },
@@ -72,14 +75,30 @@ export function TopBar() {
     <header>
       <div className="wrap flex items-center justify-between gap-6 py-5">
         <NavLink to="/" className="flex shrink-0 items-center gap-[9px] pointer-coarse:min-h-[44px]">
-          {instance?.logo_url ? (
+          {usesDefaultBrand ? (
+            <>
+              <img
+                src="/logo.png"
+                alt="AniTracker"
+                className="brand-dark-only h-8 w-auto max-w-[150px] object-contain"
+              />
+              <span className="brand-light-only brand-light-lockup items-center gap-[9px]">
+                <img src="/icon-192.png" alt="" className="h-6 w-6 rounded-[6px]" />
+                <span className="font-display text-[15px] font-bold tracking-[0.02em]">
+                  {instanceName.toUpperCase()}
+                </span>
+              </span>
+            </>
+          ) : instance?.logo_url ? (
             <img src={instance.logo_url} alt="" className="h-6 w-6 rounded-[6px]" />
           ) : (
             <span aria-hidden className="h-6 w-6 rounded-[6px] bg-stamp" />
           )}
-          <span className="font-display text-[15px] font-bold tracking-[0.02em]">
-            {(instance?.instance_name ?? "AniTrack").toUpperCase()}
-          </span>
+          {!usesDefaultBrand && (
+            <span className="font-display text-[15px] font-bold tracking-[0.02em]">
+              {instanceName.toUpperCase()}
+            </span>
+          )}
         </NavLink>
 
         <nav className="hidden gap-[30px] sm:flex">

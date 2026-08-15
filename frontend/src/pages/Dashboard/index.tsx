@@ -9,6 +9,8 @@ import { useEntries, useIncrementEntry } from "../../features/media/useMedia";
 import { useUiStore } from "../../stores/uiStore";
 import { PosterGrid, Rail, RailItem, SectionHead } from "../../components/layout/Rail";
 import { AddPoster, Poster } from "../../components/media/Poster";
+import { FranchiseCard } from "../../components/media/FranchiseCard";
+import { groupByFranchise } from "../../lib/franchise";
 import { Hero } from "../../components/media/Hero";
 import { Schedule, useSchedule } from "../../components/media/Schedule";
 import { Button, Chip } from "../../components/ui/Button";
@@ -240,9 +242,11 @@ export function DashboardPage() {
             <EmptyState>{t("list.empty")}</EmptyState>
           ) : (
             <PosterGrid>
-              {library.data.slice(0, 18).map((entry) => (
-                <Poster key={entry.id} media={entry.media} entry={entry} lang={lang} />
-              ))}
+              {groupByFranchise(library.data)
+                .slice(0, 18)
+                .map((franchise) => (
+                  <FranchiseCard key={franchise.key} franchise={franchise} lang={lang} />
+                ))}
             </PosterGrid>
           )}
         </section>

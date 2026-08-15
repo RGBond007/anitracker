@@ -42,6 +42,11 @@ class MediaRecord:
     format: str | None = None
     status: str | None = None
     season_year: int | None = None
+    season: str | None = None  # WINTER | SPRING | SUMMER | FALL
+    # Direct neighbours in the season chain, as provider ids. Only the immediate
+    # links are stored; the full chain is walked from these.
+    prequel_id: str | None = None
+    sequel_id: str | None = None
     genres: list[str] = field(default_factory=list)
     average_score: int | None = None
     duration: int | None = None

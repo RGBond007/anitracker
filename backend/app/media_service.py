@@ -58,6 +58,9 @@ def _apply(row: MediaCache, record: MediaRecord) -> MediaCache:
     row.format = record.format
     row.status = record.status
     row.season_year = record.season_year
+    row.season = record.season
+    row.prequel_id = record.prequel_id
+    row.sequel_id = record.sequel_id
     row.genres = record.genres
     row.average_score = record.average_score
     row.duration = record.duration

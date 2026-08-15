@@ -272,5 +272,10 @@
     "tomorrow": "Tomorrow",
     "episode": "Episode {{n}}",
     "behind": "{{count}} behind"
+  },
+  "season": {
+    "short": "Staffel {{n}}",
+    "owned": "{{count}} Staffeln",
+    "start": "Staffel {{n}} starten"
   }
 }

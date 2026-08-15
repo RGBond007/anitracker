@@ -26,6 +26,11 @@ export interface Media {
   format?: string | null;
   status?: string | null;
   season_year?: number | null;
+  season?: string | null;
+  /** Position in the show's season chain, and the id every season shares. */
+  season_number?: number | null;
+  root_provider_id?: string | null;
+  sequel_id?: string | null;
   genres: string[];
   average_score?: number | null;
   duration?: number | null;

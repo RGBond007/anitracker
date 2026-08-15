@@ -113,6 +113,16 @@ class MediaCache(Base):
     format: Mapped[str | None] = mapped_column(String(32))
     status: Mapped[str | None] = mapped_column(String(32))
     season_year: Mapped[int | None] = mapped_column(Integer)
+    season: Mapped[str | None] = mapped_column(String(16))
+
+    # --- Season chain -----------------------------------------------------
+    # Direct neighbours as provider ids, straight from the provider.
+    prequel_id: Mapped[str | None] = mapped_column(String(64))
+    sequel_id: Mapped[str | None] = mapped_column(String(64))
+    # Derived by walking prequels to the first season: every entry in one chain
+    # shares `root_provider_id`, which is what the library groups on.
+    root_provider_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    season_number: Mapped[int | None] = mapped_column(Integer)
     genres: Mapped[list[str]] = mapped_column(StringArray, default=list)
     average_score: Mapped[int | None] = mapped_column(Integer)
     duration: Mapped[int | None] = mapped_column(Integer)  # minutes per episode
