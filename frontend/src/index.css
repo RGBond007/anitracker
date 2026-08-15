@@ -1,0 +1,149 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+/* Lets components opt into touch-only sizing, e.g. `pointer-coarse:min-h-[44px]`. */
+@custom-variant pointer-coarse (@media (pointer: coarse));
+
+/* Self-hosted and bundled at build time — no request ever leaves the instance.
+   Every face carries its own `unicode-range`, so a browser rendering an English or
+   German UI downloads the Latin subsets and nothing else. */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource/space-grotesk/latin-500.css";
+@import "@fontsource/space-grotesk/latin-600.css";
+@import "@fontsource/space-grotesk/latin-700.css";
+
+/**
+ * `--color-*: initial` wipes Tailwind's default palette, so `bg-slate-500` and
+ * friends do not exist. The only reachable colours are the tokens below.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-ink-800: var(--ink-800);
+  --color-gutter: var(--gutter);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-paper-faint: var(--paper-faint);
+  --color-stamp: var(--stamp);
+  --color-stamp-text: var(--stamp-text);
+
+  /* Semantic aliases — components reach for these, so light mode works without
+     a single `dark:` variant in the codebase. */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-faint: var(--text-faint);
+  --color-control-line: var(--control-line);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+
+  --font-*: initial;
+  --font-display: "Space Grotesk", "Inter Variable", system-ui, sans-serif;
+  --font-sans: "Inter Variable", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+
+  --radius-poster: var(--r-poster);
+  --radius-control: var(--r-control);
+  --radius-pill: var(--r-pill);
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  html {
+    /* iOS inflates text in landscape unless told not to. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-text antialiased;
+    font-synthesis-weight: none;
+    /* The grey flash Safari paints over any tapped element. `:focus-visible`
+       still shows a real focus ring, so nothing is lost for keyboard users. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--stamp);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--stamp);
+    color: var(--ink-950);
+  }
+
+  /* Counts, scores and progress fractions are data, not prose. */
+  .tabular {
+    @apply font-mono tabular-nums;
+  }
+}
+
+@layer components {
+  /* The page column. One value, so every section lines up down the page.
+     The safe-area insets matter once the app is added to a home screen: in
+     standalone mode iOS draws under the notch and the home indicator. */
+  .wrap {
+    @apply mx-auto w-full max-w-[1280px] px-5 sm:px-11;
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  @media (min-width: 640px) {
+    .wrap {
+      padding-left: max(2.75rem, env(safe-area-inset-left));
+      padding-right: max(2.75rem, env(safe-area-inset-right));
+    }
+  }
+
+  /* Horizontal rails hide the scrollbar but stay scrollable and keyboard-reachable. */
+  .rail {
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Swiping a rail on a phone should land on a card, not halfway between two. */
+  @media (pointer: coarse) {
+    .rail {
+      scroll-snap-type: x proximity;
+      scroll-padding-left: 1.25rem;
+    }
+    .rail > * {
+      scroll-snap-align: start;
+    }
+  }
+
+  /**
+   * Touch targets. Apple asks for 44pt, Android for 48dp; the compact buttons in
+   * list rows are ~28px, which is a miss on a phone even when it looks fine.
+   */
+  @media (pointer: coarse) {
+    button,
+    a[role="button"],
+    [type="button"],
+    [type="submit"] {
+      min-height: 44px;
+    }
+  }
+}
+
+@layer base {
+  /* The popup is drawn by the OS, which does not inherit the page's tokens — an
+     unstyled option list renders dark-on-dark on Windows and Linux. */
+  option {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+}

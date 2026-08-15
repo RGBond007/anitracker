@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<myanimelist>
+  <myinfo>
+    <user_id>1234</user_id>
+    <user_name>testuser</user_name>
+    <user_total_anime>3</user_total_anime>
+  </myinfo>
+  <anime>
+    <series_animedb_id>16498</series_animedb_id>
+    <series_title><![CDATA[Shingeki no Kyojin]]></series_title>
+    <my_watched_episodes>25</my_watched_episodes>
+    <my_start_date>2013-04-10</my_start_date>
+    <my_finish_date>2013-09-30</my_finish_date>
+    <my_score>9</my_score>
+    <my_status>Completed</my_status>
+    <my_times_watched>2</my_times_watched>
+    <my_comments><![CDATA[Season 1 is peak.]]></my_comments>
+  </anime>
+  <anime>
+    <series_animedb_id>1535</series_animedb_id>
+    <series_title><![CDATA[Death Note]]></series_title>
+    <my_watched_episodes>12</my_watched_episodes>
+    <my_start_date>0000-00-00</my_start_date>
+    <my_finish_date>0000-00-00</my_finish_date>
+    <my_score>0</my_score>
+    <my_status>Watching</my_status>
+    <my_times_watched>0</my_times_watched>
+    <my_comments><![CDATA[]]></my_comments>
+  </anime>
+  <anime>
+    <series_animedb_id>9999</series_animedb_id>
+    <series_title><![CDATA[Unknown Status Show]]></series_title>
+    <my_watched_episodes>0</my_watched_episodes>
+    <my_score>0</my_score>
+    <my_status>Bogus</my_status>
+  </anime>
+  <manga>
+    <series_mangadb_id>11</series_mangadb_id>
+    <series_title><![CDATA[Berserk]]></series_title>
+    <my_read_chapters>364</my_read_chapters>
+    <my_start_date>2015-01-01</my_start_date>
+    <my_finish_date>0000-00-00</my_finish_date>
+    <my_score>10</my_score>
+    <my_status>Reading</my_status>
+    <my_times_read>1</my_times_read>
+  </manga>
+</myanimelist>

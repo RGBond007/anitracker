@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "mal_id": 16498,
+      "title": "Shingeki no Kyojin",
+      "title_english": "Attack on Titan",
+      "title_japanese": "進撃の巨人",
+      "titles": [
+        {"type": "Default", "title": "Shingeki no Kyojin"},
+        {"type": "English", "title": "Attack on Titan"},
+        {"type": "Japanese", "title": "進撃の巨人"},
+        {"type": "Synonym", "title": "AoT"}
+      ],
+      "images": {"jpg": {"image_url": "https://cdn/aot.jpg", "large_image_url": "https://cdn/aot-l.jpg"}},
+      "synopsis": "Centuries ago, mankind was slaughtered.",
+      "episodes": 25,
+      "type": "TV",
+      "status": "Finished Airing",
+      "year": 2013,
+      "score": 8.54,
+      "duration": "24 min per ep",
+      "genres": [{"name": "Action"}, {"name": "Drama"}]
+    }
+  ]
+}

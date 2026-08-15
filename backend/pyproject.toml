@@ -1,0 +1,55 @@
+[project]
+name = "anitrack"
+version = "1.0.0"
+description = "Self-hosted anime & manga tracker"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "pydantic>=2.9",
+    "email-validator>=2.2",
+    "pydantic-settings>=2.6",
+    "pyjwt>=2.10",
+    "argon2-cffi>=23.1",
+    "httpx>=0.28",
+    "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "respx>=0.22",
+    "aiosqlite>=0.20",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app", "app.providers", "app.routers", "app.importers"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# B008 is how FastAPI declares Query/File/Depends defaults -- not a bug here.
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# The GraphQL documents interpolate a shared field block; f-strings would collide
+# with GraphQL's own braces.
+"app/providers/anilist.py" = ["UP031"]
+# aclose() is an optional no-op hook, deliberately concrete on the ABC.
+"app/providers/base.py" = ["B027"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

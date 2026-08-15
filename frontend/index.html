@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- `viewport-fit=cover` lets the page reach the screen edges on notched
+         iPhones; `.wrap` pads itself back out with the safe-area insets. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <!-- Browser chrome follows the theme instead of always being dark. -->
+    <meta name="theme-color" content="#f1ece1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0c10" media="(prefers-color-scheme: dark)" />
+
+    <!-- Added to a home screen, this runs without Safari's chrome. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AniTrack" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>AniTrack</title>
+    <script>
+      // Set before first paint so there is no flash of the wrong theme.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("anitrack-theme") || "dark";
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

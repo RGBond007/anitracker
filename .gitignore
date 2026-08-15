@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+
+# Secrets & local state
+.env
+*.sql.gz
+docker/data/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+tsconfig.tsbuildinfo

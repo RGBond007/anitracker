@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">AniTrack</title>
+  <desc id="desc">A gold letter A combining a play symbol and progress checkmark on a near-black tile.</desc>
+
+  <rect width="512" height="512" rx="112" fill="#0d0c10"/>
+
+  <!-- The outer A identifies AniTrack. -->
+  <path
+    d="M126 388 244 133c8-18 27-18 36 0l106 255"
+    fill="none"
+    stroke="#d4af37"
+    stroke-width="56"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Media playback. -->
+  <path d="m225 220 62 36-62 36Z" fill="#d4af37"/>
+
+  <!-- Tracked progress doubles as the A's crossbar. -->
+  <path
+    d="m199 313 62 56 143-138"
+    fill="none"
+    stroke="#d4af37"
+    stroke-width="46"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

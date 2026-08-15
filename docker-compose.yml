@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-anitrack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-anitrack}
+      POSTGRES_DB: ${POSTGRES_DB:-anitrack}
+    volumes:
+      # Named volume, never a bind mount into a throwaway path: this is your data.
+      - anitrack-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-anitrack} -d ${POSTGRES_DB:-anitrack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    # Builds from this checkout. Once you publish an image, swap these two lines:
+    #   image: ghcr.io/<you>/anitrack:latest
+    build: .
+    image: anitrack:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-anitrack}:${POSTGRES_PASSWORD:-anitrack}@db:5432/${POSTGRES_DB:-anitrack}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env — see .env.example}
+      ALLOW_SIGNUP: ${ALLOW_SIGNUP:-true}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      INSTANCE_NAME: ${INSTANCE_NAME:-AniTrack}
+      LOGO_URL: ${LOGO_URL:-}
+      ACCENT_COLOR: ${ACCENT_COLOR:-#8b5cf6}
+      LICENSE_KEY: ${LICENSE_KEY:-}
+      MEDIA_CACHE_TTL_DAYS: ${MEDIA_CACHE_TTL_DAYS:-7}
+      PROVIDER_ORDER: ${PROVIDER_ORDER:-anilist,jikan,kitsu}
+    ports:
+      - "${PORT:-8000}:8000"
+
+volumes:
+  anitrack-db:

@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "id": "7442",
+      "attributes": {
+        "canonicalTitle": "Attack on Titan",
+        "titles": {"en": "Attack on Titan", "en_jp": "Shingeki no Kyojin", "ja_jp": "進撃の巨人"},
+        "abbreviatedTitles": ["AoT"],
+        "synopsis": "Humanity lives inside walls.",
+        "episodeCount": 25,
+        "episodeLength": 24,
+        "subtype": "TV",
+        "status": "finished",
+        "startDate": "2013-04-07",
+        "averageRating": "84.31",
+        "posterImage": {"medium": "https://kitsu/aot-m.jpg", "large": "https://kitsu/aot-l.jpg"},
+        "coverImage": {"large": "https://kitsu/aot-cover.jpg"}
+      }
+    }
+  ]
+}

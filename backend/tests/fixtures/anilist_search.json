@@ -1,0 +1,44 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 16498,
+          "idMal": 16498,
+          "type": "ANIME",
+          "format": "TV",
+          "status": "FINISHED",
+          "episodes": 25,
+          "chapters": null,
+          "duration": 24,
+          "seasonYear": 2013,
+          "averageScore": 84,
+          "genres": ["Action", "Drama", "Fantasy"],
+          "synonyms": ["進撃の巨人", "AoT"],
+          "description": "Several hundred years ago, humans were <b>nearly</b> exterminated by Titans.",
+          "title": {"romaji": "Shingeki no Kyojin", "english": "Attack on Titan", "native": "進撃の巨人"},
+          "coverImage": {"extraLarge": "https://img/aot-xl.jpg", "large": "https://img/aot-l.jpg", "medium": "https://img/aot-m.jpg", "color": "#e4a15d"},
+          "bannerImage": "https://img/aot-banner.jpg"
+        },
+        {
+          "id": 20958,
+          "idMal": 25777,
+          "type": "ANIME",
+          "format": "TV",
+          "status": "FINISHED",
+          "episodes": 12,
+          "chapters": null,
+          "duration": 24,
+          "seasonYear": 2015,
+          "averageScore": 78,
+          "genres": ["Action", "Drama"],
+          "synonyms": [],
+          "description": "Second season.",
+          "title": {"romaji": "Shingeki no Kyojin 2", "english": null, "native": "進撃の巨人2"},
+          "coverImage": {"extraLarge": null, "large": "https://img/aot2-l.jpg", "medium": "https://img/aot2-m.jpg", "color": null},
+          "bannerImage": null
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,77 @@
+/**
+ * Design tokens. Dark is the primary design and the reference mock is dark-only;
+ * light re-roles the same hexes so no off-palette colour is ever introduced.
+ */
+
+:root,
+[data-theme="dark"] {
+  --ink-950: #0d0c10;
+  --ink-900: #131217;
+  --ink-800: #1a1820;
+  --gutter: #28242f;
+  --paper: #f1ece1;
+  --paper-dim: #9c93aa;
+  --paper-faint: #5e5670;
+  --stamp: #d4af37;
+  --stamp-text: #e4c158;
+
+  --bg: var(--ink-950);
+  --surface: var(--ink-800);
+  --line: var(--gutter);
+  --text: var(--paper);
+  --text-dim: var(--paper-dim);
+  --text-faint: var(--paper-faint);
+
+  /* A border that identifies a control must clear WCAG 1.4.11's 3:1;
+     `gutter` on the page ground is far below it, so controls step up. */
+  --control-line: var(--paper-dim);
+
+  /* Translucent hairline for controls that sit on artwork (the hero's ghost
+     button). Paper-tinted rather than `paper-dim`, which reads violet against
+     warm banner art; 40% composites to 3.4:1 on `ink-950`, so it still clears
+     1.4.11 where an opaque `control-line` would look heavy. */
+  --hairline: rgb(241 236 225 / 0.4);
+  --hairline-strong: rgb(241 236 225 / 0.65);
+
+  /* Space-separated on purpose: this is consumed as `rgb(var(--scrim) / <alpha>)`,
+     and the slash form is only legal with space-separated channels. Commas here
+     produce `rgb(13, 12, 16/1)`, which invalidates the whole declaration. */
+  --scrim: 13 12 16;
+  --shadow-poster: 0 10px 26px -12px rgb(0 0 0 / 0.7);
+  --rim: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+/**
+ * Light: paper ground, ink marks. `paper-faint` carries both the dim and faint
+ * text roles here — `paper-dim` only reaches 2.5:1 on paper, which is not
+ * readable, so light trades a step of hierarchy for legibility.
+ */
+[data-theme="light"] {
+  --bg: var(--paper);
+  --surface: #ffffff;
+  --line: #ded7c8;
+  --text: var(--ink-950);
+  --text-dim: var(--paper-faint);
+  --text-faint: var(--paper-faint);
+  --control-line: var(--paper-faint);
+  --hairline: rgb(13 12 16 / 0.28);
+  --hairline-strong: rgb(13 12 16 / 0.5);
+
+  --scrim: 241 236 225;
+  --shadow-poster: 0 10px 26px -14px rgb(13 12 16 / 0.35);
+  --rim: inset 0 0 0 1px rgb(13 12 16 / 0.08);
+}
+
+:root {
+  --r-poster: 9px;
+  --r-control: 8px;
+  --r-pill: 20px;
+
+  --motion-lift: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-lift: 0ms;
+  }
+}
