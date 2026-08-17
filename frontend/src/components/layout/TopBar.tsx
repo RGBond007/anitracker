@@ -77,14 +77,19 @@ export function TopBar() {
         <NavLink to="/" className="flex shrink-0 items-center gap-[9px] pointer-coarse:min-h-[44px]">
           {usesDefaultBrand ? (
             <>
+              {/* The mark is 8:3, so height drives the width: h-11 is ~117px, still
+                  inside the max-width guard. Held back a step on a phone, where the
+                  bar also carries the search, logout and account controls. */}
               <img
                 src="/logo.png"
                 alt="AniTracker"
-                className="brand-dark-only h-8 w-auto max-w-[150px] object-contain"
+                className="brand-dark-only h-9 w-auto max-w-[150px] object-contain sm:h-11"
               />
+              {/* Light mode draws the same brand as icon + wordmark, so it grows in
+                  step — otherwise switching theme changes the header's weight. */}
               <span className="brand-light-only brand-light-lockup items-center gap-[9px]">
-                <img src="/icon-192.png" alt="" className="h-6 w-6 rounded-[6px]" />
-                <span className="font-display text-[15px] font-bold tracking-[0.02em]">
+                <img src="/icon-192.png" alt="" className="h-7 w-7 rounded-[7px] sm:h-8 sm:w-8" />
+                <span className="font-display text-[16px] font-bold tracking-[0.02em] sm:text-[18px]">
                   {instanceName.toUpperCase()}
                 </span>
               </span>
