@@ -4,10 +4,14 @@ Route handlers call this module; this module decides whether the answer comes fr
 the DB (``media_cache``), the in-process search cache, or the network.
 """
 
+import asyncio
+import logging
 import re
+import weakref
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache import TTLCache
@@ -16,7 +20,28 @@ from app.models import MediaCache, MediaType
 from app.providers.base import MediaRecord
 from app.providers.registry import ProviderRegistry
 
+log = logging.getLogger("anitrack.media")
+
 _search_cache = TTLCache(ttl=settings.search_cache_ttl_seconds, max_size=512)
+
+#: One writer at a time into `media_cache`. See `upsert_record` for why.
+#:
+#: Kept per event loop rather than as one module-level lock: an `asyncio.Lock`
+#: binds to the loop that first waits on it, and the test suite runs every case in
+#: a fresh loop, so a shared one would fail the second time it is contended. The
+#: map is weak, so a closed loop's lock is collected with it.
+_write_locks: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Lock] = (
+    weakref.WeakKeyDictionary()
+)
+
+
+def _write_lock() -> asyncio.Lock:
+    loop = asyncio.get_running_loop()
+    lock = _write_locks.get(loop)
+    if lock is None:
+        lock = _write_locks[loop] = asyncio.Lock()
+    return lock
+
 
 _HTML_TAG = re.compile(r"<[^>]+>")
 _BR = re.compile(r"<br\s*/?>", re.I)
@@ -68,25 +93,64 @@ def _apply(row: MediaCache, record: MediaRecord) -> MediaCache:
     return row
 
 
-async def upsert_record(db: AsyncSession, record: MediaRecord) -> MediaCache:
-    row = (
+async def _by_provider_id(db: AsyncSession, provider: str, provider_id: str) -> MediaCache | None:
+    return (
         await db.execute(
             select(MediaCache).where(
-                MediaCache.provider == record.provider,
-                MediaCache.provider_id == record.provider_id,
+                MediaCache.provider == provider, MediaCache.provider_id == provider_id
             )
         )
     ).scalar_one_or_none()
-    if row is None:
-        row = MediaCache(
-            provider=record.provider,
-            provider_id=record.provider_id,
-            type=MediaType(record.type),
+
+
+async def upsert_record(db: AsyncSession, record: MediaRecord) -> MediaCache:
+    """
+    Cache one provider record, tolerating a concurrent writer of the same title.
+
+    Caching a title is a look-then-insert, and two of them genuinely do overlap:
+    resolving a season chain caches a row per season in a background session while
+    the request that triggered it is still caching titles of its own, so both reach
+    the same `(provider, provider_id)` and the second INSERT violates the unique
+    constraint. `_write_lock()` closes the window inside this process — the whole
+    critical section is local statements, no provider call — and the IntegrityError
+    branch covers what a lock cannot: a second worker process or replica.
+
+    Losing the race is not an error; the winner stored the same metadata. The loser
+    adopts that row and applies its own copy of the record over it.
+    """
+    async with _write_lock():
+        row = await _by_provider_id(db, record.provider, record.provider_id)
+        if row is not None:
+            _apply(row, record)
+            await db.flush()
+            return row
+
+        fresh = _apply(
+            MediaCache(
+                provider=record.provider,
+                provider_id=record.provider_id,
+                type=MediaType(record.type),
+            ),
+            record,
         )
-        db.add(row)
-    _apply(row, record)
-    await db.flush()
-    return row
+        try:
+            # A savepoint, so a lost race rolls back the failed INSERT alone and
+            # leaves the caller's transaction — an entry being created, a chain
+            # being numbered — intact.
+            async with db.begin_nested():
+                db.add(fresh)
+                await db.flush()
+            return fresh
+        except IntegrityError:
+            if fresh in db:
+                db.expunge(fresh)
+            winner = await _by_provider_id(db, record.provider, record.provider_id)
+            if winner is None:
+                raise  # not the conflict we know how to recover from
+            log.debug("media cache: adopted a concurrent row for %s", record.provider_id)
+            _apply(winner, record)
+            await db.flush()
+            return winner
 
 
 def is_stale(row: MediaCache) -> bool:

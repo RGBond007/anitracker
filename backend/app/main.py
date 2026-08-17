@@ -10,7 +10,17 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import settings
 from app.license import validate as validate_license
 from app.providers.registry import ProviderRegistry
-from app.routers import admin, auth, dashboard, entries, imports, media, schedule, social
+from app.routers import (
+    admin,
+    auth,
+    dashboard,
+    entries,
+    imports,
+    media,
+    schedule,
+    seasons,
+    social,
+)
 from app.version import VERSION
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -51,6 +61,7 @@ api.include_router(entries.router)
 api.include_router(dashboard.router)
 api.include_router(social.router)
 api.include_router(schedule.router)
+api.include_router(seasons.router)
 api.include_router(imports.router)
 api.include_router(admin.router)
 

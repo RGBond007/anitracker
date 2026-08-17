@@ -69,7 +69,9 @@ async def test_mutual_requests_collapse_into_one_accepted_friendship(app_client)
     await app_client.post("/api/auth/register", json=FRIEND)
 
     await login(app_client, FRIEND["username"], FRIEND["password"])
-    assert (await app_client.post("/api/friends/requests", json={"username": "admin"})).status_code == 201
+    assert (
+        await app_client.post("/api/friends/requests", json={"username": "admin"})
+    ).status_code == 201
 
     # Asking back is an accept, not a second row — the unique pair constraint
     # would reject the insert.
@@ -85,7 +87,9 @@ async def test_user_search_cannot_be_wildcarded_into_a_user_dump(app_client):
     await app_client.post("/api/auth/register", json=FRIEND)
     await login(app_client, ADMIN["username"], ADMIN["password"])
 
-    assert [u["username"] for u in (await app_client.get("/api/users/search?q=ta")).json()] == ["taro"]
+    assert [u["username"] for u in (await app_client.get("/api/users/search?q=ta")).json()] == [
+        "taro"
+    ]
     # `%` and `_` are LIKE metacharacters; unescaped they match every row.
     assert (await app_client.get("/api/users/search?q=%")).json() == []
     assert (await app_client.get("/api/users/search?q=_")).json() == []
@@ -135,8 +139,11 @@ async def test_repeated_bad_logins_are_rate_limited(app_client):
     assert 429 in codes, codes
     # A failure costs double, so the budget of 10 is gone after 5 attempts.
     assert codes.index(429) == 5, codes
-    assert "Retry-After" in (
-        await app_client.post(
-            "/api/auth/login", json={"identifier": "admin", "password": "wrong-one"}
-        )
-    ).headers
+    assert (
+        "Retry-After"
+        in (
+            await app_client.post(
+                "/api/auth/login", json={"identifier": "admin", "password": "wrong-one"}
+            )
+        ).headers
+    )

@@ -29,9 +29,36 @@ export function baseTitle(title: string): string {
   );
 }
 
+/**
+ * What a season is called beyond its number.
+ *
+ * A provider names later seasons by repeating the show and appending a marker —
+ * "Frieren Season 2" — so the part worth printing is whatever is left once the
+ * show's name and that marker are taken off. Usually nothing is, and the caller
+ * falls back to "Season 2"; when a season carries a real subtitle, this finds it.
+ */
+export function seasonSubtitle(title: string, seriesTitle: string): string | null {
+  const shared = title.toLowerCase().startsWith(seriesTitle.toLowerCase());
+  const rest = shared ? title.slice(seriesTitle.length).replace(/^[\s:·・-]+/, "") : "";
+  if (!rest) return null;
+  if (/^(?:season\s*\d+|\d+(?:st|nd|rd|th)\s*season|part\s*\d+)$/i.test(rest)) return null;
+  return rest;
+}
+
 const seasonOf = (e: Entry) => e.media.season_number ?? 1;
 
-export function groupByFranchise(entries: Entry[]): Franchise[] {
+/**
+ * @param selections `root_provider_id -> provider_id`, the seasons the user has
+ *   explicitly said they are on. A pick wins over the inferred active season, which
+ *   is the whole point of making one: the card keeps showing season 2's cover even
+ *   after season 2 is finished, until the user moves on. A pick naming a season that
+ *   is not on the list is ignored here — a card stands for an entry it owns — and
+ *   the inferred season is used instead.
+ */
+export function groupByFranchise(
+  entries: Entry[],
+  selections: Record<string, string> = {},
+): Franchise[] {
   const buckets = new Map<string, Entry[]>();
   for (const entry of entries) {
     // Unresolved chains fall back to their own id, so a title never disappears
@@ -45,10 +72,12 @@ export function groupByFranchise(entries: Entry[]): Franchise[] {
   const out: Franchise[] = [];
   for (const [key, seasons] of buckets) {
     seasons.sort((a, b) => seasonOf(a) - seasonOf(b));
-    // Watching wins over finished; among several, the furthest along.
+    // The user's own pick first. Watching wins over finished; among several, the
+    // furthest along.
+    const picked = seasons.find((e) => e.media.provider_id === selections[key]);
     const watching = seasons.filter((e) => e.status === "current");
     const active =
-      watching.length > 0 ? watching[watching.length - 1] : seasons[seasons.length - 1];
+      picked ?? (watching.length > 0 ? watching[watching.length - 1] : seasons[seasons.length - 1]);
     out.push({ key, seasons, active, isMultiSeason: seasons.length > 1 });
   }
 

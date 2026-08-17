@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from pathlib import Path
@@ -72,4 +73,10 @@ async def app_client():
         yield client
 
     app.dependency_overrides.clear()
+
+    # Adding an entry kicks off season-chain resolution in a task. Left running, it
+    # outlives its test and touches the next one's database — so wait for the ones
+    # in flight before the engine goes away.
+    if app.state.background_tasks:
+        await asyncio.gather(*list(app.state.background_tasks), return_exceptions=True)
     await engine.dispose()

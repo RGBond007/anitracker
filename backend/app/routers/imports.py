@@ -7,10 +7,10 @@ from sqlalchemy import select
 from app import db as db_module
 from app import media_service
 from app.deps import CurrentUser, DbSession
-from app.ratelimit import limit as rate_limit
 from app.importers import mal_xml
 from app.models import ImportJob, ImportState, ListEntry
 from app.providers.registry import ProviderRegistry
+from app.ratelimit import limit as rate_limit
 from app.schemas import ImportJobOut
 
 log = logging.getLogger(__name__)

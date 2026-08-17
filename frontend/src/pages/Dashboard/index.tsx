@@ -6,6 +6,7 @@ import type { Entry, MediaType } from "../../lib/api-client";
 import { useDashboard } from "../../features/dashboard/useDashboard";
 import { useFeed } from "../../features/social/useSocial";
 import { useEntries, useIncrementEntry } from "../../features/media/useMedia";
+import { useSeasonSelections } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { PosterGrid, Rail, RailItem, SectionHead } from "../../components/layout/Rail";
 import { AddPoster, Poster } from "../../components/media/Poster";
@@ -66,6 +67,8 @@ export function DashboardPage() {
         ? { sort: "updated" }
         : { type: filter as MediaType, sort: "updated" },
   );
+  // Which season each show's card should represent, when its owner has said.
+  const selections = useSeasonSelections();
 
   const stats = useMemo(() => {
     if (!data) return [];
@@ -242,7 +245,7 @@ export function DashboardPage() {
             <EmptyState>{t("list.empty")}</EmptyState>
           ) : (
             <PosterGrid>
-              {groupByFranchise(library.data)
+              {groupByFranchise(library.data, selections.data)
                 .slice(0, 18)
                 .map((franchise) => (
                   <FranchiseCard key={franchise.key} franchise={franchise} lang={lang} />

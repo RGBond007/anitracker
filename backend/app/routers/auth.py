@@ -4,8 +4,9 @@ from sqlalchemy import func, or_, select
 from app import settings_service
 from app.config import settings
 from app.deps import CurrentUser, DbSession, PendingUser, user_count
-from app.ratelimit import limit as rate_limit, penalise
 from app.models import Role, TitleLanguage, User
+from app.ratelimit import limit as rate_limit
+from app.ratelimit import penalise
 from app.schemas import (
     InstanceInfo,
     LoginIn,
@@ -157,9 +158,7 @@ async def register(payload: RegisterIn, response: Response, db: DbSession) -> Us
 # Failures spend an extra hit (see `penalise` below), so a wrong password costs
 # twice what a right one does and brute force runs out of budget first.
 @router.post("/auth/login", response_model=UserOut, dependencies=[rate_limit("login", 10, 300)])
-async def login(
-    payload: LoginIn, request: Request, response: Response, db: DbSession
-) -> User:
+async def login(payload: LoginIn, request: Request, response: Response, db: DbSession) -> User:
     user = await _find_user(db, payload.identifier)
     if user is None or not verify_password(payload.password, user.password_hash):
         penalise(request, "login")

@@ -274,8 +274,19 @@
     "behind": "{{count}} behind"
   },
   "season": {
-    "short": "Staffel {{n}}",
-    "owned": "{{count}} Staffeln",
-    "start": "Staffel {{n}} starten"
+    "short": "Season {{n}}",
+    "number": "S{{n}}",
+    "owned": "{{count}} seasons",
+    "start": "Start season {{n}}",
+    "heading": "Seasons",
+    "pickHint": "Pick the season you're on",
+    "ofTotal": "of {{total}}",
+    "current": "Current season",
+    "untracked": "Not on your list",
+    "episodes": "{{n}} ep",
+    "chapters": "{{n}} ch",
+    "saved": "Now on season {{n}}",
+    "plusOne": "+1",
+    "increment": "Log one more"
   }
 }

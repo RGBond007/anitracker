@@ -200,6 +200,37 @@ class Friendship(Base):
     addressee: Mapped[User] = relationship(foreign_keys=[addressee_id])
 
 
+class FranchiseSelection(Base):
+    """
+    Which season of a series the user considers themselves to be on.
+
+    Without this the app has to *infer* the season — "the one marked watching, else
+    the furthest along" — which is a good default but not a choice. Once someone
+    picks a season explicitly, that pick wins and survives a status change: you can
+    finish season 2 and still have the series sitting on season 2 until you move it.
+
+    Keyed by `root_provider_id` rather than by a media row, so the selection belongs
+    to the series and not to whichever season happened to be open at the time.
+    """
+
+    __tablename__ = "franchise_selections"
+    __table_args__ = (
+        UniqueConstraint("user_id", "root_provider_id", name="uq_selection_user_root"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    root_provider_id: Mapped[str] = mapped_column(String(64), index=True)
+    media_cache_id: Mapped[int] = mapped_column(
+        ForeignKey("media_cache.id", ondelete="CASCADE"), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    media: Mapped[MediaCache] = relationship()
+
+
 class TitleOverride(Base):
     """v2 hook: per-locale manual title overrides. Table exists from v1."""
 

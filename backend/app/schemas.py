@@ -318,3 +318,39 @@ class LeaderboardRow(BaseModel):
 
 class LeaderboardOut(BaseModel):
     rows: list[LeaderboardRow]
+
+
+# --- Seasons ---
+
+
+class SeasonOut(BaseModel):
+    """One season of a series, with the viewer's own tracking of it if any."""
+
+    media: MediaOut
+    season_number: int
+    #: Null when this season is not on the user's list — it can still be shown and
+    #: added, which is how a series offers you the next season.
+    entry: EntryOut | None
+
+
+class SeriesOut(BaseModel):
+    root_provider_id: str
+    #: Series name, taken from season one and stripped of its "Season N" suffix.
+    title: str
+    seasons: list[SeasonOut]
+    #: The season the UI should open on: the explicit pick if there is one, else
+    #: the one being watched, else the furthest along.
+    selected_provider_id: str
+    #: True when the pick was made by the user rather than inferred.
+    is_explicit: bool
+
+
+class SeasonSelectIn(BaseModel):
+    provider_id: str = Field(min_length=1, max_length=64)
+
+
+class SeasonSelectionOut(BaseModel):
+    """One saved pick, flat enough for the client to key by series."""
+
+    root_provider_id: str
+    provider_id: str

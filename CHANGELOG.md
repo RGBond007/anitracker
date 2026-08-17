@@ -4,6 +4,20 @@ All notable changes to AniTrack are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Seasons** — a title's page now lists every season of its show, each with its own poster,
+  episode count, progress and status, and switching between them changes the artwork and the
+  numbers without a reload. The season you pick is saved as your current one and is what the
+  library card shows from then on, so finishing a season no longer moves the card on its own.
+
+### Fixed
+- Caching a title no longer fails when two writers reach the same show at once — resolving a
+  season chain in the background overlaps with the request that started it, and the second
+  insert used to hit the unique constraint.
+- The English locale carried German strings for the season labels.
+
 ## [1.0.0] — 2026-08-10
 
 First release.

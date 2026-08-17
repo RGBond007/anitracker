@@ -49,6 +49,33 @@ export interface Entry {
   media: Media;
 }
 
+/**
+ * One season of a show: its own artwork and episode count, plus the viewer's own
+ * progress on it. `entry` is null for a season that exists but is not on the list.
+ */
+export interface Season {
+  media: Media;
+  season_number: number;
+  entry: Entry | null;
+}
+
+export interface Series {
+  root_provider_id: string;
+  /** The show's name, with any "Season N" suffix taken off. */
+  title: string;
+  seasons: Season[];
+  /** The season to open on: the saved pick, else the one being watched. */
+  selected_provider_id: string;
+  /** True when the pick was made by the user rather than inferred. */
+  is_explicit: boolean;
+}
+
+/** A saved pick, flat so the library can key it by show. */
+export interface SeasonSelection {
+  root_provider_id: string;
+  provider_id: string;
+}
+
 export interface User {
   id: number;
   email: string;
@@ -269,6 +296,17 @@ export const api = {
     ),
   media: (provider: string, providerId: string, type: MediaType) =>
     request<Media>(`/media/${provider}/${providerId}?type=${type}`),
+
+  /** Every season of the show this title belongs to, with the viewer's progress. */
+  series: (provider: string, providerId: string, type: MediaType) =>
+    request<Series>(`/media/${provider}/${providerId}/series?type=${type}`),
+  /** Answers with the whole series, so the caller never has to guess the new state. */
+  selectSeason: (rootProviderId: string, providerId: string) =>
+    request<Series>(`/series/${rootProviderId}/season`, {
+      method: "PUT",
+      body: body({ provider_id: providerId }),
+    }),
+  seasonSelections: () => request<SeasonSelection[]>("/series/selections"),
 
   entries: (params: { type?: MediaType; status?: EntryStatus; sort?: string } = {}) => {
     const qs = new URLSearchParams(params as Record<string, string>).toString();

@@ -275,7 +275,18 @@
   },
   "season": {
     "short": "Staffel {{n}}",
+    "number": "S{{n}}",
     "owned": "{{count}} Staffeln",
-    "start": "Staffel {{n}} starten"
+    "start": "Staffel {{n}} starten",
+    "heading": "Staffeln",
+    "pickHint": "Wähle die Staffel, die du schaust",
+    "ofTotal": "von {{total}}",
+    "current": "Aktuelle Staffel",
+    "untracked": "Nicht auf deiner Liste",
+    "episodes": "{{n}} Ep.",
+    "chapters": "{{n}} Kap.",
+    "saved": "Jetzt bei Staffel {{n}}",
+    "plusOne": "+1",
+    "increment": "Eins weiterzählen"
   }
 }

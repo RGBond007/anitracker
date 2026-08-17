@@ -15,7 +15,6 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 
 from app.deps import CurrentUser, DbSession
-from app.ratelimit import limit as rate_limit
 from app.models import (
     EntryStatus,
     Friendship,
@@ -25,16 +24,17 @@ from app.models import (
     MediaType,
     User,
 )
+from app.ratelimit import limit as rate_limit
 from app.routers.dashboard import type_stats
 from app.schemas import (
     ComparisonOut,
     ComparisonRow,
     DiscoverUser,
     FeedItem,
-    FriendSummary,
     FriendRequestIn,
     FriendshipOut,
     FriendsOut,
+    FriendSummary,
     LeaderboardOut,
     LeaderboardRow,
     ProfileOut,
@@ -253,9 +253,7 @@ async def send_request(payload: FriendRequestIn, user: CurrentUser, db: DbSessio
         await db.refresh(existing, ["requester", "addressee"])
         return _as_out(existing, user.id)
 
-    row = Friendship(
-        requester_id=user.id, addressee_id=target.id, state=FriendshipState.pending
-    )
+    row = Friendship(requester_id=user.id, addressee_id=target.id, state=FriendshipState.pending)
     db.add(row)
     await db.commit()
     await db.refresh(row, ["requester", "addressee"])
@@ -413,9 +411,7 @@ async def friend_feed(user: CurrentUser, db: DbSession) -> list[FeedItem]:
             )
         ).all()
     )
-    return [
-        FeedItem(user=PublicUser.model_validate(owner), entry=entry) for entry, owner in rows
-    ]
+    return [FeedItem(user=PublicUser.model_validate(owner), entry=entry) for entry, owner in rows]
 
 
 # --- Discovery and leaderboard -------------------------------------------
@@ -438,8 +434,10 @@ async def discover_users(
     The tracked count is withheld unless they made their profile public: how big a
     private list is stays as private as what is in it.
     """
-    linked = select(Friendship.requester_id).where(Friendship.addressee_id == user.id).union(
-        select(Friendship.addressee_id).where(Friendship.requester_id == user.id)
+    linked = (
+        select(Friendship.requester_id)
+        .where(Friendship.addressee_id == user.id)
+        .union(select(Friendship.addressee_id).where(Friendship.requester_id == user.id))
     )
     rows = list(
         (
@@ -493,8 +491,7 @@ async def leaderboard(user: CurrentUser, db: DbSession) -> LeaderboardOut:
     ids = [user.id, *await _friend_ids(db, user.id)]
 
     people = {
-        u.id: u
-        for u in (await db.execute(select(User).where(User.id.in_(ids)))).scalars().all()
+        u.id: u for u in (await db.execute(select(User).where(User.id.in_(ids)))).scalars().all()
     }
 
     # Progress only counts toward episodes for anime and chapters for manga, so the

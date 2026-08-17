@@ -59,15 +59,19 @@ class CreatedUser(BaseModel):
 async def create_user(payload: AdminUserCreate, admin: AdminUser, db: DbSession) -> CreatedUser:
     """Creates an account the admin hands over, pending a password change."""
     clash = (
-        await db.execute(
-            select(User).where(
-                or_(
-                    func.lower(User.email) == payload.email.lower(),
-                    func.lower(User.username) == payload.username.lower(),
+        (
+            await db.execute(
+                select(User).where(
+                    or_(
+                        func.lower(User.email) == payload.email.lower(),
+                        func.lower(User.username) == payload.username.lower(),
+                    )
                 )
             )
         )
-    ).scalars().first()
+        .scalars()
+        .first()
+    )
     if clash is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email or username already taken")
 

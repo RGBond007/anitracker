@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import type { EntryStatus, MediaType } from "../../lib/api-client";
 import { useEntries } from "../../features/media/useMedia";
+import { useSeasonSelections } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { useStatusLabel } from "../../components/media/statusLabels";
 import { PosterGrid, SectionHead } from "../../components/layout/Rail";
@@ -33,6 +34,8 @@ export function ListViewPage() {
   useEffect(() => setListTab(status), [status, setListTab]);
 
   const { data, isLoading } = useEntries({ type, status: status as EntryStatus, sort });
+  // Which season each show's card should represent, when its owner has said.
+  const selections = useSeasonSelections();
 
   return (
     <div className="wrap py-8">
@@ -129,7 +132,7 @@ export function ListViewPage() {
         // One card per show. A season that is not part of a chain is a chain of
         // one, so nothing is lost by always grouping.
         <PosterGrid>
-          {groupByFranchise(data).map((franchise) => (
+          {groupByFranchise(data, selections.data).map((franchise) => (
             <FranchiseCard key={franchise.key} franchise={franchise} lang={lang} />
           ))}
         </PosterGrid>

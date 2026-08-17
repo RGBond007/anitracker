@@ -12,6 +12,9 @@ export const queryKeys = {
   entries: (filters: { type?: MediaType; status?: EntryStatus | "all"; sort?: string } = {}) =>
     ["entries", filters] as const,
   entryForMedia: (provider: string, id: string) => ["entry-for-media", provider, id] as const,
+  /** Keyed by the season asked about: any member of a chain answers for all of it. */
+  series: (provider: string, id: string) => ["series", provider, id] as const,
+  seasonSelections: ["season-selections"] as const,
   importJob: (id: number) => ["import-job", id] as const,
 
   friends: ["friends"] as const,
@@ -24,8 +27,17 @@ export const queryKeys = {
   compare: (username: string) => ["compare", username] as const,
 };
 
-/** Anything that changes a list entry invalidates all three of these. */
-export const listEntryScopes = [["entries"], ["dashboard"], ["entry-for-media"]] as const;
+/**
+ * Anything that changes a list entry invalidates all of these. `series` is in the
+ * list because it carries a copy of the entry for every season it lists — progress
+ * shown in the season switcher would otherwise go stale the moment it is edited.
+ */
+export const listEntryScopes = [
+  ["entries"],
+  ["dashboard"],
+  ["entry-for-media"],
+  ["series"],
+] as const;
 
 /**
  * Accepting or removing a friend changes who you may see, so the profile and

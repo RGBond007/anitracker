@@ -192,7 +192,6 @@ class AniListProvider(MediaProvider):
     async def get_covers(self, provider_id: str, type: str) -> Covers:
         return (await self.get_by_id(provider_id, type)).covers
 
-
     async def airing(self, provider_ids: list[str]) -> dict[str, tuple[int, int]]:
         """
         `{provider_id: (episode, airing_at_unix)}` for whichever of these are still

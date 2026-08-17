@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from app import media_service
 from app.deps import CurrentUser, DbSession, Registry
-from app.ratelimit import limit as rate_limit
 from app.models import MediaType
 from app.providers.base import Covers, MediaRecord, ProviderError
+from app.ratelimit import limit as rate_limit
 from app.schemas import MediaOut, SearchResults
 
 router = APIRouter(prefix="/media", tags=["media"])

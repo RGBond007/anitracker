@@ -48,7 +48,7 @@ Existing users keep working; the sign-up link disappears from the login screen.
 ## 4. Building from source instead of pulling
 
 ```bash
-git clone https://github.com/anitrack/anitrack.git && cd anitrack
+git clone https://github.com/RGBond007/anitrack.git && cd anitrack
 cp .env.example .env && echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
