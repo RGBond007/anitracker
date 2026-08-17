@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pytest
@@ -58,10 +59,33 @@ async def app_client():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    db_module.SessionLocal = session_factory  # background import tasks use this
+    # Sessions take turns.
+    #
+    # Every in-memory SQLite connection is a database of its own, so StaticPool --
+    # one connection, shared -- is the only way the app and its background tasks can
+    # see the same data. The catch is that the app is genuinely concurrent: adding an
+    # entry resolves the season chain in a task whose session overlaps the request
+    # that scheduled it. Two sessions interleaving on one connection collide over
+    # savepoints ("cannot open savepoint - SQL statements in progress"), the chain
+    # walk reads the error as a title it cannot reach, and the series comes back
+    # missing a member -- in whichever test happened to look, perhaps one run in five.
+    #
+    # In production each session holds its own connection out of the Postgres pool,
+    # which is what makes the overlap safe there. This lock is that guarantee,
+    # restated for a harness that has only one connection to give: it removes an
+    # interleaving that never existed outside the tests, and nothing here awaits a
+    # background task while holding a session, so taking turns cannot deadlock.
+    session_gate = asyncio.Lock()
+
+    @asynccontextmanager
+    async def session_in_turn():
+        async with session_gate, session_factory() as session:
+            yield session
+
+    db_module.SessionLocal = session_in_turn  # background import tasks use this
 
     async def override_get_db():
-        async with session_factory() as session:
+        async with session_in_turn() as session:
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
