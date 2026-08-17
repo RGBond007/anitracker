@@ -14,6 +14,8 @@ export const ICONS = {
   pencil: "M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z",
   plus: "M12 5v14M5 12h14",
   check: "m20 6-11 11-5-5",
+  search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35",
+  close: "m6 6 12 12M18 6 6 18",
   /* Three dots: zero-length segments with round caps, so they scale with the
      stroke weight instead of needing their own radius. */
   more: "M12 5h.01M12 12h.01M12 19h.01",
