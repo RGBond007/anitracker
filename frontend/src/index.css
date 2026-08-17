@@ -122,6 +122,33 @@
     }
   }
 
+  /**
+   * Changing the displayed season swaps a poster and a column of text at once, which
+   * without motion reads as a page reload. A short fade and a few pixels of travel
+   * are enough to say "this is the same page, showing something else" — deliberately
+   * under 200ms, because it sits between a click and the thing the user asked for.
+   */
+  .season-fade {
+    animation: season-fade 180ms ease-out both;
+  }
+
+  @keyframes season-fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .season-fade {
+      animation: none;
+    }
+  }
+
   /* Horizontal rails hide the scrollbar but stay scrollable and keyboard-reachable. */
   .rail {
     scrollbar-width: none;

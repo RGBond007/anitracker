@@ -1,19 +1,17 @@
 <div align="center">
 
-<img src="frontend/public/logo.png" alt="" width="76">
-
-# AniTrack
-
-**A self-hosted anime and manga tracker.**
-Search, add, score, follow your progress season by season — for you and everyone else in your
-household, on one instance you own.
+<img src=".github/assets/AniTracker-GitHub-banner.svg" alt="AniTracker" width="100%">
 
 [![CI](https://github.com/RGBond007/anitrack/actions/workflows/ci.yml/badge.svg)](https://github.com/RGBond007/anitrack/actions/workflows/ci.yml)
-[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 ![Deploy: Docker Compose](https://img.shields.io/badge/deploy-docker%20compose-2496ED?logo=docker&logoColor=white)
 ![Backend: FastAPI + Postgres](https://img.shields.io/badge/backend-FastAPI%20%2B%20Postgres-009688?logo=fastapi&logoColor=white)
 ![Frontend: React 18 + TypeScript](https://img.shields.io/badge/frontend-React%2018%20%2B%20TS-61DAFB?logo=react&logoColor=black)
 ![Telemetry: none](https://img.shields.io/badge/telemetry-none-2ea44f)
+
+**A private, self-hosted anime and manga tracker for households and small communities.**
+
+[Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Configuration](#configuration) · [Development](#development) · [License](#license)
 
 <img src="frontend/screenshots/dashboard.png" alt="AniTrack dashboard: a Vinland Saga hero with continue-watching progress, tracking figures and a rail of titles in progress" width="100%">
 
@@ -23,7 +21,7 @@ household, on one instance you own.
 
 ## Quick start
 
-Two containers, no API keys, no telemetry.
+Run AniTrack with two containers. No third-party account or API key is required.
 
 ```bash
 git clone https://github.com/RGBond007/anitrack.git
@@ -35,23 +33,44 @@ docker compose up -d --build
 
 Then open <http://localhost:8000> and the first-run wizard creates your admin account.
 
+> [!TIP]
+> For production deployment, HTTPS setup, backups, restores, and upgrades, see the
+> [installation guide](INSTALL.md).
+
 ---
 
 ## Screenshots
 
 ### Seasons
 
-A show is one entry in your library, not one per season. Pick the season you're on and the page
-follows it — poster, episode count, progress and status all change, with no reload.
+A show is one entry in your library, not one per season — and browsing a season is not the same
+thing as watching it. Every season, movie, OVA and special is grouped under the series in release
+order, each with its own poster, episode count, progress and status. Tapping one shows it. Only an
+explicit action moves the season you are **currently watching**, so you can read season 1's synopsis
+without losing your place in season 6.
 
 <table>
 <tr>
-<td width="50%"><img src="frontend/screenshots/seasons.png" alt="Attack on Titan on season 3: the season 3 poster, 7 of 12 episodes watched, and a rail of six seasons with season 3 ringed in gold"></td>
-<td width="50%"><img src="frontend/screenshots/seasons-switched.png" alt="The same page after picking season 1: the season 1 poster, 25 of 25 completed, and the gold ring moved to season 1"></td>
+<td width="50%"><img src="frontend/screenshots/seasons.png" alt="Attack on Titan on season 3: the season 3 poster, 7 of 12 episodes watched, and a carousel of seasons, movies and OVAs in release order with season 3 marked Watching now"></td>
+<td width="50%"><img src="frontend/screenshots/seasons-viewing.png" alt="The same series showing season 1's poster and synopsis, with a Set as current season button and a note reading You're on Season 3"></td>
 </tr>
 <tr>
-<td align="center"><em>On season 3 — 7/12 watched</em></td>
-<td align="center"><em>One click later: season 1, 25/25, saved as current</em></td>
+<td align="center"><em>On season 3 — the current season, marked <strong>Watching now</strong></em></td>
+<td align="center"><em>Looking at season 1: its poster and progress, and you are still on season 3</em></td>
+</tr>
+</table>
+
+When you finish a season, AniTrack offers to close it out and continue — it never moves you on its
+own. In search, a show collapses to one card, and you choose which season or related entry to add.
+
+<table>
+<tr>
+<td width="50%"><img src="frontend/screenshots/seasons-continue.png" alt="A panel reading You finished Season 1, Mark it completed and continue with Season 2, with Start Season 2 and Not now buttons"></td>
+<td width="50%"><img src="frontend/screenshots/search-chooser.png" alt="A dialog listing Attack on Titan's seasons with format, year and episode count, each with an Add button or an On your list label"></td>
+</tr>
+<tr>
+<td align="center"><em>Offered, not applied</em></td>
+<td align="center"><em>One card per show; pick what you actually want</em></td>
 </tr>
 </table>
 
@@ -70,26 +89,29 @@ follows it — poster, episode count, progress and status all change, with no re
 
 <table>
 <tr>
-<td width="60%"><img src="frontend/screenshots/seasons-light.png" alt="The same season switcher in light mode: paper ground, ink text, gold ring on the selected season"></td>
-<td width="20%"><img src="frontend/screenshots/mobile-seasons.png" alt="Season switcher on a phone: the seasons scroll horizontally with the selected one ringed"></td>
+<td width="60%"><img src="frontend/screenshots/seasons-light.png" alt="The same series page in light mode: paper ground, ink text, the viewed season outlined in ink and the current season labelled Watching now in gold"></td>
+<td width="20%"><img src="frontend/screenshots/mobile-seasons.png" alt="A phone showing the poster, progress, title and a compact scrolling row of season chips, all on the first screen"></td>
 <td width="20%"><img src="frontend/screenshots/mobile-library.png" alt="Library grid on a phone with a bottom navigation bar"></td>
 </tr>
 <tr>
 <td align="center"><em>Light mode — the same six palette tokens, re-roled</em></td>
-<td colspan="2" align="center"><em>Responsive, installable</em></td>
+<td colspan="2" align="center"><em>Compact season chips on a phone, no scrolling past the synopsis</em></td>
 </tr>
 </table>
 
 ---
 
-## What it does
+## Features
 
 - **Search anime & manga** through AniList, with Jikan (MyAnimeList) and Kitsu as automatic
   fallbacks when a provider rate-limits you. No account or API key with any of them.
-- **Seasons, grouped and followed.** AniTrack walks the prequel/sequel graph and folds a show's
-  seasons into one library card. Each season keeps its own poster, episode count, progress and
-  status; you pick the one you're on and it stays picked — finishing a season does not silently
-  move the card on its own.
+- **Seasons, grouped and deliberate.** AniTrack walks the provider's relation graph and folds a
+  show's seasons, sequel parts, movies, OVAs and specials into one library card, ordered by release
+  date. Each of them keeps its own poster, episode count, progress and status — including *Not
+  started* for what you have never opened. Browsing a season shows it; only an explicit
+  **Set as current season** moves the season you are watching, and the card in your library follows
+  that one. Finish a season and AniTrack offers to close it out and continue, rather than moving you
+  on by itself.
 - **Five list statuses** — watching/reading, completed, on hold, dropped, plan to watch/read —
   with score (0–10), progress, start/finish dates, rewatch count and notes.
 - **A dashboard** with what you're partway through, plus counts per status, mean score,
@@ -109,19 +131,20 @@ follows it — poster, episode count, progress and status all change, with no re
 - **Installable** — a web manifest and icons, so it can live on a phone home screen.
 - **White-labelling from the Settings page** — instance name, logo and accent colour, no redeploy.
 
-## What it deliberately does not do
+## Project scope
 
-No streaming, no torrents, no downloading — this is a tracker, not a media server. The social side
-stops at people you have accepted: no public timeline, no followers, no comment threads. No native
-mobile app; the web UI is responsive and installable. And no telemetry: the only outbound requests
-it ever makes are to the metadata providers listed in your `.env`.
+AniTrack is a tracker, not a media server: it does not stream, torrent, or download media. Social
+features are limited to accepted friends, with no public timeline, followers, or comment threads.
+There is no native mobile app; the responsive web app is installable as a PWA. AniTrack includes no
+telemetry, and its only outbound requests are to the metadata providers configured in `.env`.
 
 ---
 
 ## Requirements
 
-Docker with Compose v2. That's it — roughly 700 MB of images (300 MB app, 400 MB Postgres) and
-about 110 MB of RAM at rest.
+- Docker Engine with Compose v2
+- Approximately 700 MB of image storage (300 MB application, 400 MB PostgreSQL)
+- Approximately 110 MB of memory at idle
 
 ## Configuration
 
@@ -220,18 +243,28 @@ so results land in the `media_cache` table and multiple users tracking the same 
 lookup, not one each. Each provider has its own token bucket, and a 429 or 5xx falls through to the
 next provider in `PROVIDER_ORDER`.
 
-Seasons are derived, not typed in. A provider only reports a title's immediate prequel and sequel,
-so `app/season_chain.py` walks back to season one and forward again, stamping every member of the
-chain with a shared `root_provider_id` and its `season_number`. That walk costs a provider call per
-season not yet cached, so it runs in the background after a title is added rather than making you
-wait. Which season you are on is a row of your own in `franchise_selections`, keyed by the chain
-rather than by a title — so it survives a status change and is never guessed at once you have said.
+Seasons are derived, not typed in. A provider only reports a title's immediate neighbours, so
+`app/season_chain.py` walks back to season one and forward again to number the spine, then pulls in
+the movies, OVAs and specials hanging off it — grouped under the same `root_provider_id` but left
+without a `season_number`, because a movie between seasons 2 and 3 is not season 2.5. The series page
+orders the result by `start_date`. That walk costs a provider call per title not yet cached, so it
+runs in the background after a title is added rather than making you wait, and it is capped.
+
+Two pieces of state are deliberately kept apart. The **viewed** season is the URL: opening a season
+is a read, and nothing is written. The **current** season is a row of your own in
+`franchise_selections`, keyed by the series rather than by a title, so it survives a status change
+and is only ever written by `PUT /api/series/{root}/season` — which the client calls when the user
+presses a button and at no other time. That endpoint also carries the optional `start` and
+`complete_provider_id` flags, so "you finished season 3, start season 4?" applies as one transaction
+instead of an add and a select that could half-succeed.
 
 ## Contributing
 
 Issues and pull requests are welcome. Keep `ruff check`, `pytest` and `npm run lint` green, add a
 test for behaviour you change, and put user-visible changes in [CHANGELOG.md](CHANGELOG.md).
 
-## Licence
+## License
 
-MIT — see [LICENSE](LICENSE).
+AniTrack is licensed under the [GNU Affero General Public License v3.0 only](LICENSE)
+(`AGPL-3.0-only`). If you modify AniTrack and make it available to users over a network, the
+license requires you to offer those users the corresponding source code for your modified version.

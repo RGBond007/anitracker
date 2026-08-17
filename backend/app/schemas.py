@@ -324,29 +324,53 @@ class LeaderboardOut(BaseModel):
 
 
 class SeasonOut(BaseModel):
-    """One season of a series, with the viewer's own tracking of it if any."""
+    """
+    One member of a series, with the viewer's own tracking of it if any.
+
+    Called a season because that is what the UI is for, but a member can equally be
+    a movie, an OVA or a special — `kind` says which, and only a season carries a
+    `season_number`.
+    """
 
     media: MediaOut
-    season_number: int
+    #: 1..n along the spine. Null for a movie, OVA or special: it has a place in the
+    #: series but not a season number.
+    season_number: int | None
+    #: season | movie | ova | special | other
+    kind: str
     #: Null when this season is not on the user's list — it can still be shown and
-    #: added, which is how a series offers you the next season.
+    #: added, which is how a series offers you the next season. A null entry is what
+    #: the UI shows as "Not started".
     entry: EntryOut | None
+    #: True for the one season the user is on. Exactly one member of a series has
+    #: this, and browsing another season does not move it.
+    is_current: bool
 
 
 class SeriesOut(BaseModel):
     root_provider_id: str
     #: Series name, taken from season one and stripped of its "Season N" suffix.
     title: str
+    #: Every member, in release order — seasons, then whatever aired next.
     seasons: list[SeasonOut]
-    #: The season the UI should open on: the explicit pick if there is one, else
-    #: the one being watched, else the furthest along.
-    selected_provider_id: str
-    #: True when the pick was made by the user rather than inferred.
+    #: The season the user is on. Changed only by an explicit action, never by
+    #: opening another season's page.
+    current_provider_id: str
+    #: True when the current season was chosen by the user rather than inferred.
     is_explicit: bool
 
 
 class SeasonSelectIn(BaseModel):
+    """Set the current season, optionally starting it in the same breath."""
+
     provider_id: str = Field(min_length=1, max_length=64)
+    #: Put the new current season on the list as "watching" if it is not already
+    #: tracked. This is what "Start season 4" does, as one atomic change rather than
+    #: an add followed by a select that can half-apply.
+    start: bool = False
+    #: A season to mark completed as part of the same action — the other half of
+    #: "you finished season 3, start season 4?".
+    complete_provider_id: str | None = Field(default=None, max_length=64)
 
 
 class SeasonSelectionOut(BaseModel):

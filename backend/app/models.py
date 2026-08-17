@@ -119,10 +119,24 @@ class MediaCache(Base):
     # Direct neighbours as provider ids, straight from the provider.
     prequel_id: Mapped[str | None] = mapped_column(String(64))
     sequel_id: Mapped[str | None] = mapped_column(String(64))
+    # The series this title is an extra of, if any: a movie added before anything
+    # else in its series would otherwise resolve into a series of one and be stuck.
+    parent_id: Mapped[str | None] = mapped_column(String(64))
+    # The movies, OVAs and specials hanging off this title. Persisted because the
+    # chain walk reads rows, not provider records, and re-fetching every member to
+    # rediscover its extras would cost a provider call per season.
+    related_ids: Mapped[list[str]] = mapped_column(StringArray, default=list)
     # Derived by walking prequels to the first season: every entry in one chain
     # shares `root_provider_id`, which is what the library groups on.
     root_provider_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    # 1..n along the spine; NULL for an extra, which has a place in the series but
+    # not a season number — a movie between seasons 2 and 3 is not season 2.5.
     season_number: Mapped[int | None] = mapped_column(Integer)
+    #: season | movie | ova | special | other — what this title is *within* its series.
+    kind: Mapped[str | None] = mapped_column(String(16))
+    # First air date. `season_year` is too coarse to order a series by: a season and
+    # the movie that follows it six months later share a year.
+    start_date: Mapped[date | None] = mapped_column(Date)
     genres: Mapped[list[str]] = mapped_column(StringArray, default=list)
     average_score: Mapped[int | None] = mapped_column(Integer)
     duration: Mapped[int | None] = mapped_column(Integer)  # minutes per episode

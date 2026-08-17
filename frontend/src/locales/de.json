@@ -80,7 +80,11 @@
     "typeLabel": "Medientyp",
     "prompt": "Durchsuche AniList nach Titeln — der japanische Originaltitel trifft meist am besten.",
     "noResults": "Keine Treffer für \"{{query}}\". Versuche den japanischen Originaltitel oder weniger Wörter.",
-    "providersDown": "Die Metadaten-Dienste sind nicht erreichbar. Titel auf deiner Liste funktionieren weiter — sie kommen aus dem lokalen Zwischenspeicher."
+    "providersDown": "Die Metadaten-Dienste sind nicht erreichbar. Titel auf deiner Liste funktionieren weiter — sie kommen aus dem lokalen Zwischenspeicher.",
+    "chooseEntry": "{{count}} Einträge",
+    "chooseHint": "Wähle die Staffel, den Film oder das Special für deine Liste.",
+    "addThis": "Hinzufügen",
+    "onYourList": "Auf deiner Liste"
   },
   "detail": {
     "addToList": "Zur Liste hinzufügen",
@@ -279,14 +283,30 @@
     "owned": "{{count}} Staffeln",
     "start": "Staffel {{n}} starten",
     "heading": "Staffeln",
-    "pickHint": "Wähle die Staffel, die du schaust",
+    "browseHint": "Tippe eine Staffel an, um sie anzusehen",
     "ofTotal": "von {{total}}",
-    "current": "Aktuelle Staffel",
-    "untracked": "Nicht auf deiner Liste",
+    "currentBadge": "Läuft aktuell",
+    "currentShort": "Läuft aktuell",
+    "setAsCurrent": "Als aktuelle Staffel setzen",
+    "startNamed": "{{name}} starten",
+    "stillOn": "Du bist bei {{name}}",
+    "notStarted": "Nicht begonnen",
+    "notNow": "Später",
+    "finishedHeading": "{{name}} abgeschlossen",
+    "finishedBody": "Als abgeschlossen markieren und mit {{name}} weitermachen?",
     "episodes": "{{n}} Ep.",
     "chapters": "{{n}} Kap.",
-    "saved": "Jetzt bei Staffel {{n}}",
     "plusOne": "+1",
-    "increment": "Eins weiterzählen"
+    "increment": "Eins weiterzählen",
+    "kind_season": "Staffel",
+    "kind_movie": "Film",
+    "kind_ova": "OVA",
+    "kind_special": "Special",
+    "kind_other": "Verwandt",
+    "kindShort_season": "TV",
+    "kindShort_movie": "FILM",
+    "kindShort_ova": "OVA",
+    "kindShort_special": "SP",
+    "kindShort_other": "VERW"
   }
 }

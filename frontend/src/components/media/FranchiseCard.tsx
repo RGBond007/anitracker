@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import type { TitleLanguage } from "../../lib/api-client";
 import { type Franchise, baseTitle, nextSeasonId } from "../../lib/franchise";
-import { useAddEntry } from "../../features/media/useMedia";
+import { useSetCurrentSeason } from "../../features/media/useSeasons";
 import { displayTitle } from "../../lib/titles";
 import { cx } from "../../lib/cx";
 import { CoverImage } from "./CoverImage";
@@ -25,7 +25,7 @@ export function FranchiseCard({
   lang: TitleLanguage;
 }) {
   const { t } = useTranslation();
-  const add = useAddEntry();
+  const setCurrent = useSetCurrentSeason();
   const { active, seasons, isMultiSeason } = franchise;
   const media = active.media;
 
@@ -85,14 +85,17 @@ export function FranchiseCard({
       {nextId && (
         <button
           type="button"
-          disabled={add.isPending}
+          disabled={setCurrent.isPending}
           onClick={() =>
-            add.mutate({
-              provider: media.provider,
+            // One call, not an add followed by a select: this both tracks the next
+            // season and moves the user onto it, which is what the card is offering.
+            // The season is usually uncached at this point — it is only an id on the
+            // finished season's `sequel_id` — and the endpoint fetches it.
+            setCurrent.mutate({
+              root: franchise.key,
               provider_id: nextId,
-              type: media.type,
-              status: "current",
-              progress: 0,
+              start: true,
+              complete_provider_id: media.provider_id,
             })
           }
           className="mt-2 w-full rounded-control border border-stamp/50 px-2 py-1.5 text-[11px] text-stamp-text transition-colors hover:bg-stamp hover:text-ink-950"

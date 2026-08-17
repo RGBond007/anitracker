@@ -80,7 +80,11 @@
     "typeLabel": "Media type",
     "prompt": "Search AniList by title — the original Japanese name usually matches best.",
     "noResults": "No matches for \"{{query}}\". Try the original Japanese title, or fewer words.",
-    "providersDown": "Couldn't reach the metadata providers. Titles already on your list still work — they come from the local cache."
+    "providersDown": "Couldn't reach the metadata providers. Titles already on your list still work — they come from the local cache.",
+    "chooseEntry": "{{count}} entries",
+    "chooseHint": "Pick the season, movie or special you want on your list.",
+    "addThis": "Add",
+    "onYourList": "On your list"
   },
   "detail": {
     "addToList": "Add to list",
@@ -279,14 +283,30 @@
     "owned": "{{count}} seasons",
     "start": "Start season {{n}}",
     "heading": "Seasons",
-    "pickHint": "Pick the season you're on",
+    "browseHint": "Tap a season to look at it",
     "ofTotal": "of {{total}}",
-    "current": "Current season",
-    "untracked": "Not on your list",
+    "currentBadge": "Currently watching",
+    "currentShort": "Watching now",
+    "setAsCurrent": "Set as current season",
+    "startNamed": "Start {{name}}",
+    "stillOn": "You're on {{name}}",
+    "notStarted": "Not started",
+    "notNow": "Not now",
+    "finishedHeading": "You finished {{name}}",
+    "finishedBody": "Mark it completed and continue with {{name}}?",
     "episodes": "{{n}} ep",
     "chapters": "{{n}} ch",
-    "saved": "Now on season {{n}}",
     "plusOne": "+1",
-    "increment": "Log one more"
+    "increment": "Log one more",
+    "kind_season": "Season",
+    "kind_movie": "Movie",
+    "kind_ova": "OVA",
+    "kind_special": "Special",
+    "kind_other": "Related",
+    "kindShort_season": "TV",
+    "kindShort_movie": "MOVIE",
+    "kindShort_ova": "OVA",
+    "kindShort_special": "SP",
+    "kindShort_other": "REL"
   }
 }

@@ -5,8 +5,8 @@ import { useSearchParams } from "react-router-dom";
 import type { MediaType } from "../../lib/api-client";
 import { useSearch } from "../../features/media/useMedia";
 import { useUiStore } from "../../stores/uiStore";
-import { Poster } from "../../components/media/Poster";
-import { PosterGrid, SectionHead } from "../../components/layout/Rail";
+import { SeriesResults } from "../../components/media/SeriesResults";
+import { SectionHead } from "../../components/layout/Rail";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
 import { Button, Chip } from "../../components/ui/Button";
@@ -76,11 +76,9 @@ export function SearchPage() {
       ) : !data || data.results.length === 0 ? (
         <EmptyState>{t("search.noResults", { query })}</EmptyState>
       ) : (
-        <PosterGrid>
-          {data.results.map((media) => (
-            <Poster key={`${media.provider}-${media.provider_id}`} media={media} lang={lang} />
-          ))}
-        </PosterGrid>
+        // One card per show, not one per season: six rows of Attack on Titan used
+        // to bury every other match.
+        <SeriesResults results={data.results} lang={lang} />
       )}
     </div>
   );

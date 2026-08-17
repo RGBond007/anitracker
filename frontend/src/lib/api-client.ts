@@ -49,25 +49,43 @@ export interface Entry {
   media: Media;
 }
 
+/** What a member of a series is. Only a `season` carries a season number. */
+export type SeasonKind = "season" | "movie" | "ova" | "special" | "other";
+
 /**
- * One season of a show: its own artwork and episode count, plus the viewer's own
- * progress on it. `entry` is null for a season that exists but is not on the list.
+ * One member of a series: its own artwork and episode count, plus the viewer's own
+ * progress on it. `entry` is null for a member that exists but is not on the list —
+ * which is the state the UI calls "Not started".
  */
 export interface Season {
   media: Media;
-  season_number: number;
+  /** Null for a movie, OVA or special: it has a place in the series, not a number. */
+  season_number: number | null;
+  kind: SeasonKind;
   entry: Entry | null;
+  /** The one season the user is on. Browsing another season does not move it. */
+  is_current: boolean;
 }
 
 export interface Series {
   root_provider_id: string;
   /** The show's name, with any "Season N" suffix taken off. */
   title: string;
+  /** Every member, in release order. */
   seasons: Season[];
-  /** The season to open on: the saved pick, else the one being watched. */
-  selected_provider_id: string;
-  /** True when the pick was made by the user rather than inferred. */
+  /** The season the user is on — changed only by an explicit action. */
+  current_provider_id: string;
+  /** True when the current season was chosen by the user rather than inferred. */
   is_explicit: boolean;
+}
+
+/** The one write that moves a user between seasons. */
+export interface SetCurrentSeason {
+  provider_id: string;
+  /** Track it as "watching" too — what "Start season 4" does. */
+  start?: boolean;
+  /** Mark this season completed in the same transaction. */
+  complete_provider_id?: string;
 }
 
 /** A saved pick, flat so the library can key it by show. */
@@ -301,11 +319,8 @@ export const api = {
   series: (provider: string, providerId: string, type: MediaType) =>
     request<Series>(`/media/${provider}/${providerId}/series?type=${type}`),
   /** Answers with the whole series, so the caller never has to guess the new state. */
-  selectSeason: (rootProviderId: string, providerId: string) =>
-    request<Series>(`/series/${rootProviderId}/season`, {
-      method: "PUT",
-      body: body({ provider_id: providerId }),
-    }),
+  setCurrentSeason: (rootProviderId: string, input: SetCurrentSeason) =>
+    request<Series>(`/series/${rootProviderId}/season`, { method: "PUT", body: body(input) }),
   seasonSelections: () => request<SeasonSelection[]>("/series/selections"),
 
   entries: (params: { type?: MediaType; status?: EntryStatus; sort?: string } = {}) => {

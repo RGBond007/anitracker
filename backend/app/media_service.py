@@ -84,8 +84,15 @@ def _apply(row: MediaCache, record: MediaRecord) -> MediaCache:
     row.status = record.status
     row.season_year = record.season_year
     row.season = record.season
+    row.start_date = record.start_date or row.start_date
     row.prequel_id = record.prequel_id
     row.sequel_id = record.sequel_id
+    # Both derived from the same relation list rather than asked of each adapter: a
+    # provider reports edges, and which of them mean "same series" is one policy,
+    # declared on `Related`. An adapter that forgot to apply it would silently drop
+    # its movies out of their series.
+    row.parent_id = next((r.provider_id for r in record.related if r.is_series_parent), None)
+    row.related_ids = [r.provider_id for r in record.related if r.is_series_extra]
     row.genres = record.genres
     row.average_score = record.average_score
     row.duration = record.duration

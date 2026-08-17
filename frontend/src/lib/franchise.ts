@@ -94,6 +94,10 @@ export function groupByFranchise(
 export function nextSeasonId(franchise: Franchise): string | null {
   const { active, seasons } = franchise;
   if (active.status !== "completed") return null;
+  // Starting the next season is a write against the *series*, so without a resolved
+  // chain there is nothing to write it to. Better to withhold the offer than to make
+  // one the server will refuse.
+  if (!active.media.root_provider_id) return null;
   const sequel = active.media.sequel_id;
   if (!sequel) return null;
   const owned = new Set(seasons.map((e) => e.media.provider_id));

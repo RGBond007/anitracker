@@ -7,15 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Seasons** — a title's page now lists every season of its show, each with its own poster,
-  episode count, progress and status, and switching between them changes the artwork and the
-  numbers without a reload. The season you pick is saved as your current one and is what the
-  library card shows from then on, so finishing a season no longer moves the card on its own.
+- **Seasons** — a title's page lists every season of its show, each with its own poster, episode
+  count, progress and status, and moving between them changes the artwork and the numbers without a
+  reload. The season you are on drives the poster and progress shown in the library and on the
+  dashboard.
+- **Viewing a season is separate from watching it.** Opening a season shows its details and nothing
+  more; the season you are on changes only through **Set as current season** or **Start season N**.
+  So you can read season 1's synopsis, or look at a movie, without losing your place.
+- **Finishing a season offers to continue.** Watch the last episode and a panel offers to mark the
+  season completed and start the next one, as a single change. It never moves you on by itself, and
+  "Not now" is remembered.
+- **Movies, OVAs, specials and sequel parts** are grouped under their series and ordered by release
+  date, so a movie sits between the seasons it shipped between. Only seasons are numbered.
+- **Six per-season states** — watching, completed, on hold, dropped, plan to watch, and *Not
+  started* for a season you have never opened.
+- **A compact season selector beside the title on phones**, so choosing a season no longer means
+  scrolling past the whole synopsis. The poster carousel stays below for browsing.
+- **Search groups a show into one card** and lets you choose which season or related entry to add,
+  instead of returning six rows of the same series.
+
+### Changed
+- The current season is marked with a "Watching now" label and a filled dot, and the season being
+  viewed with an outline — two signals that do not depend on the accent colour alone.
+- Changing the displayed season fades the poster and details in over 180ms instead of swapping them,
+  and no longer raises a toast over the season carousel.
+- The detail page's cover is capped on phones, so the title, progress and season selector fit on the
+  first screen.
 
 ### Fixed
 - Caching a title no longer fails when two writers reach the same show at once — resolving a
   season chain in the background overlaps with the request that started it, and the second
   insert used to hit the unique constraint.
+- A movie or OVA added before the rest of its series no longer resolves into a series of one and stay
+  stuck there; it now finds its parent series and joins it.
+- The detail page no longer overflows horizontally on a phone, which made mobile browsers zoom the
+  whole page out to fit.
 - The English locale carried German strings for the season labels.
 
 ## [1.0.0] — 2026-08-10

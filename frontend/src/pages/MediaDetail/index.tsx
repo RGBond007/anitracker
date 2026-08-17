@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import type { MediaType, Season } from "../../lib/api-client";
 import { useAddEntry, useEntryForMedia, useMediaDetail } from "../../features/media/useMedia";
-import { useSelectSeason, useSeries } from "../../features/media/useSeasons";
+import { useSeries } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { baseTitle } from "../../lib/franchise";
 import { queryKeys } from "../../lib/queryKeys";
@@ -12,8 +12,10 @@ import { displayTitle } from "../../lib/titles";
 import { CoverImage } from "../../components/media/CoverImage";
 import { EntryForm } from "../../components/media/EntryForm";
 import { mediaHref } from "../../components/media/Poster";
+import { SeasonActions } from "../../components/media/SeasonActions";
+import { useSeasonLabels } from "../../components/media/seasonLabels";
 import { SeasonProgress } from "../../components/media/SeasonProgress";
-import { SeasonSwitcher } from "../../components/media/SeasonSwitcher";
+import { SeasonChips, SeasonSwitcher } from "../../components/media/SeasonSwitcher";
 import { Button } from "../../components/ui/Button";
 import { ErrorNote } from "../../components/ui/EmptyState";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
@@ -36,50 +38,41 @@ export function MediaDetailPage() {
   const [params] = useSearchParams();
   const type = (params.get("type") as MediaType) ?? "anime";
   const lang = useUiStore((s) => s.titleLanguage);
-  const toast = useUiStore((s) => s.toast);
+  const labels = useSeasonLabels();
 
   const media = useMediaDetail(provider, id, type);
   const entry = useEntryForMedia(provider, id);
   const series = useSeries(provider, id, type);
   const add = useAddEntry();
-  const selectSeason = useSelectSeason();
 
   const seasons = series.data?.seasons ?? [];
   const isMultiSeason = seasons.length > 1;
-  const viewing = seasons.find((s) => s.media.provider_id === id);
+  const seasonCount = seasons.filter((s) => s.kind === "season").length;
+  const viewed = seasons.find((s) => s.media.provider_id === id);
 
   /**
-   * Show a season and remember it, in that order.
+   * Show a season. That is all this does.
    *
-   * The URL stays the source of truth for which season is on screen — everything
-   * else on the page reads the route — so switching navigates. Nothing is refetched
-   * to do it: the season's metadata and the viewer's entry both arrived with the
-   * series, so they are written into the caches the new URL will read and the swap
-   * paints from data already in hand instead of flashing a skeleton.
+   * Which season is *displayed* is URL state, and which season the user *is on* is
+   * server state written only by `SeasonActions` — keeping them apart is what lets
+   * someone read season 1's synopsis without being moved back to season 1.
+   *
+   * The URL is the single source of truth for the displayed season, so this
+   * navigates rather than holding a second copy in component state. Nothing is
+   * refetched to do it: the season's metadata, the viewer's entry and the series
+   * itself all arrived together, so they are written into the caches the new URL
+   * will read and the swap paints from data already in hand.
    */
-  const switchTo = (season: Season) => {
+  const view = (season: Season) => {
     const target = season.media.provider_id;
-    const root = series.data?.root_provider_id;
-    if (!root) return;
+    if (target === id || !series.data) return;
 
-    if (target !== id) {
-      queryClient.setQueryData(queryKeys.media(provider, target, type), season.media);
-      queryClient.setQueryData(queryKeys.entryForMedia(provider, target), season.entry);
-      queryClient.setQueryData(queryKeys.series(provider, target), {
-        ...series.data,
-        selected_provider_id: target,
-        is_explicit: true,
-      });
-      // `replace`, so a run of season switches leaves one entry in history and Back
-      // still returns to wherever the title was opened from.
-      navigate(mediaHref(season.media), { replace: true });
-    }
-
-    if (target === series.data?.selected_provider_id && series.data.is_explicit) return;
-    selectSeason.mutate(
-      { root, providerId: target },
-      { onSuccess: () => toast(t("season.saved", { n: season.season_number })) },
-    );
+    queryClient.setQueryData(queryKeys.media(provider, target, type), season.media);
+    queryClient.setQueryData(queryKeys.entryForMedia(provider, target), season.entry);
+    queryClient.setQueryData(queryKeys.series(provider, target), series.data);
+    // `replace`, so a run of season changes leaves one entry in history and Back
+    // still returns to wherever the title was opened from.
+    navigate(mediaHref(season.media), { replace: true });
   };
 
   if (media.isLoading) {
@@ -127,14 +120,17 @@ export function MediaDetailPage() {
     // the cover was clipped against the left of the viewport.
     <div className="wrap space-y-6 py-8">
       <div className="grid gap-6 md:grid-cols-[240px_1fr]">
-        <div className="space-y-3">
-          {/* Keyed on the season, so switching cross-fades to the new artwork
+        {/* Capped on a phone. Full-width artwork is a 585px-tall wall that pushes the
+            title, the progress and the season chips off the first screen — and the
+            whole point of the chips is being reachable without a scroll. */}
+        <div className="mx-auto w-full max-w-[190px] space-y-3 sm:max-w-[240px] md:mx-0 md:max-w-none">
+          {/* Keyed on the season, so changing season fades in the new artwork
               instead of repainting the old <img> in place. */}
           <CoverImage
             key={m.provider_id}
             media={m}
             lang={lang}
-            className="aspect-2/3 w-full rounded-poster"
+            className="season-fade aspect-2/3 w-full rounded-poster"
           />
 
           {entry.data ? (
@@ -159,14 +155,26 @@ export function MediaDetailPage() {
           )}
         </div>
 
-        <div className="space-y-5">
+        {/* `min-w-0` is load-bearing: a grid item's automatic minimum size is its
+            content, so the horizontally scrolling chip row inside would otherwise
+            widen this column to its full scroll width — 600px of chips — and a phone
+            browser answers that by zooming the whole page out to fit.
+
+            Keyed on the season as well: the whole column is what changed, and a short
+            fade says so without the page appearing to reload. */}
+        <div key={m.provider_id} className="season-fade min-w-0 space-y-5">
           <div>
-            {isMultiSeason && (
+            {isMultiSeason && viewed && (
               <p className="font-mono mb-1.5 text-[11px] uppercase tracking-[0.12em]">
-                <span className="text-stamp-text">
-                  {t("season.short", { n: viewing?.season_number ?? m.season_number ?? 1 })}
-                </span>
-                <span className="text-text-faint"> {t("season.ofTotal", { total: seasons.length })}</span>
+                <span className="text-text-dim">{labels.name(viewed, seriesTitle, lang)}</span>
+                {/* "of 6" counts seasons only. A movie is not the seventh season, and
+                    counting the extras in would make season 1 of 6 read "of 12". */}
+                {viewed.kind === "season" && seasonCount > 1 && (
+                  <span className="text-text-faint">
+                    {" "}
+                    {t("season.ofTotal", { total: seasonCount })}
+                  </span>
+                )}
               </p>
             )}
             <h1 className="font-display text-3xl font-bold leading-tight tracking-tight">
@@ -176,6 +184,20 @@ export function MediaDetailPage() {
               <p className="mt-1 text-sm text-text-dim">{alternates.join(" · ")}</p>
             )}
           </div>
+
+          {/* Phones get the seasons here, beside the title: the carousel is a long
+              way down past the synopsis, and picking a season should not require
+              reading the plot first. The carousel stays for browsing artwork. */}
+          {isMultiSeason && series.data && (
+            <div className="sm:hidden">
+              <SeasonChips seasons={seasons} viewingProviderId={id} onView={view} />
+            </div>
+          )}
+
+          {/* The one place the current season can change. */}
+          {series.data && viewed && (
+            <SeasonActions series={series.data} viewed={viewed} lang={lang} onView={view} />
+          )}
 
           <div className="grid grid-cols-2 gap-0.5 bg-line sm:grid-cols-4">
             <Fact
@@ -234,22 +256,21 @@ export function MediaDetailPage() {
         </div>
       </div>
 
-      {/* A show with one season has nothing to switch between, so it says nothing. */}
+      {/* A show with one season has nothing to browse, so it says nothing. */}
       {isMultiSeason && series.data && (
         <section>
           <div className="mb-3.5 flex items-baseline justify-between gap-4">
             <h2 className="font-display text-[15px] font-bold tracking-[-0.01em]">
               {t("season.heading")}
             </h2>
-            <p className="text-[11.5px] text-text-faint">{t("season.pickHint")}</p>
+            <p className="text-[11.5px] text-text-faint">{t("season.browseHint")}</p>
           </div>
           <SeasonSwitcher
             seasons={seasons}
             seriesTitle={seriesTitle}
             viewingProviderId={id}
-            currentProviderId={series.data.selected_provider_id}
             lang={lang}
-            onSelect={switchTo}
+            onView={view}
           />
         </section>
       )}

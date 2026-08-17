@@ -1,57 +1,91 @@
+import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { Season, TitleLanguage } from "../../lib/api-client";
 import { cx } from "../../lib/cx";
-import { seasonSubtitle } from "../../lib/franchise";
-import { displayTitle } from "../../lib/titles";
 import { CoverImage } from "./CoverImage";
-import { useStatusLabel } from "./statusLabels";
+import { useSeasonLabels } from "./seasonLabels";
 
 /**
- * The season picker on a title's page.
+ * Bring the viewed member into the middle of its scroller.
  *
- * Every season is shown with its own artwork, count and progress, because that is
- * the thing being chosen between — a list of numbers would make the user remember
- * which cover belongs to which season. The one being viewed carries a gold ring and
- * full contrast; the rest are held back rather than greyed out, so the row still
- * reads as one line of artwork.
+ * A show with twelve members scrolls, and season 6 starts off the right-hand edge —
+ * so opening season 6 would show a row that appears to begin at season 1 with
+ * nothing selected in it. Set directly rather than through `scrollIntoView`, which
+ * also scrolls the page vertically to reach the element.
+ */
+function useCentreOnViewed(viewingProviderId: string) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const item = useRef<HTMLElement | null>(null);
+
+  // A callback ref, so the same hook serves the carousel's <div> cells and the chip
+  // row's <button>s without either having to know the other's element type.
+  const active = useCallback((el: HTMLElement | null) => {
+    item.current = el;
+  }, []);
+
+  useEffect(() => {
+    const box = scroller.current;
+    const el = item.current;
+    if (!box || !el) return;
+    box.scrollLeft = Math.max(0, el.offsetLeft - (box.clientWidth - el.clientWidth) / 2);
+  }, [viewingProviderId]);
+
+  return { scroller, active };
+}
+
+/**
+ * The season carousel on a title's page: browsing, not choosing.
  *
- * Picking is a single click that both shows the season and saves it, so there is no
- * "apply" step and no second highlight to explain. The only time two markers appear
- * is when the saved season is not the one on screen — arriving from a search result
- * for season 1 while season 2 is the one being watched — and then the saved one is
- * flagged in the caption instead.
+ * Clicking a card shows that season and nothing more — the user's current season is
+ * moved by the action beside the title, never by looking around. That makes two
+ * states that have to be told apart at a glance, so they are told apart twice over
+ * and never by colour alone:
+ *
+ * - **viewed** — a paper outline and a lifted card, the one whose details fill the
+ *   page. A shape, so it survives a colourblind reader and a greyscale print.
+ * - **current** — a filled dot and the words "Watching now" under the artwork. Text,
+ *   so it survives the same.
+ *
+ * Both at once is the ordinary case and reads as both: outlined *and* labelled.
  */
 export function SeasonSwitcher({
   seasons,
   seriesTitle,
   viewingProviderId,
-  currentProviderId,
   lang,
-  onSelect,
+  onView,
 }: {
   seasons: Season[];
   seriesTitle: string;
-  /** The season whose details the page is showing. */
+  /** The member whose details the page is showing. Comes from the URL. */
   viewingProviderId: string;
-  /** The season saved as the user's current one. */
-  currentProviderId: string;
   lang: TitleLanguage;
-  onSelect: (season: Season) => void;
+  onView: (season: Season) => void;
 }) {
+  const { scroller, active } = useCentreOnViewed(viewingProviderId);
+
   return (
     // Negative margins let the row bleed to the screen edge on a phone while its
     // first cover still lines up with the page column.
-    <div className="rail -mx-5 flex gap-3.5 overflow-x-auto px-5 pb-1.5 sm:mx-0 sm:px-0">
+    <div
+      ref={scroller}
+      className="rail -mx-5 flex gap-3.5 overflow-x-auto px-5 pb-1.5 sm:mx-0 sm:px-0"
+      role="list"
+    >
       {seasons.map((season) => (
-        <div key={season.media.provider_id} className="w-[100px] shrink-0 sm:w-[116px]">
+        <div
+          key={season.media.provider_id}
+          ref={season.media.provider_id === viewingProviderId ? active : undefined}
+          className="w-[112px] shrink-0 sm:w-[128px]"
+          role="listitem"
+        >
           <SeasonCard
             season={season}
             seriesTitle={seriesTitle}
             isViewing={season.media.provider_id === viewingProviderId}
-            isCurrent={season.media.provider_id === currentProviderId}
             lang={lang}
-            onSelect={() => onSelect(season)}
+            onView={() => onView(season)}
           />
         </div>
       ))}
@@ -63,43 +97,33 @@ function SeasonCard({
   season,
   seriesTitle,
   isViewing,
-  isCurrent,
   lang,
-  onSelect,
+  onView,
 }: {
   season: Season;
   seriesTitle: string;
   isViewing: boolean;
-  isCurrent: boolean;
   lang: TitleLanguage;
-  onSelect: () => void;
+  onView: () => void;
 }) {
   const { t } = useTranslation();
-  const statusLabel = useStatusLabel();
-  const { media, entry, season_number: number } = season;
+  const { badge, name, statusLine } = useSeasonLabels();
+  const { media, entry, is_current: isCurrent } = season;
 
   const total = media.total_units;
   const pct = entry && total ? Math.min(100, (entry.progress / total) * 100) : 0;
-  const subtitle = seasonSubtitle(displayTitle(media, lang), seriesTitle);
-  const name = subtitle ?? t("season.short", { n: number });
 
   return (
     <button
       type="button"
-      onClick={onSelect}
+      onClick={onView}
       aria-current={isViewing || undefined}
-      // No aria-label: the button's own content — the season badge, its name, the
-      // progress and the status — is a better name than "Show season 3" is.
       className="group block w-full text-left"
     >
       <div
         className={cx(
           "relative aspect-2/3 w-full overflow-hidden rounded-poster",
           "transition ease-out will-change-transform",
-          // Held back with a light hand: the gold ring is what marks the selected
-          // season, so the others only need to stop competing. A heavier veil looked
-          // right on the dark ground and bleached the artwork to milk on the light
-          // one, where dimming means fading into the paper rather than receding.
           isViewing
             ? "motion-safe:-translate-y-0.5"
             : "opacity-[0.88] saturate-[0.9] group-hover:opacity-100 group-hover:saturate-100 motion-safe:group-hover:-translate-y-0.5",
@@ -111,33 +135,23 @@ function SeasonCard({
       >
         <CoverImage media={media} lang={lang} className="h-full w-full" />
 
-        {/* The selected ring is an inset shadow rather than a border so it follows
-            the poster's radius exactly and takes no space from the artwork. */}
+        {/* The viewed outline is an inset shadow rather than a border so it follows
+            the poster's radius exactly and takes no space from the artwork. It is
+            paper, not gold: gold means "current" everywhere else in this component. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 rounded-poster transition-shadow"
           style={{
             boxShadow: isViewing
-              ? "inset 0 0 0 2px var(--stamp)"
-              : "var(--rim), inset 0 0 0 0 var(--stamp)",
+              ? "inset 0 0 0 2px var(--text), var(--rim)"
+              : "var(--rim), inset 0 0 0 0 var(--text)",
             transitionDuration: "var(--motion-lift)",
           }}
         />
 
         <span className="font-mono absolute left-1.5 top-1.5 rounded-pill bg-ink-950/80 px-1.5 py-px text-[10px] font-medium text-paper backdrop-blur">
-          {t("season.number", { n: number })}
+          {badge(season)}
         </span>
-
-        {isViewing && (
-          <span
-            aria-hidden
-            className="absolute right-1.5 top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-stamp text-ink-950"
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </span>
-        )}
 
         {pct > 0 && (
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-[3px] bg-ink-950/40">
@@ -151,32 +165,79 @@ function SeasonCard({
 
       <p
         className={cx(
-          "font-display mt-2 line-clamp-1 text-[12px] font-semibold leading-tight",
-          isViewing ? "text-text" : "text-text-dim group-hover:text-text",
+          "font-display mt-2 line-clamp-1 text-[12px] leading-tight",
+          isViewing ? "font-bold text-text" : "font-semibold text-text-dim group-hover:text-text",
         )}
       >
-        {name}
+        {name(season, seriesTitle, lang)}
       </p>
       <p className="tabular mt-[3px] line-clamp-1 text-[10.5px] text-text-faint">
-        {entry ? (
-          <>
-            {entry.progress}
-            {total ? `/${total}` : ""}
-            {/* The status is the first thing to go when the card is narrow: the
-                fraction is the number being compared across seasons, and keeping
-                both truncated the line to "25/25 ·…" on a phone. */}
-            <span className="hidden sm:inline"> · {statusLabel(entry.status, media.type)}</span>
-          </>
-        ) : total ? (
-          t(media.type === "manga" ? "season.chapters" : "season.episodes", { n: total })
-        ) : (
-          t("season.untracked")
-        )}
+        {statusLine(season)}
       </p>
-      {/* Only worth saying when the saved season is not the one on screen. */}
-      {isCurrent && !isViewing && (
-        <p className="mt-[3px] text-[10.5px] font-medium text-stamp-text">{t("season.current")}</p>
+      {isCurrent && (
+        <p className="mt-[3px] flex items-center gap-1 text-[10.5px] font-medium text-stamp-text">
+          <span aria-hidden className="h-[5px] w-[5px] shrink-0 rounded-full bg-stamp" />
+          {t("season.currentShort")}
+        </p>
       )}
     </button>
+  );
+}
+
+/**
+ * The same set, as chips — what a phone gets beside the title so the seasons are
+ * reachable without scrolling past the synopsis to the carousel below.
+ */
+export function SeasonChips({
+  seasons,
+  viewingProviderId,
+  onView,
+}: {
+  seasons: Season[];
+  viewingProviderId: string;
+  onView: (season: Season) => void;
+}) {
+  const { t } = useTranslation();
+  const { badge } = useSeasonLabels();
+  const { scroller, active } = useCentreOnViewed(viewingProviderId);
+
+  return (
+    <div ref={scroller} className="rail -mx-5 flex gap-1.5 overflow-x-auto px-5 py-0.5" role="list">
+      {seasons.map((season) => {
+        const isViewing = season.media.provider_id === viewingProviderId;
+        return (
+          <button
+            key={season.media.provider_id}
+            ref={isViewing ? active : undefined}
+            type="button"
+            role="listitem"
+            onClick={() => onView(season)}
+            aria-current={isViewing || undefined}
+            className={cx(
+              "font-mono flex shrink-0 items-center gap-1.5 rounded-pill border px-2.5 py-1 text-[11px] transition",
+              isViewing
+                ? "border-text bg-text font-semibold text-bg"
+                : "border-line bg-surface text-text-dim",
+            )}
+          >
+            {season.is_current && (
+              <>
+                <span
+                  aria-hidden
+                  className={cx(
+                    "h-[5px] w-[5px] shrink-0 rounded-full",
+                    // On the filled chip the gold dot would sit on paper and lose
+                    // its contrast, so it inverts to the chip's own ground.
+                    isViewing ? "bg-bg" : "bg-stamp",
+                  )}
+                />
+                <span className="sr-only">{t("season.currentBadge")}</span>
+              </>
+            )}
+            {badge(season)}
+          </button>
+        );
+      })}
+    </div>
   );
 }

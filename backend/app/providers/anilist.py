@@ -1,3 +1,5 @@
+from datetime import date
+
 import httpx
 
 from app.providers.base import (
@@ -7,6 +9,7 @@ from app.providers.base import (
     NotFound,
     ProviderError,
     RateLimited,
+    Related,
 )
 from app.providers.ratelimit import TokenBucket
 
@@ -23,6 +26,7 @@ _MEDIA_FIELDS = """
   duration
   seasonYear
   season
+  startDate { year month day }
   averageScore
   genres
   synonyms
@@ -110,18 +114,22 @@ class AniListProvider(MediaProvider):
         return payload.get("data") or {}
 
     @staticmethod
-    def _chain_links(node: dict, media_type: str) -> tuple[str | None, str | None]:
+    def _same_medium(node: dict, media_type: str) -> bool:
+        return (node.get("type") or "").lower() == media_type.lower()
+
+    @classmethod
+    def _chain_links(cls, node: dict, media_type: str) -> tuple[str | None, str | None]:
         """
         The direct prequel and sequel, if they are the same medium and a real season
         rather than a special. AniList hangs OVAs, movies and recaps off the same
         `relations` edge, and treating a recap as "Staffel 2" would be worse than
-        showing nothing.
+        showing nothing — those arrive through `_related` instead, unnumbered.
         """
         seasonish = {"TV", "TV_SHORT", "ONA"}
         prequel = sequel = None
         for edge in (node.get("relations") or {}).get("edges") or []:
             child = edge.get("node") or {}
-            if (child.get("type") or "").lower() != media_type.upper().lower():
+            if not cls._same_medium(child, media_type):
                 continue
             if child.get("format") not in seasonish:
                 continue
@@ -131,12 +139,50 @@ class AniListProvider(MediaProvider):
                 sequel = str(child["id"])
         return prequel, sequel
 
+    @classmethod
+    def _related(cls, node: dict, media_type: str) -> list[Related]:
+        """
+        Every neighbour of the same medium, raw. The season spine is filtered here to
+        TV formats; this is not, because the movie, the OVA and the recap special all
+        belong on a series page even though none of them is a season of it.
+        """
+        out: list[Related] = []
+        for edge in (node.get("relations") or {}).get("edges") or []:
+            child = edge.get("node") or {}
+            if not cls._same_medium(child, media_type) or child.get("id") is None:
+                continue
+            out.append(
+                Related(
+                    provider_id=str(child["id"]),
+                    relation=edge.get("relationType") or "OTHER",
+                    format=child.get("format"),
+                )
+            )
+        return out
+
+    @staticmethod
+    def _start_date(node: dict) -> date | None:
+        """
+        AniList reports a partial date for anything not yet dated — a year with no
+        month is normal for an announced season — so a date is only built when all
+        three parts are there, and the year alone keeps working through `season_year`.
+        """
+        raw = node.get("startDate") or {}
+        year, month, day = raw.get("year"), raw.get("month"), raw.get("day")
+        if not (year and month and day):
+            return None
+        try:
+            return date(year, month, day)
+        except ValueError:  # the provider has published 2月30日 before now
+            return None
+
     def _to_record(self, node: dict) -> MediaRecord:
         media_type = (node.get("type") or "ANIME").lower()
         cover = node.get("coverImage") or {}
         title = node.get("title") or {}
         total = node.get("episodes") if media_type == "anime" else node.get("chapters")
         prequel, sequel = self._chain_links(node, media_type)
+        related = self._related(node, media_type)
         return MediaRecord(
             provider=self.name,
             provider_id=str(node["id"]),
@@ -158,8 +204,10 @@ class AniListProvider(MediaProvider):
             status=node.get("status"),
             season_year=node.get("seasonYear"),
             season=node.get("season"),
+            start_date=self._start_date(node),
             prequel_id=prequel,
             sequel_id=sequel,
+            related=related,
             genres=list(node.get("genres") or []),
             average_score=node.get("averageScore"),
             duration=node.get("duration"),
