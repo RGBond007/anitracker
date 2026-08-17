@@ -1,366 +1,250 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 
-import type { TitleLanguage, User } from "../../lib/api-client";
-import {
-  useChangePassword,
-  useMe,
-  useCreateUser,
-  useRevokeSessions,
-  useUpdateProfile,
-  useUserAdmin,
-  useUsers,
-} from "../../features/auth/useAuth";
-import { useInstance, useUpdateInstance } from "../../features/instance/useInstance";
-import { LANGUAGES } from "../../lib/i18n";
-import { useUiStore } from "../../stores/uiStore";
-import { Button } from "../../components/ui/Button";
-import { Field } from "../../components/ui/Field";
-import { Input, Segmented, Select } from "../../components/ui/Input";
-import { Panel, PanelHeader } from "../../components/ui/Panel";
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <Panel>
-      <PanelHeader>{title}</PanelHeader>
-      <div className="space-y-4 p-5">{children}</div>
-    </Panel>
-  );
-}
-
-function AdminInstance() {
-  const { t } = useTranslation();
-  const { data: instance } = useInstance();
-  const update = useUpdateInstance();
-  if (!instance) return null;
-
-  return (
-    <Section title={t("settings.instance")}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("setup.instanceName")} hint={t("settings.clearHint")}>
-          <Input
-            defaultValue={instance.instance_name}
-            onBlur={(e) =>
-              e.target.value !== instance.instance_name &&
-              update.mutate({ instance_name: e.target.value })
-            }
-          />
-        </Field>
-        <Field label={t("settings.logoUrl")} hint={t("settings.clearHint")}>
-          <Input
-            defaultValue={instance.logo_url}
-            onBlur={(e) =>
-              e.target.value !== instance.logo_url && update.mutate({ logo_url: e.target.value })
-            }
-          />
-        </Field>
-        <Field label={t("setup.accent")}>
-          <div className="flex items-center gap-2">
-            <Input
-              className="tabular"
-              defaultValue={instance.accent_color}
-              onBlur={(e) =>
-                e.target.value !== instance.accent_color &&
-                update.mutate({ accent_color: e.target.value })
-              }
-            />
-            <span
-              aria-hidden
-              className="h-10 w-10 shrink-0 rounded-control border border-line"
-              style={{ backgroundColor: instance.accent_color }}
-            />
-          </div>
-        </Field>
-        <Field label={t("settings.registration")} hint={t("settings.registrationHint")}>
-          <Segmented
-            name="registration"
-            value={instance.allow_signup ? "open" : "closed"}
-            onChange={(v) => update.mutate({ allow_signup: v === "open" })}
-            options={[
-              { value: "open", label: t("settings.registrationOpen") },
-              { value: "closed", label: t("settings.registrationClosed") },
-            ]}
-          />
-        </Field>
-      </div>
-    </Section>
-  );
-}
+import { useMe } from "../../features/auth/useAuth";
+import { cx } from "../../lib/cx";
+import { AboutSection } from "./About";
+import { AppearanceSection } from "./Appearance";
+import { InstanceSection } from "./Instance";
+import { ProfileSection } from "./Profile";
+import { SecuritySection } from "./Security";
+import { UsersSection } from "./Users";
+import { ConfirmDialog, DirtyContext, ICONS, Icon } from "./parts";
 
 /**
- * Creating an account on someone's behalf. The generated password is displayed
- * once, here, and never again — the server hashes it and keeps no clear copy, so
- * this panel is the only chance to write it down.
+ * Settings, as one page showing one section at a time.
+ *
+ * The old page stacked every group in its own bordered card, which read as an
+ * admin console rather than as part of the app. Structure now comes from a quiet
+ * section list and the page surface itself; the sections below own their own
+ * saving, so nothing here knows what a preference is.
  */
-function CreateUser() {
-  const { t } = useTranslation();
-  const create = useCreateUser();
-  const [form, setForm] = useState({ email: "", username: "" });
-  const issued = create.data;
 
-  if (issued) {
-    return (
-      <div className="rounded-control border border-stamp/50 p-4">
-        <p className="text-sm">
-          {t("settings.createdUser", { name: issued.user.username })}
-        </p>
-        <p className="mt-2 text-xs text-text-dim">{t("settings.tempOnce")}</p>
-        <code className="tabular mt-2 block rounded-control bg-bg px-3 py-2.5 text-sm select-all">
-          {issued.temporary_password}
-        </code>
-        <Button className="mt-3 px-3 py-1.5 text-xs" onClick={() => create.reset()}>
-          {t("settings.createAnother")}
-        </Button>
-      </div>
-    );
-  }
+export type SectionId = "profile" | "appearance" | "security" | "instance" | "users" | "about";
+
+const SECTIONS: { id: SectionId; icon: string; adminOnly?: boolean }[] = [
+  { id: "profile", icon: ICONS.profile },
+  { id: "appearance", icon: ICONS.appearance },
+  { id: "security", icon: ICONS.security },
+  { id: "instance", icon: ICONS.instance, adminOnly: true },
+  { id: "users", icon: ICONS.users, adminOnly: true },
+  { id: "about", icon: ICONS.about },
+];
+
+function SectionNav({
+  idPrefix,
+  sections,
+  active,
+  labels,
+  label,
+  onSelect,
+  orientation,
+}: {
+  idPrefix: string;
+  sections: typeof SECTIONS;
+  active: SectionId;
+  labels: Record<SectionId, string>;
+  /** Names the tablist itself — both copies of the nav describe the same thing. */
+  label: string;
+  onSelect: (id: SectionId) => void;
+  orientation: "vertical" | "horizontal";
+}) {
+  const vertical = orientation === "vertical";
+  const refs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // Arrow keys move between tabs, which is what a `tablist` promises. Selection
+  // follows focus, so the panel changes as you arrow through — there is nothing
+  // to load, so there is nothing to make that expensive.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const keys = vertical ? ["ArrowDown", "ArrowUp"] : ["ArrowRight", "ArrowLeft"];
+    const step = e.key === keys[0] ? 1 : e.key === keys[1] ? -1 : 0;
+    if (!step && e.key !== "Home" && e.key !== "End") return;
+    e.preventDefault();
+    const index = sections.findIndex((s) => s.id === active);
+    const next =
+      e.key === "Home"
+        ? 0
+        : e.key === "End"
+          ? sections.length - 1
+          : (index + step + sections.length) % sections.length;
+    const target = sections[next].id;
+    refs.current[target]?.focus();
+    onSelect(target);
+  };
 
   return (
-    <form
-      className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
-      onSubmit={(e) => {
-        e.preventDefault();
-        create.mutate(form);
-      }}
-    >
-      <Field label={t("auth.username")}>
-        <Input
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-        />
-      </Field>
-      <Field label={t("auth.email")}>
-        <Input
-          type="email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-      </Field>
-      <Button
-        type="submit"
-        variant="stamp"
-        disabled={form.username.length < 2 || !form.email.includes("@") || create.isPending}
-      >
-        {t("settings.createUser")}
-      </Button>
-      {create.error && (
-        <p className="text-sm text-stamp-text sm:col-span-3">
-          {(create.error as Error).message}
-        </p>
+    <div
+      role="tablist"
+      aria-orientation={orientation}
+      aria-label={label}
+      onKeyDown={onKeyDown}
+      className={cx(
+        vertical
+          ? "flex flex-col gap-0.5"
+          : "rail -mx-5 flex gap-1 overflow-x-auto px-5 pb-1 sm:-mx-11 sm:px-11",
       )}
-    </form>
-  );
-}
-
-function AdminUsers({ me }: { me: User }) {
-  const { t } = useTranslation();
-  const { data: users } = useUsers();
-  const { update, remove } = useUserAdmin();
-  const error = update.error ?? remove.error;
-
-  return (
-    <Section title={t("settings.users")}>
-      <CreateUser />
-
-      <ul className="divide-y divide-line">
-        {users?.map((u) => (
-          <li key={u.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-            <div>
-              <p>
-                {u.username}
-                {u.id === me.id && (
-                  <span className="ml-2 text-xs text-text-dim">{t("settings.you")}</span>
-                )}
-              </p>
-              <p className="font-mono text-[11px] text-text-faint">
-                {u.email} · {u.role}
-                {u.must_change_password && ` · ${t("settings.pendingFirstLogin")}`}
-              </p>
-            </div>
-            {u.id !== me.id && (
-              <div className="flex gap-3">
-                <button
-                  className="text-xs text-text-dim hover:text-stamp-text"
-                  onClick={() =>
-                    update.mutate({
-                      id: u.id,
-                      patch: { role: u.role === "admin" ? "user" : "admin" },
-                    })
-                  }
-                >
-                  {u.role === "admin" ? t("settings.makeUser") : t("settings.makeAdmin")}
-                </button>
-                <button
-                  className="text-xs text-text-dim hover:text-stamp-text"
-                  onClick={() =>
-                    confirm(t("settings.deleteUserConfirm", { name: u.username })) &&
-                    remove.mutate(u.id)
-                  }
-                >
-                  {t("settings.deleteUser")}
-                </button>
-              </div>
+    >
+      {sections.map((section) => {
+        const isActive = section.id === active;
+        return (
+          <button
+            key={section.id}
+            ref={(node) => {
+              refs.current[section.id] = node;
+            }}
+            id={`${idPrefix}-tab-${section.id}`}
+            role="tab"
+            type="button"
+            aria-selected={isActive}
+            aria-controls="settings-panel"
+            tabIndex={isActive ? 0 : -1}
+            onClick={() => onSelect(section.id)}
+            className={cx(
+              "relative flex shrink-0 items-center gap-2.5 whitespace-nowrap text-[13.5px] transition-colors",
+              vertical ? "rounded-control px-3 py-2.5 text-left" : "rounded-pill px-3.5 py-2",
+              // Colour is never the only signal: the active tab also carries a
+              // gold rule — a bar down its left edge in the sidebar, an
+              // underline in the phone rail — and steps up to medium weight.
+              isActive
+                ? "font-medium text-stamp-text"
+                : "text-text-dim hover:bg-surface hover:text-text",
+              isActive && vertical && "bg-surface",
+              isActive &&
+                vertical &&
+                "before:absolute before:inset-y-1.5 before:-left-px before:w-[2px] before:rounded-pill before:bg-stamp",
+              isActive && !vertical && "bg-surface",
+              isActive &&
+                !vertical &&
+                "after:absolute after:inset-x-3.5 after:-bottom-px after:h-[2px] after:rounded-pill after:bg-stamp",
             )}
-          </li>
-        ))}
-      </ul>
-      {error && <p className="text-sm text-stamp-text">{String(error)}</p>}
-    </Section>
+          >
+            <Icon path={section.icon} className={isActive ? "text-stamp-text" : undefined} />
+            {labels[section.id]}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 export function SettingsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: me } = useMe();
-  const { data: instance } = useInstance();
-  const profile = useUpdateProfile();
-  const password = useChangePassword();
-  const revoke = useRevokeSessions();
-  const theme = useUiStore((s) => s.theme);
-  const [pw, setPw] = useState({ current: "", next: "" });
+  const [params, setParams] = useSearchParams();
+  const [dirty, setDirty] = useState(false);
+  /** A section the user asked for while edits were pending. */
+  const [pendingJump, setPendingJump] = useState<SectionId | null>(null);
+
+  const isAdmin = me?.role === "admin";
+  const sections = useMemo(() => SECTIONS.filter((s) => !s.adminOnly || isAdmin), [isAdmin]);
+
+  const requested = params.get("s") as SectionId | null;
+  const active: SectionId = sections.some((s) => s.id === requested) ? requested! : "profile";
+
+  // The browser's own "leave site?" prompt is the only one available for a real
+  // navigation away, and it only appears if something is actually unsaved.
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
+  const open = useCallback(
+    (id: SectionId) => {
+      setDirty(false);
+      setParams(id === "profile" ? {} : { s: id }, { replace: true });
+    },
+    [setParams],
+  );
+
+  const select = (id: SectionId) => {
+    if (id === active) return;
+    if (dirty) setPendingJump(id);
+    else open(id);
+  };
 
   if (!me) return null;
 
+  const labels: Record<SectionId, string> = {
+    profile: t("settings.profile"),
+    appearance: t("settings.appearance"),
+    security: t("settings.security"),
+    instance: t("settings.instance"),
+    users: t("settings.users"),
+    about: t("settings.about"),
+  };
+
   return (
-    <div className="wrap max-w-3xl space-y-5 py-8">
-      <h1 className="font-display text-[26px] font-bold tracking-[-0.01em]">{t("settings.title")}</h1>
+    <DirtyContext.Provider value={setDirty}>
+      <div className="wrap py-8 sm:py-10">
+        <header className="max-w-prose">
+          <h1 className="font-display text-[26px] font-bold tracking-[-0.01em]">
+            {t("settings.title")}
+          </h1>
+          <p className="mt-1.5 text-sm text-text-dim">{t("settings.subtitle")}</p>
+        </header>
 
-      <Section title={t("settings.profile")}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("auth.username")}>
-            <Input
-              defaultValue={me.username}
-              onBlur={(e) =>
-                e.target.value !== me.username && profile.mutate({ username: e.target.value })
-              }
-            />
-          </Field>
-          <Field label={t("auth.email")}>
-            <Input
-              type="email"
-              defaultValue={me.email}
-              onBlur={(e) => e.target.value !== me.email && profile.mutate({ email: e.target.value })}
-            />
-          </Field>
+        {/* Phone: the section list becomes a rail under the title. */}
+        <div className="mt-6 border-b border-line lg:hidden">
+          <SectionNav
+            idPrefix="rail"
+            sections={sections}
+            active={active}
+            labels={labels}
+            label={t("settings.sections")}
+            onSelect={select}
+            orientation="horizontal"
+          />
         </div>
-        {profile.error && <p className="text-sm text-stamp-text">{String(profile.error)}</p>}
-      </Section>
 
-      {/* Two columns, not three: at 1280px a third column leaves each control
-          ~213px, which is too narrow for a segmented label to survive. */}
-      <Section title={t("settings.appearance")}>
-        <div className="grid items-start gap-x-5 gap-y-4 sm:grid-cols-2">
-          <Field label={t("settings.theme")}>
-            <Segmented
-              name="theme"
-              value={theme}
-              onChange={(v) => profile.mutate({ theme: v })}
-              options={[
-                { value: "dark" as const, label: t("settings.dark") },
-                { value: "light" as const, label: t("settings.light") },
-              ]}
-            />
-          </Field>
+        <div className="mt-8 lg:mt-10 lg:grid lg:grid-cols-[184px_minmax(0,1fr)] lg:gap-14">
+          <div className="hidden lg:block">
+            <div className="sticky top-8">
+              <SectionNav
+                idPrefix="side"
+                sections={sections}
+                active={active}
+                labels={labels}
+                label={t("settings.sections")}
+                onSelect={select}
+                orientation="vertical"
+              />
+            </div>
+          </div>
 
-          <Field label={t("settings.titleLanguage")} hint={t("settings.titleLanguageHint")}>
-            <Segmented
-              name="title-language"
-              value={me.title_language}
-              onChange={(v) => profile.mutate({ title_language: v as TitleLanguage })}
-              options={[
-                { value: "romaji", label: "Romaji" },
-                { value: "english", label: "English" },
-                { value: "native", label: "Native" },
-              ]}
-            />
-          </Field>
-
-          <Field label={t("settings.visibility")} hint={t("settings.visibilityHint")}>
-            <Segmented
-              name="visibility"
-              value={me.profile_public ? "public" : "friends"}
-              onChange={(v) => profile.mutate({ profile_public: v === "public" })}
-              options={[
-                { value: "friends", label: t("settings.visibilityFriends") },
-                { value: "public", label: t("settings.visibilityPublic") },
-              ]}
-            />
-          </Field>
-
-          <Field label={t("settings.uiLanguage")}>
-            <Select
-              value={me.ui_language}
-              onChange={(e) => {
-                void i18n.changeLanguage(e.target.value);
-                profile.mutate({ ui_language: e.target.value });
-              }}
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-      </Section>
-
-      <Section title={t("settings.password")}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("settings.currentPassword")}>
-            <Input
-              type="password"
-              autoComplete="current-password"
-              value={pw.current}
-              onChange={(e) => setPw({ ...pw, current: e.target.value })}
-            />
-          </Field>
-          <Field label={t("settings.newPassword")} hint={t("setup.passwordHint")}>
-            <Input
-              type="password"
-              autoComplete="new-password"
-              value={pw.next}
-              onChange={(e) => setPw({ ...pw, next: e.target.value })}
-            />
-          </Field>
-        </div>
-        <Button
-          disabled={pw.next.length < 8 || password.isPending}
-          onClick={() =>
-            password.mutate(
-              { current: pw.current, next: pw.next },
-              { onSuccess: () => setPw({ current: "", next: "" }) },
-            )
-          }
-        >
-          {t("settings.changePassword")}
-        </Button>
-        {password.error && <p className="text-sm text-stamp-text">{String(password.error)}</p>}
-
-        <div className="border-t border-line pt-4">
-          <p className="text-xs text-text-faint">{t("settings.revokeHint")}</p>
-          <Button
-            className="mt-2"
-            disabled={revoke.isPending}
-            onClick={() => confirm(t("settings.revokeConfirm")) && revoke.mutate()}
+          {/* One column of content, capped so a text input never runs the full
+              width of a 27" display. */}
+          <div
+            id="settings-panel"
+            role="tabpanel"
+            aria-label={labels[active]}
+            tabIndex={-1}
+            className="min-w-0 max-w-[660px] pb-10 outline-none"
           >
-            {t("settings.revoke")}
-          </Button>
+            {active === "profile" && <ProfileSection me={me} />}
+            {active === "appearance" && <AppearanceSection me={me} />}
+            {active === "security" && <SecuritySection />}
+            {active === "instance" && isAdmin && <InstanceSection />}
+            {active === "users" && isAdmin && <UsersSection me={me} />}
+            {active === "about" && <AboutSection />}
+          </div>
         </div>
-      </Section>
+      </div>
 
-      {me.role === "admin" && (
-        <>
-          <AdminInstance />
-          <AdminUsers me={me} />
-        </>
+      {pendingJump && (
+        <ConfirmDialog
+          title={t("settings.discardTitle")}
+          body={t("settings.discardBody")}
+          confirmLabel={t("settings.discard")}
+          onCancel={() => setPendingJump(null)}
+          onConfirm={() => {
+            open(pendingJump);
+            setPendingJump(null);
+          }}
+        />
       )}
-
-      <Section title={t("settings.about")}>
-        <p className="font-mono text-xs text-text-dim">
-          AniTracker {instance?.version} · {instance?.license_tier} · {t("settings.noTelemetry")}
-        </p>
-      </Section>
-    </div>
+    </DirtyContext.Provider>
   );
 }

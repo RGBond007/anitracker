@@ -12,14 +12,15 @@ export function useInstance() {
   });
 }
 
-export function useUpdateInstance() {
+/** `silent` leaves the confirmation to the caller — see `useUpdateProfile`. */
+export function useUpdateInstance({ silent = false }: { silent?: boolean } = {}) {
   const queryClient = useQueryClient();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
     mutationFn: api.updateInstance,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.instance });
-      toast("Instance updated");
+      if (!silent) toast("Instance updated");
     },
   });
 }

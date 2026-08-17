@@ -72,7 +72,12 @@ export function useLogout() {
   });
 }
 
-export function useUpdateProfile() {
+/**
+ * `silent` is for callers that confirm the save themselves — settings puts the
+ * tick next to the field that changed, and a toast on top of that is the same
+ * message twice.
+ */
+export function useUpdateProfile({ silent = false }: { silent?: boolean } = {}) {
   const queryClient = useQueryClient();
   const sync = useSyncPreferences();
   const toast = useUiStore((s) => s.toast);
@@ -81,7 +86,7 @@ export function useUpdateProfile() {
     onSuccess: (user) => {
       sync(user);
       queryClient.setQueryData(queryKeys.me, user);
-      toast("Profile saved");
+      if (!silent) toast("Profile saved");
     },
   });
 }

@@ -35,8 +35,21 @@ export function Modal({
       >
         <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
           <h2 className="font-display text-[15px] font-bold tracking-[-0.01em]">{title}</h2>
+          {/* A drawn cross, not the "✕" character: the glyph's weight and size
+              come from whatever font the OS falls back to. */}
           <button onClick={onClose} aria-label="Close" className="text-text-dim hover:text-text">
-            ✕
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
           </button>
         </div>
         <div className="p-4">{children}</div>
