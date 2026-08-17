@@ -289,7 +289,7 @@ async def test_clearing_a_branding_override_falls_back_to_env(app_client):
     await app_client.patch("/api/admin/instance", json={"instance_name": ""})
 
     info = (await app_client.get("/api/instance")).json()
-    assert info["instance_name"] == "AniTrack"  # the .env default
+    assert info["instance_name"] == "AniTracker"  # the .env default
 
 
 async def test_non_admin_cannot_edit_the_instance(app_client):

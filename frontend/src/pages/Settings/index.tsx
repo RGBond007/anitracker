@@ -358,7 +358,7 @@ export function SettingsPage() {
 
       <Section title={t("settings.about")}>
         <p className="font-mono text-xs text-text-dim">
-          AniTrack {instance?.version} · {instance?.license_tier} · {t("settings.noTelemetry")}
+          AniTracker {instance?.version} · {instance?.license_tier} · {t("settings.noTelemetry")}
         </p>
       </Section>
     </div>

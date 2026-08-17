@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     app.state.background_tasks = set()
     app.state.license = validate_license()
     log.info(
-        "AniTrack %s starting -- providers: %s, license tier: %s",
+        "AniTracker %s starting -- providers: %s, license tier: %s",
         VERSION,
         ", ".join(p.name for p in app.state.registry.providers),
         app.state.license.tier,
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AniTrack API",
+    title="AniTracker API",
     version=VERSION,
     lifespan=lifespan,
     docs_url="/api/docs",

@@ -1,4 +1,4 @@
-# Installing AniTrack
+# Installing AniTracker
 
 ## 1. Requirements
 
@@ -6,19 +6,18 @@
 - ~350 MB disk for images, plus your database
 - A free port (8000 by default)
 
-## 2. Install
+## 2. Install from source
 
 ```bash
-mkdir -p /opt/anitrack && cd /opt/anitrack
-curl -O https://raw.githubusercontent.com/anitrack/anitrack/main/docker-compose.yml
-curl -O https://raw.githubusercontent.com/anitrack/anitrack/main/.env.example
+git clone https://github.com/RGBond007/anitrack.git
+cd anitrack
 cp .env.example .env
 ```
 
 Set the one required value:
 
 ```bash
-echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
+printf '\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env
 ```
 
 If this instance will be reachable from outside your LAN, also change `POSTGRES_PASSWORD` in
@@ -45,22 +44,9 @@ docker compose up -d
 
 Existing users keep working; the sign-up link disappears from the login screen.
 
-## 4. Building from source instead of pulling
+## 4. HTTPS
 
-```bash
-git clone https://github.com/RGBond007/anitrack.git && cd anitrack
-cp .env.example .env && echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
-```
-
-In `docker-compose.yml`, comment out `image:` under the `app` service and uncomment `build: .`, then:
-
-```bash
-docker compose up -d --build
-```
-
-## 5. HTTPS
-
-AniTrack serves the UI and API from one origin, so any reverse proxy needs only a pass-through.
+AniTracker serves the UI and API from one origin, so any reverse proxy needs only a pass-through.
 Set `COOKIE_SECURE=true` in `.env` and restart — session cookies are then marked `Secure`, which
 browsers require for cross-site-safe cookies over TLS.
 
@@ -91,28 +77,30 @@ server {
 If you proxy from another machine, drop the `ports:` mapping from the `app` service and put both
 containers on a shared Docker network instead.
 
-## 6. Upgrading
+## 5. Upgrading
 
 ```bash
-cd /opt/anitrack
-docker compose pull
-docker compose up -d
+cd /path/to/anitrack
+git pull --ff-only
+docker compose up -d --build
 ```
 
 Migrations run automatically on start; the container waits for Postgres first. Your data is in the
 named volume `anitrack-db`, which is untouched by image replacement — that is why the compose file
 uses a named volume rather than a bind mount into the install directory.
 
-**Take a backup before a major-version upgrade** (step 7). To roll back, pin the previous tag:
+**Take a backup before a major-version upgrade** (step 6). To roll back, check out the previous
+release tag and rebuild:
 
-```yaml
-image: ghcr.io/anitrack/anitrack:1.0.0
+```bash
+git switch --detach v1.0.0
+docker compose up -d --build
 ```
 
 then `docker compose up -d`. Note that migrations are forward-only: restore the matching database
 backup if the newer version already migrated your schema.
 
-## 7. Backup and restore
+## 6. Backup and restore
 
 Backup (both the database and your `.env` — without `JWT_SECRET` everyone gets logged out):
 
@@ -129,7 +117,7 @@ gunzip -c anitrack-2026-08-10.sql.gz | docker compose exec -T db psql -U anitrac
 docker compose up -d
 ```
 
-## 8. Troubleshooting
+## 7. Troubleshooting
 
 **`JWT_SECRET` error on startup.** Compose refuses to start without it. Add it to `.env` in the same
 directory as `docker-compose.yml`.
@@ -139,7 +127,7 @@ HTTP — the browser discards the session cookie. Set it to `false`, or finish t
 
 **"Metadata providers unavailable" on search.** All three APIs failed or rate-limited you. They are
 public and free, so limits are real: AniList throttles around 30 requests/minute. Wait a minute;
-AniTrack backs off and retries automatically. Check `docker compose logs app` for which provider
+AniTracker backs off and retries automatically. Check `docker compose logs app` for which provider
 failed. Anything already on your list keeps working — it is served from the local cache.
 
 **Import finished with failures.** Titles MAL has but AniList and Kitsu do not (usually delisted or
@@ -154,10 +142,10 @@ docker compose exec app python -c "from app.security import hash_password; print
 docker compose exec db psql -U anitrack -c "UPDATE users SET password_hash='<paste>', token_version=token_version+1 WHERE username='you';"
 ```
 
-## 9. Development without Docker
+## 8. Development without Docker
 
 ```bash
-docker run -d --name anitrack-dev-db -p 5432:5432 \
+docker run -d --name anitracker-dev-db -p 5432:5432 \
   -e POSTGRES_USER=anitrack -e POSTGRES_PASSWORD=anitrack -e POSTGRES_DB=anitrack \
   postgres:16-alpine
 
@@ -168,6 +156,11 @@ export JWT_SECRET=dev-secret-change-me
 .venv/bin/alembic upgrade head
 .venv/bin/uvicorn app.main:app --reload
 
-# second terminal
-cd frontend && npm install && npm run dev   # http://localhost:5173, proxies /api to :8000
+# In a second terminal, from the repository root
+cd frontend
+npm ci
+npm run dev   # http://localhost:5173, proxies /api to :8000
 ```
+
+Contributors should read [CONTRIBUTING.md](CONTRIBUTING.md) for the complete workflow and required
+checks before opening a pull request.

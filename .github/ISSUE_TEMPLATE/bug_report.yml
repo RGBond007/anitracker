@@ -1,0 +1,74 @@
+name: Bug report
+description: Report reproducible behavior that is incorrect or unexpected
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Search existing issues first and do not include secrets or private data.
+        Report security vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: AniTracker version
+      description: Release tag or commit hash where the problem occurs.
+      placeholder: v2.0.0 or abc1234
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - Docker Compose build from source
+        - Local development environment
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, browser if relevant, and Docker/Compose versions.
+      placeholder: Ubuntu 24.04, Docker 27, Compose 2.29, Firefox 141
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove passwords, tokens, cookies, email addresses, database contents, and other private data.
+      render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots or other details that may help diagnosis.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed secrets and private data from this report.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

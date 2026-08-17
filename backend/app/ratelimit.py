@@ -2,7 +2,7 @@
 In-process rate limiting.
 
 State lives in this process's memory, which is the right scope for the way
-AniTrack ships: one uvicorn worker in one container. Run it behind `--workers N`
+AniTracker ships: one uvicorn worker in one container. Run it behind `--workers N`
 and each worker keeps its own counters, so the effective limit multiplies by N —
 if you scale that way, move `_HITS` to Redis and keep the rest of this module.
 

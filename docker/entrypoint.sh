@@ -1,9 +1,9 @@
 #!/bin/sh
 # Migrations run on every start: `docker compose up -d` must work with zero manual DB setup,
-# and `docker compose pull && up -d` must upgrade an existing volume in place.
+# and `docker compose up -d --build` must upgrade an existing volume in place.
 set -e
 
-echo "AniTrack: waiting for the database…"
+echo "AniTracker: waiting for the database…"
 python - <<'PY'
 import asyncio, os, sys, time
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -25,13 +25,13 @@ while True:
         break
     except Exception as exc:
         if time.time() > deadline:
-            print(f"AniTrack: database unreachable after 60s: {exc}", file=sys.stderr)
+            print(f"AniTracker: database unreachable after 60s: {exc}", file=sys.stderr)
             sys.exit(1)
         time.sleep(1)
 PY
 
-echo "AniTrack: applying migrations…"
+echo "AniTracker: applying migrations…"
 alembic upgrade head
 
-echo "AniTrack: starting."
+echo "AniTracker: starting."
 exec "$@"

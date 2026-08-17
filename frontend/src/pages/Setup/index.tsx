@@ -52,7 +52,7 @@ export function SetupPage() {
       email: "",
       username: "",
       password: "",
-      instance_name: "AniTrack",
+      instance_name: "AniTracker",
       accent_color: "#C9A227",
       title_language: "romaji",
       ui_language: i18n.language,

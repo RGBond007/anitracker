@@ -1,6 +1,6 @@
 """License validation stub.
 
-AniTrack v1 is open source and unlicensed-by-key: this validator always returns a
+AniTracker v1 is open source and unlicensed-by-key: this validator always returns a
 valid, unrestricted result. It exists so that gating a future paid tier is a
 config + implementation change *here* rather than a refactor of the app.
 

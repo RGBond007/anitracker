@@ -17,7 +17,7 @@ export function AppShell() {
       </main>
       <footer className="wrap">
         <div className="font-mono flex flex-wrap justify-between gap-2 border-t border-line py-[26px] text-[11px] text-text-faint">
-          <span>{t("footer.tagline", { name: instance?.instance_name ?? "AniTrack" })}</span>
+          <span>{t("footer.tagline", { name: instance?.instance_name ?? "AniTracker" })}</span>
           <span>v{instance?.version ?? "1.0.0"}</span>
         </div>
       </footer>

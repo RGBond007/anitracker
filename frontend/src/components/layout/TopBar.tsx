@@ -60,9 +60,9 @@ export function TopBar() {
   // count rides the nav rather than only existing on the page itself.
   const { data: friends } = useFriends();
   const pending = friends?.incoming.length ?? 0;
-  const instanceName = instance?.instance_name ?? "AniTrack";
+  const instanceName = instance?.instance_name ?? "AniTracker";
   const usesDefaultBrand =
-    !instance?.logo_url && (instanceName === "AniTrack" || instanceName === "AniTracker");
+    !instance?.logo_url && (instanceName === "AniTracker" || instanceName === "AniTracker");
 
   const links = [
     { to: "/", label: t("nav.dashboard"), end: true, badge: 0 },

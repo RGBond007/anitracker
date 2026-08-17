@@ -21,9 +21,9 @@ export function LoginPage() {
 
   const pending = login.isPending || register.isPending;
   const error = login.error ?? register.error;
-  const instanceName = instance?.instance_name ?? "AniTrack";
+  const instanceName = instance?.instance_name ?? "AniTracker";
   const usesDefaultBrand =
-    !instance?.logo_url && (instanceName === "AniTrack" || instanceName === "AniTracker");
+    !instance?.logo_url && (instanceName === "AniTracker" || instanceName === "AniTrack");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

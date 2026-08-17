@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose an improvement to AniTracker
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve AniTracker. Explain the user problem before proposing implementation details.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem or limitation are you experiencing, and who does it affect?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should a successful solution let the user accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe current workarounds or other approaches you considered.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add examples, sketches, or related projects if useful.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and discussions for this request.
+          required: true
+        - label: This request fits AniTracker's scope as a tracker, not a streaming or download service.
+          required: true
+        - label: I understand that acceptance does not guarantee immediate implementation.
+          required: true

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     trust_proxy: bool = False
 
     # --- Branding (white-label hooks) ---
-    instance_name: str = "AniTrack"
+    instance_name: str = "AniTracker"
     logo_url: str = ""
     accent_color: str = "#8b5cf6"
 

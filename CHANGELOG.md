@@ -1,12 +1,14 @@
 # Changelog
 
-All notable changes to AniTrack are documented here.
+All notable changes to AniTracker are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
+- Contributor documentation, issue forms, pull-request guidance, a security policy, project
+  governance, and a documented release process.
 - **Seasons** — a title's page lists every season of its show, each with its own poster, episode
   count, progress and status, and moving between them changes the artwork and the numbers without a
   reload. The season you are on drives the poster and progress shown in the library and on the
@@ -27,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of returning six rows of the same series.
 
 ### Changed
+- The public product name is now consistently **AniTracker**. Compatibility-sensitive internal
+  identifiers such as database names, storage keys, and cookies remain unchanged.
+- The project is now licensed under the GNU Affero General Public License v3.0 only
+  (`AGPL-3.0-only`). Version 1.0.0 remains available under its original MIT license.
 - The current season is marked with a "Watching now" label and a filled dot, and the season being
   viewed with an outline — two signals that do not depend on the accent colour alone.
 - Changing the displayed season fades the poster and details in over 180ms instead of swapping them,

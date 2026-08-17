@@ -11,9 +11,9 @@
 
 **A private, self-hosted anime and manga tracker for households and small communities.**
 
-[Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Configuration](#configuration) · [Development](#development) · [License](#license)
+[Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Installation](INSTALL.md) · [Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md)
 
-<img src="frontend/screenshots/dashboard.png" alt="AniTrack dashboard: a Vinland Saga hero with continue-watching progress, tracking figures and a rail of titles in progress" width="100%">
+<img src="frontend/screenshots/dashboard.png" alt="AniTracker dashboard: a Vinland Saga hero with continue-watching progress, tracking figures and a rail of titles in progress" width="100%">
 
 </div>
 
@@ -21,13 +21,13 @@
 
 ## Quick start
 
-Run AniTrack with two containers. No third-party account or API key is required.
+Run AniTracker with two containers. No third-party account or API key is required.
 
 ```bash
 git clone https://github.com/RGBond007/anitrack.git
 cd anitrack
 cp .env.example .env
-sed -i '' "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env   # Linux: drop the ''
+printf '\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env
 docker compose up -d --build
 ```
 
@@ -60,7 +60,7 @@ without losing your place in season 6.
 </tr>
 </table>
 
-When you finish a season, AniTrack offers to close it out and continue — it never moves you on its
+When you finish a season, AniTracker offers to close it out and continue — it never moves you on its
 own. In search, a show collapses to one card, and you choose which season or related entry to add.
 
 <table>
@@ -105,12 +105,12 @@ own. In search, a show collapses to one card, and you choose which season or rel
 
 - **Search anime & manga** through AniList, with Jikan (MyAnimeList) and Kitsu as automatic
   fallbacks when a provider rate-limits you. No account or API key with any of them.
-- **Seasons, grouped and deliberate.** AniTrack walks the provider's relation graph and folds a
+- **Seasons, grouped and deliberate.** AniTracker walks the provider's relation graph and folds a
   show's seasons, sequel parts, movies, OVAs and specials into one library card, ordered by release
   date. Each of them keeps its own poster, episode count, progress and status — including *Not
   started* for what you have never opened. Browsing a season shows it; only an explicit
   **Set as current season** moves the season you are watching, and the card in your library follows
-  that one. Finish a season and AniTrack offers to close it out and continue, rather than moving you
+  that one. Finish a season and AniTracker offers to close it out and continue, rather than moving you
   on by itself.
 - **Five list statuses** — watching/reading, completed, on hold, dropped, plan to watch/read —
   with score (0–10), progress, start/finish dates, rewatch count and notes.
@@ -133,9 +133,9 @@ own. In search, a show collapses to one card, and you choose which season or rel
 
 ## Project scope
 
-AniTrack is a tracker, not a media server: it does not stream, torrent, or download media. Social
+AniTracker is a tracker, not a media server: it does not stream, torrent, or download media. Social
 features are limited to accepted friends, with no public timeline, followers, or comment threads.
-There is no native mobile app; the responsive web app is installable as a PWA. AniTrack includes no
+There is no native mobile app; the responsive web app is installable as a PWA. AniTracker includes no
 telemetry, and its only outbound requests are to the metadata providers configured in `.env`.
 
 ---
@@ -162,14 +162,14 @@ The ones people change most:
 | `POSTGRES_PASSWORD` | `anitrack` | Change it before this leaves your LAN. |
 | `RATE_LIMIT_ENABLED` | `true` | Caps repeated hits on login, registration, search and friend requests. |
 | `TRUST_PROXY` | `false` | Only `true` behind a proxy you control — it makes rate limits trust `X-Forwarded-For`. |
-| `INSTANCE_NAME` | `AniTrack` | Name in the header, tab title and wizard. Also editable in Settings. |
+| `INSTANCE_NAME` | `AniTracker` | Name in the header, tab title and wizard. Also editable in Settings. |
 | `ACCENT_COLOR` | `#C9A227` | Stamp accent: buttons, focus rings, progress. Also editable in Settings. |
 | `PROVIDER_ORDER` | `anilist,jikan,kitsu` | Which metadata APIs to try, in order. |
 | `MEDIA_CACHE_TTL_DAYS` | `7` | How long cached metadata is trusted. |
 
 ## Importing from MyAnimeList
 
-On MAL: **Profile → Export → Export Your List**, once for anime and once for manga. In AniTrack:
+On MAL: **Profile → Export → Export Your List**, once for anime and once for manga. In AniTracker:
 **Settings → Import from MyAnimeList**, then drop in the downloaded file (`.xml` or `.xml.gz`).
 
 The importer resolves MAL ids to full metadata, keeps your score, progress, dates, rewatch count
@@ -178,7 +178,7 @@ is imported as unscored rather than as a zero.
 
 ## Reverse proxy
 
-AniTrack serves the UI and the API from a single origin on port 8000, so any proxy works with a
+AniTracker serves the UI and the API from a single origin on port 8000, so any proxy works with a
 plain pass-through. Set `COOKIE_SECURE=true` once you're on HTTPS.
 
 ```caddy
@@ -203,23 +203,30 @@ survives image replacement — see [INSTALL.md](INSTALL.md) for backups and roll
 
 ## Development
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete development setup, repository map,
+migration workflow, translation policy, testing requirements, and pull-request process.
+
 ```bash
 # Backend (needs a Postgres; see INSTALL.md for a one-liner)
-cd backend && python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+cd backend
+python3.12 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
 .venv/bin/alembic upgrade head
 .venv/bin/uvicorn app.main:app --reload
 
-# Frontend, proxied to the backend on :8000
-cd frontend && npm install && npm run dev
+# In a second terminal, proxied to the backend on :8000
+cd frontend
+npm ci
+npm run dev
 ```
 
 Tests never hit the live provider APIs — they run against recorded fixtures in
 `backend/tests/fixtures/` and an in-memory SQLite database, so `pytest` needs no services:
 
 ```bash
-cd backend && .venv/bin/pytest          # suite
-cd backend && .venv/bin/ruff check .    # lint, as CI runs it
-cd frontend && npm run lint             # tsc --noEmit
+(cd backend && .venv/bin/pytest -q)
+(cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check .)
+(cd frontend && npm run lint && npm run build)
 ```
 
 `.github/workflows/ci.yml` runs those three plus a Docker image build on every push and pull
@@ -260,11 +267,20 @@ instead of an add and a select that could half-succeed.
 
 ## Contributing
 
-Issues and pull requests are welcome. Keep `ruff check`, `pytest` and `npm run lint` green, add a
-test for behaviour you change, and put user-visible changes in [CHANGELOG.md](CHANGELOG.md).
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), which covers local setup,
+project structure, tests, translations, database migrations, and pull-request expectations. Please
+read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
+- Use the issue forms for reproducible bugs and scoped feature proposals.
+- Use [SUPPORT.md](SUPPORT.md) for installation and usage help.
+- Report vulnerabilities privately according to [SECURITY.md](SECURITY.md).
+- Significant features and breaking changes should be discussed before implementation.
+
+Project decisions and releases are documented in [GOVERNANCE.md](GOVERNANCE.md) and
+[RELEASING.md](RELEASING.md).
 
 ## License
 
-AniTrack is licensed under the [GNU Affero General Public License v3.0 only](LICENSE)
-(`AGPL-3.0-only`). If you modify AniTrack and make it available to users over a network, the
+AniTracker is licensed under the [GNU Affero General Public License v3.0 only](LICENSE)
+(`AGPL-3.0-only`). If you modify AniTracker and make it available to users over a network, the
 license requires you to offer those users the corresponding source code for your modified version.

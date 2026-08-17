@@ -1,6 +1,6 @@
 {
-  "name": "AniTrack",
-  "short_name": "AniTrack",
+  "name": "AniTracker",
+  "short_name": "AniTracker",
   "description": "Self-hosted anime and manga tracker",
   "start_url": "/",
   "scope": "/",
