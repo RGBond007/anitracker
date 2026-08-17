@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] — 2026-08-17
+
 ### Added
 - Contributor documentation, issue forms, pull-request guidance, a security policy, project
   governance, and a documented release process.
@@ -91,3 +93,7 @@ First release.
 - Title languages are limited to Romaji/English/Native — the free public APIs do not expose
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
+
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/RGBond007/anitracker/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/RGBond007/anitracker/releases/tag/v1.0.0
