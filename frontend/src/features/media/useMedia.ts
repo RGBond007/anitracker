@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api, type EntryStatus, type MediaType } from "../../lib/api-client";
+import { api, type Entry, type EntryStatus, type MediaType } from "../../lib/api-client";
 import { listEntryScopes, queryKeys } from "../../lib/queryKeys";
 import { useUiStore } from "../../stores/uiStore";
 
@@ -68,10 +68,54 @@ export function useUpdateEntry() {
   });
 }
 
+/**
+ * The same arithmetic the increment endpoint does, applied to a cached entry.
+ *
+ * Kept in step with `backend/app/routers/entries.py` deliberately: the optimistic
+ * copy has to agree with the answer that replaces it a moment later, or the
+ * progress bar moves twice.
+ */
+function bumped(entry: Entry): Entry {
+  const total = entry.media.total_units;
+  const progress = total ? Math.min(entry.progress + 1, total) : entry.progress + 1;
+  const status: EntryStatus =
+    total && progress >= total
+      ? "completed"
+      : entry.status === "planned" || entry.status === "on_hold"
+        ? "current"
+        : entry.status;
+  return { ...entry, progress, status };
+}
+
 /** No toast: +1 is a high-frequency action and a toast per click is noise. */
 export function useIncrementEntry() {
+  const queryClient = useQueryClient();
   const invalidate = useEntryInvalidation();
-  return useMutation({ mutationFn: api.incrementEntry, onSuccess: invalidate });
+
+  return useMutation({
+    mutationFn: api.incrementEntry,
+
+    // The bar has to move under the pointer rather than a round trip later, so
+    // the count is written into the cache first and the server's own answer
+    // replaces it when it lands.
+    onMutate: (id: number) => {
+      const previous = queryClient.getQueriesData<Entry | null>({
+        queryKey: ["entry-for-media"],
+      });
+      queryClient.setQueriesData<Entry | null>({ queryKey: ["entry-for-media"] }, (old) =>
+        old && old.id === id ? bumped(old) : old,
+      );
+      return { previous };
+    },
+
+    onError: (_error, _id, context) => {
+      for (const [key, value] of context?.previous ?? []) {
+        queryClient.setQueryData(key, value);
+      }
+    },
+
+    onSettled: invalidate,
+  });
 }
 
 export function useDeleteEntry() {

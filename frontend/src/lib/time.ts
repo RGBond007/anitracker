@@ -1,5 +1,18 @@
 type Translate = (key: string, opts?: Record<string, unknown>) => string;
 
+/**
+ * A stored `YYYY-MM-DD` in the reader's own date format — 17.08.2026 in German,
+ * 8/17/2026 in American English.
+ *
+ * The parts are pulled apart by hand because `new Date("2026-08-17")` is defined
+ * to be UTC midnight, which in any negative offset renders as the day before.
+ */
+export function calendarDate(iso: string, locale: string): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  if (!year || !month || !day) return iso;
+  return new Date(year, month - 1, day).toLocaleDateString(locale);
+}
+
 /** "2h ago", "yesterday", "3 days ago" — the caption line on the activity rail. */
 export function relativeTime(iso: string, t: Translate): string {
   const then = new Date(iso).getTime();

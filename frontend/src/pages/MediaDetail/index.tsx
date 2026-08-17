@@ -10,15 +10,14 @@ import { baseTitle } from "../../lib/franchise";
 import { queryKeys } from "../../lib/queryKeys";
 import { displayTitle } from "../../lib/titles";
 import { CoverImage } from "../../components/media/CoverImage";
-import { EntryForm } from "../../components/media/EntryForm";
 import { mediaHref } from "../../components/media/Poster";
 import { SeasonActions } from "../../components/media/SeasonActions";
 import { useSeasonLabels } from "../../components/media/seasonLabels";
 import { SeasonProgress } from "../../components/media/SeasonProgress";
 import { SeasonChips, SeasonSwitcher } from "../../components/media/SeasonSwitcher";
+import { ViewingLog } from "../../components/media/ViewingLog";
 import { Button } from "../../components/ui/Button";
 import { ErrorNote } from "../../components/ui/EmptyState";
-import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { Skeleton } from "../../components/ui/Skeleton";
 
 function Fact({ label, value }: { label: string; value: string | number }) {
@@ -275,16 +274,21 @@ export function MediaDetailPage() {
         </section>
       )}
 
-      {/* The list-entry form is inline on this page, not behind a modal (§4). */}
+      {/* The viewer's own record of this season, reading as the last line of the
+          carousel above rather than as a panel bolted to the bottom of the page.
+          Keyed on the entry so changing season shows that season's numbers rather
+          than the last one's. */}
       {entry.data && (
-        <Panel>
-          <PanelHeader>{t("entry.edit")}</PanelHeader>
-          <div className="p-4">
-            {/* Keyed on the entry so switching season resets the form's defaults to
-                that season's own progress rather than keeping the last one's. */}
-            <EntryForm key={entry.data.id} entry={entry.data} type={m.type} />
-          </div>
-        </Panel>
+        <ViewingLog
+          key={entry.data.id}
+          entry={entry.data}
+          seasonLabel={isMultiSeason && viewed ? labels.name(viewed, seriesTitle, lang) : null}
+          title={seasonTitle}
+          series={series.data ?? null}
+          viewed={viewed ?? null}
+          lang={lang}
+          onView={view}
+        />
       )}
     </div>
   );

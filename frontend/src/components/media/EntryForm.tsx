@@ -16,10 +16,15 @@ export function EntryForm({
   entry,
   type,
   onDone,
+  showRemove = true,
+  submitLabel,
 }: {
   entry: Entry;
   type: MediaType;
   onDone?: () => void;
+  /** Off where the surrounding UI already owns the removal — an overflow menu. */
+  showRemove?: boolean;
+  submitLabel?: string;
 }) {
   const { t } = useTranslation();
   const statusLabel = useStatusLabel();
@@ -103,17 +108,21 @@ export function EntryForm({
       {update.error && <p className="text-sm text-stamp-text">{String(update.error)}</p>}
 
       <div className="flex items-center justify-between gap-3 pt-1">
-        <button
-          type="button"
-          className="text-sm text-text-dim underline-offset-2 hover:text-stamp hover:underline"
-          onClick={() => {
-            if (confirm(t("entry.removeConfirm"))) {
-              remove.mutate(entry.id, { onSuccess: () => onDone?.() });
-            }
-          }}
-        >
-          {t("entry.remove")}
-        </button>
+        {showRemove ? (
+          <button
+            type="button"
+            className="text-sm text-text-dim underline-offset-2 hover:text-stamp hover:underline"
+            onClick={() => {
+              if (confirm(t("entry.removeConfirm"))) {
+                remove.mutate(entry.id, { onSuccess: () => onDone?.() });
+              }
+            }}
+          >
+            {t("entry.remove")}
+          </button>
+        ) : (
+          <span />
+        )}
 
         <div className="flex gap-2">
           {onDone && (
@@ -123,7 +132,7 @@ export function EntryForm({
           )}
           {/* The button names the action; the toast repeats the verb (§8). */}
           <Button type="submit" variant="stamp" disabled={update.isPending || !isDirty}>
-            {t("entry.save")}
+            {submitLabel ?? t("entry.save")}
           </Button>
         </div>
       </div>

@@ -19,8 +19,25 @@ function readDeclined(): string[] {
   }
 }
 
+/**
+ * Remember that the offer to move on from `providerId` was turned down.
+ *
+ * Exported because the viewing log makes the same offer at the point the last
+ * episode is logged: declining it there must not leave the same question waiting
+ * further up the page the next time the title is opened.
+ */
+export function declineSeasonPrompt(providerId: string): string[] {
+  const kept = [...new Set([...readDeclined(), providerId])].slice(-50);
+  try {
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(kept));
+  } catch {
+    /* private mode: the offer simply comes back next time */
+  }
+  return kept;
+}
+
 /** The member that follows `season` in release order — the next thing to watch. */
-function nextAfter(series: Series, season: Season): Season | null {
+export function nextAfter(series: Series, season: Season): Season | null {
   const index = series.seasons.findIndex((s) => s.media.provider_id === season.media.provider_id);
   if (index < 0) return null;
   const rest = series.seasons.slice(index + 1);
@@ -63,15 +80,7 @@ export function SeasonActions({
   const next = nextAfter(series, viewed);
   const viewedName = name(viewed, series.title, lang);
 
-  const decline = (providerId: string) => {
-    const kept = [...new Set([...declined, providerId])].slice(-50);
-    setDeclined(kept);
-    try {
-      localStorage.setItem(DISMISS_KEY, JSON.stringify(kept));
-    } catch {
-      /* private mode: the offer simply comes back next time */
-    }
-  };
+  const decline = (providerId: string) => setDeclined(declineSeasonPrompt(providerId));
 
   const move = (target: Season, options: { start?: boolean; complete?: boolean } = {}) =>
     setCurrent.mutate(
