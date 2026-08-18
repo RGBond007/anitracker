@@ -42,9 +42,7 @@ def animated_webp() -> bytes:
 
 
 async def upload(client, data: bytes, filename="me.png", content_type="image/png"):
-    return await client.put(
-        "/api/me/avatar", files={"file": (filename, data, content_type)}
-    )
+    return await client.put("/api/me/avatar", files={"file": (filename, data, content_type)})
 
 
 def stored_files() -> list[str]:
