@@ -296,14 +296,20 @@ async function rotateSession(): Promise<boolean> {
 
 async function request<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
   const isForm = init.body instanceof FormData;
-  const res = await fetch(`/api${path}`, {
+  const requestInit = {
     ...init,
-    credentials: "include",
+    credentials: "include" as RequestCredentials,
     headers: {
       ...(isForm ? {} : { "Content-Type": "application/json" }),
       ...(init.headers ?? {}),
     },
-  });
+  };
+  // The Pages demo uses the same API contract without pretending a static host
+  // can run FastAPI. Vite removes this branch from the production bundle.
+  const res =
+    import.meta.env.VITE_DEMO === "true"
+      ? await (await import("../demo/mockApi")).demoRequest(path, requestInit)
+      : await fetch(`/api${path}`, requestInit);
 
   // A 401 on the short-lived access token is the normal path, not an error.
   if (res.status === 401 && retry && !path.startsWith("/auth/")) {

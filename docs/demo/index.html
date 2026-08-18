@@ -1,44 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0d0c10" />
-    <meta name="description" content="Try AniTracker in an interactive browser-only demo." />
-    <title>AniTracker Demo</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script src="app.js" defer></script>
+    <!-- `viewport-fit=cover` lets the page reach the screen edges on notched
+         iPhones; `.wrap` pads itself back out with the safe-area insets. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <!-- Browser chrome follows the theme instead of always being dark. -->
+    <meta name="theme-color" content="#f1ece1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0c10" media="(prefers-color-scheme: dark)" />
+
+    <!-- Added to a home screen, this runs without Safari's chrome. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AniTracker" />
+    <link rel="apple-touch-icon" href="/anitracker/demo/icon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/anitracker/demo/icon-192.png" />
+    <link rel="manifest" href="/anitracker/demo/manifest.webmanifest" />
+    <title>AniTracker</title>
+    <script>
+      // Set before first paint so there is no flash of the wrong theme.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("anitrack-theme") || "dark";
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/anitracker/demo/assets/index-DAT39Ryc.js"></script>
+    <link rel="stylesheet" crossorigin href="/anitracker/demo/assets/index-XswHLYoi.css">
   </head>
   <body>
-    <a class="skip-link" href="#content">Skip to content</a>
-
-    <header class="topbar">
-      <a class="brand" href="../" aria-label="Back to AniTracker release page">
-        <span class="brand-mark" aria-hidden="true">A</span>
-        <strong>AniTracker</strong>
-      </a>
-      <nav class="desktop-nav" aria-label="Demo navigation">
-        <button type="button" data-view="dashboard">Dashboard</button>
-        <button type="button" data-view="search">Search</button>
-        <button type="button" data-view="library">Library <span class="nav-count" data-library-count>0</span></button>
-      </nav>
-      <button class="reset-button" type="button" data-reset>Reset demo</button>
-    </header>
-
-    <aside class="demo-notice" aria-label="Demo information">
-      <span>Interactive demo</span>
-      <p>Everything stays in this browser. No account, server, or real library is used.</p>
-      <a href="../">About AniTracker <span aria-hidden="true">↗</span></a>
-    </aside>
-
-    <main id="content" tabindex="-1"></main>
-
-    <nav class="mobile-nav" aria-label="Mobile demo navigation">
-      <button type="button" data-view="dashboard"><span aria-hidden="true">◫</span>Home</button>
-      <button type="button" data-view="search"><span aria-hidden="true">⌕</span>Search</button>
-      <button type="button" data-view="library"><span aria-hidden="true">▤</span>Library</button>
-    </nav>
-
-    <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="root"></div>
   </body>
 </html>

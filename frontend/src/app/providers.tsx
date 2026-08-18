@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, HashRouter } from "react-router-dom";
 
 import { ToastViewport } from "../components/ui/Toast";
 import "../lib/i18n";
@@ -16,12 +16,16 @@ const queryClient = new QueryClient({
 });
 
 export function Providers({ children }: { children: ReactNode }) {
+  // GitHub Pages cannot rewrite deep links to index.html. Hash routing keeps the
+  // real application routes usable in the static demo; production stays clean.
+  const AppRouter = import.meta.env.VITE_DEMO === "true" ? HashRouter : BrowserRouter;
+
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <AppRouter>
         {children}
         <ToastViewport />
-      </BrowserRouter>
+      </AppRouter>
     </QueryClientProvider>
   );
 }

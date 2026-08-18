@@ -43,7 +43,7 @@ export function LoginPage() {
       <Panel className="w-full max-w-sm p-6">
         {usesDefaultBrand && (
           <img
-            src="/logo.png"
+            src={`${import.meta.env.BASE_URL}logo.png`}
             alt="AniTracker"
             className="brand-dark-only h-auto w-full max-w-[260px]"
           />

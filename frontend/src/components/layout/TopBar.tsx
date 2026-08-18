@@ -56,6 +56,7 @@ export function TopBar() {
   const { data: friends } = useFriends();
   const pending = friends?.incoming.length ?? 0;
   const instanceName = instance?.instance_name ?? "AniTracker";
+  const publicAsset = (name: string) => `${import.meta.env.BASE_URL}${name}`;
   const usesDefaultBrand =
     !instance?.logo_url && (instanceName === "AniTracker" || instanceName === "AniTracker");
 
@@ -76,14 +77,14 @@ export function TopBar() {
                   inside the max-width guard. Held back a step on a phone, where the
                   bar also carries the search, logout and account controls. */}
               <img
-                src="/logo.png"
+                src={publicAsset("logo.png")}
                 alt="AniTracker"
                 className="brand-dark-only h-9 w-auto max-w-[150px] object-contain sm:h-11"
               />
               {/* Light mode draws the same brand as icon + wordmark, so it grows in
                   step — otherwise switching theme changes the header's weight. */}
               <span className="brand-light-only brand-light-lockup items-center gap-[9px]">
-                <img src="/icon-192.png" alt="" className="h-7 w-7 rounded-[7px] sm:h-8 sm:w-8" />
+                <img src={publicAsset("icon-192.png")} alt="" className="h-7 w-7 rounded-[7px] sm:h-8 sm:w-8" />
                 <span className="font-display text-[16px] font-bold tracking-[0.02em] sm:text-[18px]">
                   {instanceName.toUpperCase()}
                 </span>
