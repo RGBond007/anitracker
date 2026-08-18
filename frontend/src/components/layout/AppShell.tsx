@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useInstance } from "../../features/instance/useInstance";
+import { DemoBanner } from "../../demo/DemoBanner";
 import { BottomNav } from "./BottomNav";
 import { TopBar } from "./TopBar";
 
@@ -12,6 +13,7 @@ export function AppShell() {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(56px+env(safe-area-inset-bottom))] sm:pb-0">
       <TopBar />
+      <DemoBanner />
       <main className="flex-1">
         <Outlet />
       </main>
