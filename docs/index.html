@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0c10" />
+    <meta
+      name="description"
+      content="AniTracker 2.0.0 — a private, self-hosted anime and manga tracker for households and small communities."
+    />
+    <meta property="og:title" content="AniTracker 2.0.0" />
+    <meta
+      property="og:description"
+      content="Track the story, not the service. Self-hosted, multi-user, and telemetry-free."
+    />
+    <meta property="og:image" content="assets/anitracker-banner.svg" />
+    <title>AniTracker 2.0.0 — Track the story</title>
+    <link rel="icon" href="assets/anitracker-banner.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="AniTracker home">
+        <span class="wordmark-mark" aria-hidden="true">A</span>
+        <span>AniTracker</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#release">Release</a>
+        <a href="#screens">Screens</a>
+        <a href="#install">Install</a>
+      </nav>
+      <a class="header-link" href="https://github.com/RGBond007/anitracker">GitHub <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow"><span>Current release</span> 17 AUG 2026</p>
+          <h1>Track the story.<br /><em>Own the data.</em></h1>
+          <p class="hero-intro">
+            A private, self-hosted anime and manga tracker built for households,
+            friends, and every season in between.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#install">Install v2.0.0</a>
+            <a class="button button-secondary" href="https://github.com/RGBond007/anitracker/releases/tag/v2.0.0">Release notes <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-label="AniTracker dashboard preview">
+          <div class="release-stamp" aria-label="Version 2.0.0">
+            <span>Release</span>
+            <strong>2.0.0</strong>
+            <small>AGPL · SELF-HOSTED</small>
+          </div>
+          <div class="hero-frame">
+            <img src="assets/screenshots/dashboard.png" alt="AniTracker dashboard with a continue-watching hero and tracked-title statistics" />
+          </div>
+          <p class="frame-caption"><span>01</span> Your queue, without an algorithm choosing it for you.</p>
+        </div>
+      </section>
+
+      <div class="facts" aria-label="Project facts">
+        <p><span>01</span><strong>No telemetry</strong>Your viewing stays yours.</p>
+        <p><span>02</span><strong>Three providers</strong>AniList, Jikan, Kitsu.</p>
+        <p><span>03</span><strong>One command</strong>Docker Compose deployment.</p>
+        <p><span>04</span><strong>Multi-user</strong>Built for your circle.</p>
+      </div>
+
+      <section class="release" id="release">
+        <div class="section-heading">
+          <p class="eyebrow"><span>Release dossier</span> V2.0.0</p>
+          <h2>One show.<br />Every chapter.</h2>
+          <p>
+            Version 2 reorganizes a series around the way it is actually watched:
+            seasons, sequel parts, movies, OVAs, and specials stay connected—but
+            every entry keeps its own progress.
+          </p>
+        </div>
+
+        <ol class="season-strip" aria-label="AniTracker season workflow">
+          <li class="season-card season-card-active">
+            <span>Season 01</span>
+            <strong>Complete</strong>
+            <small>12 / 12 episodes</small>
+          </li>
+          <li class="season-card season-card-current">
+            <span>Season 02</span>
+            <strong>Watching now</strong>
+            <small>07 / 12 episodes</small>
+          </li>
+          <li class="season-card">
+            <span>OVA</span>
+            <strong>Not started</strong>
+            <small>1 episode</small>
+          </li>
+          <li class="season-card">
+            <span>Season 03</span>
+            <strong>Plan to watch</strong>
+            <small>10 episodes</small>
+          </li>
+        </ol>
+
+        <div class="feature-ledger">
+          <article>
+            <span class="ledger-number">01</span>
+            <h3>Browse without losing your place</h3>
+            <p>Opening another season changes what you see—not what you are watching. Progress only moves when you say so.</p>
+          </article>
+          <article>
+            <span class="ledger-number">02</span>
+            <h3>Continue deliberately</h3>
+            <p>Finish a season and AniTracker offers the next one. It never advances your list behind your back.</p>
+          </article>
+          <article>
+            <span class="ledger-number">03</span>
+            <h3>Search once, choose precisely</h3>
+            <p>A series appears as one result. Pick the exact season or related entry you want to add.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="screens" id="screens">
+        <div class="section-heading section-heading-row">
+          <div>
+            <p class="eyebrow"><span>Interface archive</span> REAL SCREENS</p>
+            <h2>Made to be read.</h2>
+          </div>
+          <p>Manga gutters, paper-and-ink contrast, and enough information to make the next action obvious.</p>
+        </div>
+
+        <figure class="screen screen-wide">
+          <div class="screen-image"><img loading="lazy" src="assets/screenshots/seasons.png" alt="Series page showing the current season, its progress, and related entries in release order" /></div>
+          <figcaption><span>Panel 01</span><strong>The full series, in release order.</strong><small>Current and viewed seasons use separate visual signals.</small></figcaption>
+        </figure>
+
+        <div class="screen-pair">
+          <figure class="screen">
+            <div class="screen-image"><img loading="lazy" src="assets/screenshots/seasons-viewing.png" alt="AniTracker displaying an earlier season while preserving the currently watched season" /></div>
+            <figcaption><span>Panel 02</span><strong>Look back without moving back.</strong><small>Browsing does not alter watch progress.</small></figcaption>
+          </figure>
+          <figure class="screen screen-dialog">
+            <div class="screen-image"><img loading="lazy" src="assets/screenshots/search-chooser.png" alt="Search dialog for selecting one entry from a grouped series" /></div>
+            <figcaption><span>Panel 03</span><strong>One result. The right entry.</strong><small>Grouped search keeps duplicates out of the way.</small></figcaption>
+          </figure>
+        </div>
+
+        <div class="mobile-callout">
+          <div class="phone-frame">
+            <img loading="lazy" src="assets/screenshots/mobile-seasons.png" alt="AniTracker season page on a mobile phone" />
+          </div>
+          <div>
+            <p class="eyebrow"><span>Compact edition</span> PWA</p>
+            <h2>Your list travels light.</h2>
+            <p>Install AniTracker from the browser and keep the season selector, progress controls, and title details above the fold.</p>
+            <ul>
+              <li>Responsive by default</li>
+              <li>English and German</li>
+              <li>Dark and light themes</li>
+              <li>Home-screen installable</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="install" id="install">
+        <div class="install-copy">
+          <p class="eyebrow"><span>Run your own copy</span> DOCKER COMPOSE</p>
+          <h2>Two containers.<br />Zero third-party accounts.</h2>
+          <p>Clone, create a secret, and start. The first-run wizard handles the admin account when you open AniTracker.</p>
+          <div class="license-note"><strong>Free software, for real.</strong> AniTracker 2.0.0 is licensed AGPL-3.0-only.</div>
+        </div>
+        <div class="terminal" aria-label="Installation commands">
+          <div class="terminal-bar"><span></span><span></span><span></span><small>install.sh</small></div>
+          <pre><code id="install-code"><span>$</span> git clone https://github.com/RGBond007/anitracker.git
+<span>$</span> cd anitracker
+<span>$</span> cp .env.example .env
+<span>$</span> printf '\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" &gt;&gt; .env
+<span>$</span> docker compose up -d --build</code></pre>
+          <button class="copy-button" type="button" data-copy-target="install-code">Copy commands</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="wordmark" href="#top"><span class="wordmark-mark" aria-hidden="true">A</span><span>AniTracker</span></a>
+      <p>Track anime and manga on infrastructure you control.</p>
+      <div>
+        <a href="https://github.com/RGBond007/anitracker">Source</a>
+        <a href="https://github.com/RGBond007/anitracker/blob/main/INSTALL.md">Install guide</a>
+        <a href="https://github.com/RGBond007/anitracker/blob/main/CONTRIBUTING.md">Contribute</a>
+      </div>
+    </footer>
+  </body>
+</html>
