@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0c10" />
+    <meta name="description" content="Try AniTracker in an interactive browser-only demo." />
+    <title>AniTracker Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="Back to AniTracker release page">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <strong>AniTracker</strong>
+      </a>
+      <nav class="desktop-nav" aria-label="Demo navigation">
+        <button type="button" data-view="dashboard">Dashboard</button>
+        <button type="button" data-view="search">Search</button>
+        <button type="button" data-view="library">Library <span class="nav-count" data-library-count>0</span></button>
+      </nav>
+      <button class="reset-button" type="button" data-reset>Reset demo</button>
+    </header>
+
+    <aside class="demo-notice" aria-label="Demo information">
+      <span>Interactive demo</span>
+      <p>Everything stays in this browser. No account, server, or real library is used.</p>
+      <a href="../">About AniTracker <span aria-hidden="true">↗</span></a>
+    </aside>
+
+    <main id="content" tabindex="-1"></main>
+
+    <nav class="mobile-nav" aria-label="Mobile demo navigation">
+      <button type="button" data-view="dashboard"><span aria-hidden="true">◫</span>Home</button>
+      <button type="button" data-view="search"><span aria-hidden="true">⌕</span>Search</button>
+      <button type="button" data-view="library"><span aria-hidden="true">▤</span>Library</button>
+    </nav>
+
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
