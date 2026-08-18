@@ -18,8 +18,54 @@ import type {
   User,
 } from "../lib/api-client";
 
-const LIBRARY_KEY = "anitracker-real-demo-library-v1";
+const LIBRARY_KEY = "anitracker-real-demo-library-v2";
 const USER_KEY = "anitracker-real-demo-user-v1";
+
+// These are provider-owned URLs, exactly like the cover/banner URLs returned to
+// a normal AniTracker instance. Keeping them out of the repository avoids
+// redistributing third-party artwork; the generated SVG below remains a fallback.
+const providerArt: Record<string, { cover: string; banner?: string }> = {
+  frieren: {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-qQTzQnEJJ3oB.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/154587-ivXNJ23SM1xB.jpg",
+  },
+  "vinland-saga": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101348-2fhDFPCuMNiz.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101348-pivKKffCAwAY.jpg",
+  },
+  "dungeon-meshi": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153518-IVXPDY5ph3kO.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/153518-7uRvV7SLqmHV.jpg",
+  },
+  pluto: {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx99088-LTJskMD1wbbQ.png",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/99088-KFYEoH7jCF0b.jpg",
+  },
+  "mob-psycho": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21507-6YUSbh2m0N1p.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21507-Qx8bGsLXUgLo.jpg",
+  },
+  eizouken: {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx109298-suwdIUbJEPJx.png",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/109298-ej4YYg87HHoA.jpg",
+  },
+  "aot-1": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-buvcRTBx4NSm.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg",
+  },
+  "aot-2": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20958-HuFJyr54Mmir.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/20958-Y7eQdz9VENBD.jpg",
+  },
+  "aot-3": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx99147-AiPDD8cwlCfi.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/99147-HACsFVrynFf5.jpg",
+  },
+  "odd-taxi": {
+    cover: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx128547-nNekWTKqmvEi.jpg",
+    banner: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/128547-aVWJmZz9dwJJ.jpg",
+  },
+};
 
 const svgArt = (title: string, a: string, b: string, wide = false) => {
   const safeTitle = title.replaceAll("&", "&amp;").replaceAll("<", "&lt;");
@@ -45,8 +91,8 @@ const media = (
   title_english: title,
   title_native: title,
   synonyms: [],
-  cover_url: svgArt(title, colors[0], colors[1]),
-  banner_url: svgArt(title, colors[0], colors[1], true),
+  cover_url: providerArt[provider_id]?.cover ?? svgArt(title, colors[0], colors[1]),
+  banner_url: providerArt[provider_id]?.banner ?? svgArt(title, colors[0], colors[1], true),
   synopsis: "A hand-picked title in the AniTracker demo catalogue. Explore its details, add it to your list, and change the progress just as you would on a self-hosted instance.",
   total_units: total,
   format: "TV",

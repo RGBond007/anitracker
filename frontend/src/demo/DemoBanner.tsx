@@ -3,6 +3,7 @@ export function DemoBanner() {
 
   const reset = () => {
     localStorage.removeItem("anitracker-real-demo-library-v1");
+    localStorage.removeItem("anitracker-real-demo-library-v2");
     localStorage.removeItem("anitracker-real-demo-user-v1");
     window.location.assign(`${import.meta.env.BASE_URL}`);
   };
