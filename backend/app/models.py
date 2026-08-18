@@ -84,9 +84,26 @@ class User(Base):
     must_change_password: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false"
     )
+    # The uploaded profile picture, as the bare filename `app.avatars` generated for
+    # it -- never a path and never anything the user chose, so nothing that reaches
+    # the filesystem came from a request. NULL is the normal state: an account that
+    # has not uploaded one draws its initials instead.
+    avatar_filename: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     entries: Mapped[list["ListEntry"]] = relationship(back_populates="user")
+
+    @property
+    def avatar_url(self) -> str | None:
+        """
+        Where the picture is served from, or None.
+
+        Built here rather than in each schema so there is one answer, and read
+        straight off the model by `from_attributes`. Every upload gets a new random
+        filename, so this URL changes whenever the picture does and a replacement
+        appears immediately instead of behind a stale cache entry.
+        """
+        return f"/media/avatars/{self.avatar_filename}" if self.avatar_filename else None
 
 
 class MediaCache(Base):

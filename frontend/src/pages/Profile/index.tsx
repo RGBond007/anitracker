@@ -15,7 +15,7 @@ import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { PosterGridSkeleton, Skeleton } from "../../components/ui/Skeleton";
 import { displayTitle } from "../../lib/titles";
-import { UserAvatar } from "../Friends/avatar";
+import { Avatar } from "../../components/ui/Avatar";
 
 /**
  * Score agreement, one row per shared title. A dash on either side means that
@@ -96,7 +96,7 @@ export function ProfilePage() {
   return (
     <div className="wrap py-8">
       <header className="mb-8 flex flex-wrap items-center gap-4">
-        <UserAvatar name={p.user.username} size={56} />
+        <Avatar user={p.user} size={96} decorative />
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-2xl font-bold tracking-[-0.01em]">{p.user.username}</h1>
           <p className="tabular mt-0.5 text-xs text-text-faint">

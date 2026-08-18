@@ -44,7 +44,13 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 # The SPA is served by the backend from app/static -- one fewer container.
 COPY --from=frontend /build/dist ./app/static
 
-RUN chmod +x /usr/local/bin/entrypoint.sh && chown -R anitrack:anitrack /app
+# Uploaded media lives outside /app so a rebuild cannot overwrite it. Created and
+# owned here because Docker seeds a fresh named volume from the image's own
+# directory -- without this the mount lands root-owned and the unprivileged app
+# cannot write an avatar to it.
+RUN mkdir -p /data/media/avatars \
+ && chmod +x /usr/local/bin/entrypoint.sh \
+ && chown -R anitrack:anitrack /app /data
 
 USER anitrack
 EXPOSE 8000

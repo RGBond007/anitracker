@@ -115,8 +115,19 @@ class MediaProvider(ABC):
 
     @abstractmethod
     async def search(
-        self, query: str, type: str, page: int = 1, per_page: int = 20
-    ) -> list[MediaRecord]: ...
+        self,
+        query: str,
+        type: str,
+        page: int = 1,
+        per_page: int = 20,
+        genres: list[str] | None = None,
+    ) -> list[MediaRecord]:
+        """
+        `genres` narrows at the source where the provider can do it. A provider
+        that cannot is free to ignore it -- the caller filters the results too, so
+        an ignored hint costs precision, never correctness.
+        """
+        ...
 
     @abstractmethod
     async def get_by_id(self, provider_id: str, type: str) -> MediaRecord: ...
@@ -127,5 +138,14 @@ class MediaProvider(ABC):
     async def get_by_mal_id(self, mal_id: int, type: str) -> MediaRecord:
         """Used by the MAL XML importer. Providers that cannot map MAL ids raise NotFound."""
         raise NotFound(f"{self.name} cannot resolve MAL ids")
+
+    async def trending(self, type: str, limit: int = 12) -> list[MediaRecord]:
+        """
+        What is being watched right now, for the search page's resting state.
+
+        Optional: a provider with no notion of trending says so, and the registry
+        moves on to the next one rather than inventing a list.
+        """
+        raise NotFound(f"{self.name} has no trending list")
 
     async def aclose(self) -> None: ...

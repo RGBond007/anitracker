@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
 from sqlalchemy import func, or_, select
 
-from app import settings_service
+from app import avatars, settings_service
 from app.config import settings
 from app.deps import CurrentUser, DbSession, PendingUser, user_count
 from app.models import Role, TitleLanguage, User
@@ -228,6 +228,45 @@ async def update_me(payload: UserUpdate, user: CurrentUser, db: DbSession) -> Us
         setattr(user, key, value)
     await db.commit()
     await db.refresh(user)
+    return user
+
+
+@router.put(
+    "/me/avatar",
+    response_model=UserOut,
+    dependencies=[rate_limit("avatar", 12, 3600, scope="user")],
+)
+async def upload_avatar(user: CurrentUser, db: DbSession, file: UploadFile = File(...)) -> User:
+    """
+    Replace your own profile picture. Yours: the route has no user parameter, so
+    there is nothing to tamper with -- whose avatar this writes is decided by the
+    session, not by the request body.
+    """
+    # One byte past the limit is enough to know it is over, and stops a
+    # multi-gigabyte body from being read into memory to find that out.
+    data = await file.read(settings.max_avatar_bytes + 1)
+    try:
+        filename = avatars.store(data)
+    except avatars.AvatarError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+
+    previous = user.avatar_filename
+    user.avatar_filename = filename
+    await db.commit()
+    await db.refresh(user)
+    # Only once the row naming the new file is committed. The other order can
+    # delete the picture that is still being served if the commit fails.
+    avatars.discard(previous)
+    return user
+
+
+@router.delete("/me/avatar", response_model=UserOut)
+async def remove_avatar(user: CurrentUser, db: DbSession) -> User:
+    previous = user.avatar_filename
+    user.avatar_filename = None
+    await db.commit()
+    await db.refresh(user)
+    avatars.discard(previous)
     return user
 
 

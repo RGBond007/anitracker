@@ -75,8 +75,15 @@ class KitsuProvider(MediaProvider):
         )
 
     async def search(
-        self, query: str, type: str, page: int = 1, per_page: int = 20
+        self,
+        query: str,
+        type: str,
+        page: int = 1,
+        per_page: int = 20,
+        genres: list[str] | None = None,
     ) -> list[MediaRecord]:
+        # Kitsu categorises rather than tagging genres, and its slugs do not line
+        # up with AniList's names. Left to the caller's own filtering.
         data = await self._get(
             f"/{type}",
             {

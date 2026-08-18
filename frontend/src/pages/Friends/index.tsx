@@ -11,13 +11,16 @@ import {
   useSendFriendRequest,
   useUserSearch,
 } from "../../features/social/useSocial";
-import { SectionHead } from "../../components/layout/Rail";
+import { useMe } from "../../features/auth/useAuth";
+import { useUiStore } from "../../stores/uiStore";
 import { Button } from "../../components/ui/Button";
+import { Icon, ICONS } from "../../components/ui/Icon";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { Skeleton } from "../../components/ui/Skeleton";
-import { UserAvatar } from "./avatar";
+import { Avatar } from "../../components/ui/Avatar";
+import { FriendsWatching, PersonalPicks, TrustedPick } from "./discovery";
 import { ActivityFeed, Discover, Leaderboard } from "./sections";
 
 function PersonRow({
@@ -32,7 +35,7 @@ function PersonRow({
 }) {
   return (
     <li className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
-      <UserAvatar name={user.username} />
+      <Avatar user={user} size={34} decorative />
       <Link
         to={`/u/${user.username}`}
         className="flex min-w-0 flex-1 flex-col justify-center hover:text-stamp-text pointer-coarse:min-h-[44px]"
@@ -165,6 +168,8 @@ function RequestList({
 export function FriendsPage() {
   const { t } = useTranslation();
   const { data, isLoading, error, refetch } = useFriends();
+  const { data: me } = useMe();
+  const lang = useUiStore((s) => s.titleLanguage);
   const remove = useRemoveFriend();
   const statsLine = useStatsLine();
 
@@ -189,13 +194,33 @@ export function FriendsPage() {
 
   return (
     <div className="wrap py-8">
-      <SectionHead>{t("nav.friends")}</SectionHead>
+      {/* The heading says whose page this is; the line under it says who can see
+          it, which is the one thing worth stating before anything social. */}
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h1 className="font-display text-[19px] font-bold tracking-[-0.01em]">
+          {t("nav.friends")}
+        </h1>
+        <p className="flex items-center gap-1.5 text-[12px] text-text-faint">
+          <Icon path={ICONS.eye} size={13} />
+          {me?.profile_public ? t("friends.visibleEveryone") : t("friends.visibleFriends")}
+        </p>
+      </div>
 
       {/* Requests first: they are the only thing on this page waiting on you. */}
       <RequestList title={t("friends.incoming")} rows={data.incoming} incoming />
       <RequestList title={t("friends.outgoing")} rows={data.outgoing} incoming={false} />
 
-      <AddFriend />
+      {/* What friends are for, before the machinery of managing them: one title
+          they vouched for, what they are watching, and what that suggests. */}
+      <div className="space-y-8">
+        <TrustedPick lang={lang} />
+        <FriendsWatching lang={lang} />
+        <PersonalPicks lang={lang} />
+      </div>
+
+      <div className="mt-10">
+        <AddFriend />
+      </div>
       <Leaderboard />
       <ActivityFeed />
 

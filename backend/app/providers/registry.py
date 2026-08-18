@@ -53,9 +53,14 @@ class ProviderRegistry:
         raise ProviderError(f"all providers failed for {method}: " + " | ".join(errors))
 
     async def search(
-        self, query: str, type: str, page: int = 1, per_page: int = 20
+        self,
+        query: str,
+        type: str,
+        page: int = 1,
+        per_page: int = 20,
+        genres: list[str] | None = None,
     ) -> list[MediaRecord]:
-        return await self._attempt("search", query, type, page, per_page)
+        return await self._attempt("search", query, type, page, per_page, genres)
 
     async def get_by_id(self, provider: str, provider_id: str, type: str) -> MediaRecord:
         """Detail lookups are pinned to the provider that produced the id."""
@@ -66,3 +71,6 @@ class ProviderRegistry:
 
     async def get_by_mal_id(self, mal_id: int, type: str) -> MediaRecord:
         return await self._attempt("get_by_mal_id", mal_id, type)
+
+    async def trending(self, type: str, limit: int = 12) -> list[MediaRecord]:
+        return await self._attempt("trending", type, limit)

@@ -28,6 +28,15 @@ def _record_to_out(record: MediaRecord) -> MediaOut:
         format=record.format,
         status=record.status,
         season_year=record.season_year,
+        season=record.season,
+        start_date=record.start_date,
+        # Carried through rather than dropped: a search result is never cached, so
+        # these edges are the only thing the client has to tell one show's seasons
+        # from another show with a similar name.
+        prequel_id=record.prequel_id,
+        sequel_id=record.sequel_id,
+        parent_id=next((r.provider_id for r in record.related if r.is_series_parent), None),
+        related_ids=[r.provider_id for r in record.related if r.is_series_extra],
         genres=record.genres,
         average_score=record.average_score,
         duration=record.duration,
@@ -44,13 +53,21 @@ def _record_to_out(record: MediaRecord) -> MediaOut:
 async def search_media(
     user: CurrentUser,
     registry: Registry,
-    q: str = Query(min_length=1, max_length=200),
+    # Optional, because a genre is a search in its own right: picking "Thriller"
+    # with an empty box browses the genre rather than being a dead end.
+    q: str = Query("", max_length=200),
     type: MediaType = MediaType.anime,
     page: int = Query(1, ge=1, le=50),
     per_page: int = Query(20, ge=1, le=50),
+    # Repeatable: `?genre=Action&genre=Drama` means both, not either.
+    genre: list[str] = Query(default_factory=list, max_length=8),
 ) -> SearchResults:
+    if not q.strip() and not genre:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, "Give a search term or at least one genre"
+        )
     try:
-        records = await media_service.search(registry, q, type.value, page, per_page)
+        records = await media_service.search(registry, q, type.value, page, per_page, genre)
     except ProviderError as exc:
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY, f"Metadata providers unavailable: {exc}"
@@ -60,6 +77,31 @@ async def search_media(
         page=page,
         has_more=len(records) >= per_page,
     )
+
+
+@router.get(
+    "/trending",
+    response_model=list[MediaOut],
+    dependencies=[rate_limit("media_trending", 30, 60, scope="user")],
+)
+async def trending_media(
+    user: CurrentUser,
+    registry: Registry,
+    type: MediaType = MediaType.anime,
+    limit: int = Query(12, ge=1, le=30),
+) -> list[MediaOut]:
+    """
+    What is being watched right now. Declared before `/{provider}/{provider_id}`,
+    which would otherwise capture "trending" as a provider name.
+
+    A provider with no trending list is not an error -- the section simply does
+    not appear, rather than the page failing over a decoration.
+    """
+    try:
+        records = await media_service.trending(registry, type.value, limit)
+    except ProviderError:
+        return []
+    return [_record_to_out(r) for r in records]
 
 
 @router.get("/{provider}/{provider_id}", response_model=MediaOut)

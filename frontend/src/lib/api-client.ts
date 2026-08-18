@@ -30,7 +30,17 @@ export interface Media {
   /** Position in the show's season chain, and the id every season shares. */
   season_number?: number | null;
   root_provider_id?: string | null;
+  /**
+   * The provider's relation edges. Present on search results, which are never
+   * cached and so have no resolved chain — they are what franchise grouping
+   * follows instead of comparing titles.
+   */
+  prequel_id?: string | null;
   sequel_id?: string | null;
+  parent_id?: string | null;
+  related_ids?: string[];
+  /** ISO date. Orders two cours of the same year, which `season_year` cannot. */
+  start_date?: string | null;
   genres: string[];
   average_score?: number | null;
   duration?: number | null;
@@ -105,6 +115,8 @@ export interface User {
   profile_public: boolean;
   /** True until an admin-issued one-time password has been replaced. */
   must_change_password: boolean;
+  /** Null until a picture is uploaded; the UI draws initials in that case. */
+  avatar_url?: string | null;
   created_at: string;
 }
 
@@ -123,7 +135,34 @@ export interface PublicUser {
   id: number;
   username: string;
   profile_public: boolean;
+  /** As public as the username it is drawn beside. Null means initials. */
+  avatar_url?: string | null;
   created_at: string;
+}
+
+/** One friend and the thing they are part-way through. */
+export interface WatchingItem {
+  user: PublicUser;
+  entry: Entry;
+}
+
+/**
+ * A title worth a look, and the evidence for it. Nothing here is predicted:
+ * `fans` really rated it 9+, and `shared_genres` really are shared with the
+ * title the personal list is reasoning from.
+ */
+export interface Recommendation {
+  media: Media;
+  fans: PublicUser[];
+  top_score?: number | null;
+  shared_genres: string[];
+}
+
+export interface Recommendations {
+  featured?: Recommendation | null;
+  /** What the personal list is based on — the viewer's own favourite. */
+  because?: Media | null;
+  personal: Recommendation[];
 }
 
 export type FriendshipState = "pending" | "accepted" | "blocked";
@@ -304,14 +343,32 @@ export const api = {
   logout: () => request<void>("/auth/logout", { method: "POST" }),
   updateProfile: (patch: Partial<User>) =>
     request<User>("/me", { method: "PATCH", body: body(patch) }),
+  /**
+   * Replace your own profile picture. No user id: whose avatar this writes is
+   * decided by the session, and the server re-encodes whatever is sent.
+   */
+  uploadAvatar: (file: Blob) => {
+    const form = new FormData();
+    form.append("file", file, "avatar");
+    return request<User>("/me/avatar", { method: "PUT", body: form });
+  },
+  removeAvatar: () => request<User>("/me/avatar", { method: "DELETE" }),
   revokeSessions: () => request<void>("/me/sessions/revoke", { method: "POST" }),
   changePassword: (current_password: string, new_password: string) =>
     request<void>("/me/password", { method: "POST", body: body({ current_password, new_password }) }),
 
-  search: (q: string, type: MediaType, page = 1) =>
-    request<{ results: Media[]; page: number; has_more: boolean }>(
-      `/media/search?q=${encodeURIComponent(q)}&type=${type}&page=${page}`,
-    ),
+  search: (q: string, type: MediaType, page = 1, genres: string[] = []) => {
+    const params = new URLSearchParams({ q, type, page: String(page) });
+    // Narrowed at the source where the provider supports it, so a genre search
+    // returns a page of matches rather than a page filtered down to three.
+    for (const genre of genres) params.append("genre", genre);
+    return request<{ results: Media[]; page: number; has_more: boolean }>(
+      `/media/search?${params}`,
+    );
+  },
+  /** What is being watched right now — the search page's resting state. */
+  trending: (type: MediaType, limit = 12) =>
+    request<Media[]>(`/media/trending?type=${type}&limit=${limit}`),
   media: (provider: string, providerId: string, type: MediaType) =>
     request<Media>(`/media/${provider}/${providerId}?type=${type}`),
 
@@ -360,6 +417,10 @@ export const api = {
   profile: (username: string) => request<Profile>(`/users/${encodeURIComponent(username)}`),
   compare: (username: string) =>
     request<Comparison>(`/users/${encodeURIComponent(username)}/compare`),
+  /** One current title per friend — a row of people, not a feed of events. */
+  friendsWatching: () => request<WatchingItem[]>("/friends/watching"),
+  recommendations: () => request<Recommendations>("/recommendations"),
+
   feed: () => request<FeedItem[]>("/feed"),
   schedule: () => request<AiringEpisode[]>("/schedule"),
   discover: () => request<DiscoverUser[]>("/discover"),

@@ -6,7 +6,10 @@ export const queryKeys = {
   me: ["me"] as const,
   users: ["users"] as const,
   dashboard: ["dashboard"] as const,
-  search: (q: string, type: MediaType) => ["search", type, q] as const,
+  /** Sorted, so picking the same genres in either order is one cache entry. */
+  search: (q: string, type: MediaType, genres: string[] = []) =>
+    ["search", type, q, [...genres].sort().join(",")] as const,
+  trending: (type: MediaType) => ["trending", type] as const,
   media: (provider: string, id: string, type: MediaType) =>
     ["media", provider, id, type] as const,
   entries: (filters: { type?: MediaType; status?: EntryStatus | "all"; sort?: string } = {}) =>
@@ -18,6 +21,8 @@ export const queryKeys = {
   importJob: (id: number) => ["import-job", id] as const,
 
   friends: ["friends"] as const,
+  friendsWatching: ["friends-watching"] as const,
+  recommendations: ["recommendations"] as const,
   feed: ["feed"] as const,
   schedule: ["schedule"] as const,
   discover: ["discover"] as const,
@@ -37,6 +42,11 @@ export const listEntryScopes = [
   ["dashboard"],
   ["entry-for-media"],
   ["series"],
+  // Deliberately not `recommendations`. Adding a title does remove it from the
+  // server's answer, so invalidating here would make the card vanish from under
+  // the pointer that just clicked it. The card reports its own state instead --
+  // it asks whether the title is on the list -- and the list refreshes on the
+  // next visit.
 ] as const;
 
 /**
@@ -45,6 +55,8 @@ export const listEntryScopes = [
  */
 export const friendScopes = [
   ["friends"],
+  ["friends-watching"],
+  ["recommendations"],
   ["feed"],
   ["profile"],
   ["compare"],

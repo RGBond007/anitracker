@@ -147,3 +147,136 @@ async def test_repeated_bad_logins_are_rate_limited(app_client):
             )
         ).headers
     )
+
+
+# --- What friends are watching, and what to watch next --------------------
+
+
+async def befriend(client, other_username: str, other_creds: dict) -> None:
+    """Admin and `other` end up accepted friends, whoever is logged in after."""
+    await login(client, ADMIN["username"], ADMIN["password"])
+    created = await client.post("/api/friends/requests", json={"username": other_username})
+    assert created.status_code == 201, created.text
+    await login(client, other_creds["username"], other_creds["password"])
+    accepted = await client.post(f"/api/friends/requests/{created.json()['id']}/accept")
+    assert accepted.status_code == 200, accepted.text
+
+
+async def track(client, provider_id: str, **fields) -> dict:
+    resp = await client.post(
+        "/api/entries",
+        json={"provider": "stub", "provider_id": provider_id, "type": "anime", **fields},
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()
+
+
+async def test_friends_watching_shows_one_title_per_friend_and_no_strangers(app_client):
+    await setup_admin(app_client)
+    await app_client.post("/api/auth/register", json=FRIEND)
+    stranger = {"email": "e@example.com", "username": "erin", "password": "erinpassword12"}
+    await app_client.post("/api/auth/register", json=stranger)
+
+    # The stranger is watching something too, and must not appear.
+    await login(app_client, stranger["username"], stranger["password"])
+    await track(app_client, "1535", status="current", progress=3)
+
+    await befriend(app_client, FRIEND["username"], FRIEND)
+    await login(app_client, FRIEND["username"], FRIEND["password"])
+    await track(app_client, "16498", status="current", progress=7)
+    # A second current title from the same friend: the row is people, not events.
+    await track(app_client, "900", status="current", progress=2)
+    # ...and something finished, which is not "watching".
+    await track(app_client, "902", status="completed", progress=13)
+
+    await login(app_client, ADMIN["username"], ADMIN["password"])
+    rows = (await app_client.get("/api/friends/watching")).json()
+
+    assert [r["user"]["username"] for r in rows] == ["taro"]
+    assert rows[0]["entry"]["status"] == "current"
+    # The entry carries its own media row, which is what "S3 · 7/12" is read off.
+    assert rows[0]["entry"]["media"]["provider_id"] in {"16498", "900"}
+
+
+async def test_unfriending_removes_them_from_watching(app_client):
+    await setup_admin(app_client)
+    await app_client.post("/api/auth/register", json=FRIEND)
+    await befriend(app_client, FRIEND["username"], FRIEND)
+
+    await login(app_client, FRIEND["username"], FRIEND["password"])
+    await track(app_client, "16498", status="current", progress=1)
+    friend_id = (await app_client.get("/api/me")).json()["id"]
+
+    await login(app_client, ADMIN["username"], ADMIN["password"])
+    assert len((await app_client.get("/api/friends/watching")).json()) == 1
+
+    assert (await app_client.delete(f"/api/friends/{friend_id}")).status_code == 204
+    assert (await app_client.get("/api/friends/watching")).json() == []
+
+
+async def test_recommendations_come_from_friends_scores_and_explain_themselves(app_client):
+    await setup_admin(app_client)
+    await app_client.post("/api/auth/register", json=FRIEND)
+    await befriend(app_client, FRIEND["username"], FRIEND)
+
+    # Taro loved two things the admin does not have.
+    await login(app_client, FRIEND["username"], FRIEND["password"])
+    await track(app_client, "1535", status="completed", score=10, progress=37)
+    await track(app_client, "910", status="completed", score=9, progress=1)
+
+    # The admin's own favourite is the basis for "because you liked ...".
+    await login(app_client, ADMIN["username"], ADMIN["password"])
+    await track(app_client, "16498", status="completed", score=10, progress=25)
+
+    body = (await app_client.get("/api/recommendations")).json()
+
+    # Most sure-of-it wins: both have one fan, so the higher score decides.
+    assert body["featured"]["media"]["provider_id"] == "1535"
+    assert [f["username"] for f in body["featured"]["fans"]] == ["taro"]
+    assert body["featured"]["top_score"] == 10
+
+    assert body["because"]["provider_id"] == "16498"
+    # The reason is real: the movie shares "Drama" with Attack on Titan.
+    personal = {r["media"]["provider_id"]: r for r in body["personal"]}
+    assert "910" in personal
+    assert "Drama" in personal["910"]["shared_genres"]
+    # Nothing already on the admin's list is recommended back to them.
+    assert "16498" not in personal
+
+
+async def test_a_recommendation_disappears_once_it_is_on_your_list(app_client):
+    await setup_admin(app_client)
+    await app_client.post("/api/auth/register", json=FRIEND)
+    await befriend(app_client, FRIEND["username"], FRIEND)
+
+    await login(app_client, FRIEND["username"], FRIEND["password"])
+    await track(app_client, "1535", status="completed", score=10, progress=37)
+
+    await login(app_client, ADMIN["username"], ADMIN["password"])
+    assert (await app_client.get("/api/recommendations")).json()["featured"] is not None
+
+    # "Add to plan" is the ordinary entry endpoint, and adding it twice is refused.
+    await track(app_client, "1535", status="planned")
+    duplicate = await app_client.post(
+        "/api/entries",
+        json={"provider": "stub", "provider_id": "1535", "type": "anime", "status": "planned"},
+    )
+    assert duplicate.status_code == 409
+
+    assert (await app_client.get("/api/recommendations")).json()["featured"] is None
+
+
+async def test_recommendations_are_empty_without_friends(app_client):
+    await setup_admin(app_client)
+    await track(app_client, "16498", status="completed", score=10, progress=25)
+
+    body = (await app_client.get("/api/recommendations")).json()
+    assert body["featured"] is None
+    assert body["personal"] == []
+
+
+async def test_friends_data_requires_a_session(app_client):
+    await setup_admin(app_client)
+    await app_client.post("/api/auth/logout")
+    assert (await app_client.get("/api/friends/watching")).status_code == 401
+    assert (await app_client.get("/api/recommendations")).status_code == 401

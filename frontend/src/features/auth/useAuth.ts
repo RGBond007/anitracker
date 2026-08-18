@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { api, type User } from "../../lib/api-client";
-import { queryKeys } from "../../lib/queryKeys";
+import { friendScopes, queryKeys } from "../../lib/queryKeys";
 import { useUiStore } from "../../stores/uiStore";
 
 /** Mirrors the authoritative user record into the UI-only caches (theme, language). */
@@ -89,6 +89,36 @@ export function useUpdateProfile({ silent = false }: { silent?: boolean } = {}) 
       if (!silent) toast("Profile saved");
     },
   });
+}
+
+/**
+ * Upload or clear your own profile picture.
+ *
+ * Both write the fresh user straight into the `me` cache, so the navigation's
+ * face changes in the same paint. Every upload is stored under a new generated
+ * filename, so the new URL is a different URL and no cache anywhere is holding
+ * the old picture -- there is nothing to bust and nothing to hard-refresh.
+ *
+ * The friend caches carry copies of the same person, so they are dropped too.
+ */
+function useAvatarSuccess() {
+  const queryClient = useQueryClient();
+  return (user: User) => {
+    queryClient.setQueryData(queryKeys.me, user);
+    for (const key of friendScopes) {
+      void queryClient.invalidateQueries({ queryKey: key });
+    }
+  };
+}
+
+export function useUploadAvatar() {
+  const onSuccess = useAvatarSuccess();
+  return useMutation({ mutationFn: api.uploadAvatar, onSuccess });
+}
+
+export function useRemoveAvatar() {
+  const onSuccess = useAvatarSuccess();
+  return useMutation({ mutationFn: api.removeAvatar, onSuccess });
 }
 
 export function useChangePassword() {

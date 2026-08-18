@@ -37,8 +37,15 @@ services:
       LICENSE_KEY: ${LICENSE_KEY:-}
       MEDIA_CACHE_TTL_DAYS: ${MEDIA_CACHE_TTL_DAYS:-7}
       PROVIDER_ORDER: ${PROVIDER_ORDER:-anilist,jikan,kitsu}
+      MEDIA_ROOT: /data/media
     ports:
       - "${PORT:-8000}:8000"
+    volumes:
+      # Uploaded profile pictures. A named volume for the same reason the database
+      # has one: `up -d --build` replaces the container, and what users uploaded
+      # must outlive it.
+      - anitrack-media:/data/media
 
 volumes:
   anitrack-db:
+  anitrack-media:

@@ -12,7 +12,7 @@ import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { displayTitle } from "../../lib/titles";
 import { relativeTime } from "../../lib/time";
-import { UserAvatar } from "./avatar";
+import { Avatar } from "../../components/ui/Avatar";
 
 /**
  * Turns an entry into the sentence a person would say about it. The feed is a
@@ -94,7 +94,7 @@ export function Discover() {
             key={user.id}
             className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-b-0"
           >
-            <UserAvatar name={user.username} />
+            <Avatar user={user} decorative />
             <Link
               to={`/u/${user.username}`}
               className="flex min-w-0 flex-1 flex-col justify-center hover:text-stamp-text pointer-coarse:min-h-[44px]"

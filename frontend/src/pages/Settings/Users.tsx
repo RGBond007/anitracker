@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useCreateUser, useUserAdmin, useUsers } from "../../features/auth/useAuth";
 import type { User } from "../../lib/api-client";
 import { cx } from "../../lib/cx";
+import { Avatar } from "../../components/ui/Avatar";
 import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
@@ -73,7 +74,10 @@ export function UsersSection({ me }: { me: User }) {
       <ul className="mt-2 divide-y divide-line">
         {matches.map((user) => (
           <li key={user.id} className="flex items-center justify-between gap-4 py-3.5">
-            <div className="min-w-0">
+            {/* The same face as everywhere else, so an admin scanning this list
+                recognises people by the picture they chose. */}
+            <Avatar user={user} size={30} decorative className="mr-1" />
+            <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 text-sm">
                 <span className="truncate font-medium">{user.username}</span>
                 {user.id === me.id && (

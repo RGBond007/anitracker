@@ -77,8 +77,16 @@ class JikanProvider(MediaProvider):
         )
 
     async def search(
-        self, query: str, type: str, page: int = 1, per_page: int = 20
+        self,
+        query: str,
+        type: str,
+        page: int = 1,
+        per_page: int = 20,
+        genres: list[str] | None = None,
     ) -> list[MediaRecord]:
+        # Jikan filters by numeric genre id, not name, and mapping names to MAL's
+        # ids would be a second lookup table to keep in step. The caller filters
+        # the results anyway, so this is left to it.
         data = await self._get(f"/{type}", {"q": query, "page": page, "limit": per_page})
         return [self._to_record(n, type) for n in data.get("data") or []]
 

@@ -300,3 +300,55 @@ async def test_non_admin_cannot_edit_the_instance(app_client):
     )
     resp = await app_client.patch("/api/admin/instance", json={"instance_name": "Hijacked"})
     assert resp.status_code == 403
+
+
+async def test_search_results_carry_their_relation_edges(app_client):
+    """
+    Grouping seasons on the search page follows the provider's own links, so the
+    links have to survive the trip. A result that arrived without them would send
+    the client back to comparing titles.
+    """
+    await setup_admin(app_client)
+    results = (await app_client.get("/api/media/search?q=frieren&type=anime")).json()["results"]
+    by_id = {r["provider_id"]: r for r in results}
+
+    assert by_id["901"]["prequel_id"] == "900"
+    assert by_id["901"]["sequel_id"] == "902"
+    # The movie names the series it hangs off, which is what puts it in the same
+    # group as the seasons rather than on its own.
+    assert by_id["910"]["parent_id"] == "900"
+    assert "910" in by_id["900"]["related_ids"]
+    # A real date, so two cours of one year cannot land in an arbitrary order.
+    assert by_id["900"]["start_date"] == "2020-01-10"
+
+    # "Not Frieren" matches the text but is related to nothing here: the grouping
+    # it feeds must not fold it in.
+    assert by_id["913"]["prequel_id"] is None
+    assert by_id["913"]["parent_id"] is None
+
+
+async def test_trending_is_served_and_needs_a_session(app_client):
+    await setup_admin(app_client)
+    rows = (await app_client.get("/api/media/trending?type=anime&limit=3")).json()
+    assert len(rows) == 3
+    assert all(r["type"] == "anime" for r in rows)
+
+    await app_client.post("/api/auth/logout")
+    assert (await app_client.get("/api/media/trending")).status_code == 401
+
+
+async def test_genre_is_a_search_in_its_own_right(app_client):
+    """
+    A genre narrows at the provider, and stands alone: picking one with an empty
+    box browses it rather than being refused.
+    """
+    await setup_admin(app_client)
+
+    # The stub ignores the genre hint, as Jikan and Kitsu do -- what matters here
+    # is that the request is accepted and answered rather than rejected.
+    genre_only = await app_client.get("/api/media/search?type=anime&genre=Action")
+    assert genre_only.status_code == 200, genre_only.text
+    assert len(genre_only.json()["results"]) > 0
+
+    # Neither a term nor a genre is not a search at all.
+    assert (await app_client.get("/api/media/search?type=anime")).status_code == 422

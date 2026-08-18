@@ -5,6 +5,7 @@ import { useUpdateProfile } from "../../features/auth/useAuth";
 import type { User } from "../../lib/api-client";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
+import { AvatarField } from "./AvatarField";
 import { SaveRow, SectionHeading, errorMessage, useSavedFlag, useUnsavedGuard } from "./parts";
 
 /** Loose on purpose — the server is the authority, this only catches typos. */
@@ -49,6 +50,10 @@ export function ProfileSection({ me }: { me: User }) {
   return (
     <section>
       <SectionHeading title={t("settings.profile")} description={t("settings.profileHint")} />
+
+      {/* The picture belongs with the name and the email: all three are how this
+          account appears to other people. */}
+      <AvatarField me={me} />
 
       <form
         className="grid gap-5 sm:grid-cols-2"

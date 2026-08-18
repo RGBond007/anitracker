@@ -39,9 +39,27 @@ _MEDIA_FIELDS = """
 
 SEARCH_QUERY = (
     """
-query ($search: String, $type: MediaType, $page: Int, $perPage: Int) {
+query (
+  $search: String, $type: MediaType, $page: Int, $perPage: Int
+  $genres: [String], $sort: [MediaSort]
+) {
   Page(page: $page, perPage: $perPage) {
-    media(search: $search, type: $type, sort: SEARCH_MATCH) {
+    media(search: $search, type: $type, sort: $sort, genre_in: $genres, isAdult: false) {
+      %s
+    }
+  }
+}
+"""
+    % _MEDIA_FIELDS
+)
+
+#: What people are actually watching this week, which is what "popular right now"
+#: has to mean -- POPULARITY_DESC would return the same all-time list every day.
+TRENDING_QUERY = (
+    """
+query ($type: MediaType, $perPage: Int) {
+  Page(page: 1, perPage: $perPage) {
+    media(type: $type, sort: TRENDING_DESC, isAdult: false) {
       %s
     }
   }
@@ -214,12 +232,35 @@ class AniListProvider(MediaProvider):
         )
 
     async def search(
-        self, query: str, type: str, page: int = 1, per_page: int = 20
+        self,
+        query: str,
+        type: str,
+        page: int = 1,
+        per_page: int = 20,
+        genres: list[str] | None = None,
     ) -> list[MediaRecord]:
         data = await self._post(
             SEARCH_QUERY,
-            {"search": query, "type": type.upper(), "page": page, "perPage": per_page},
+            {
+                # Null rather than "": with no search term AniList ranks the
+                # whole genre by popularity, which is what browsing a genre with
+                # an empty box should give you.
+                "search": query.strip() or None,
+                "type": type.upper(),
+                "page": page,
+                "perPage": per_page,
+                # Null rather than an empty list: AniList reads `genre_in: []` as
+                # "in none of these" and answers with nothing at all.
+                "genres": genres or None,
+                # SEARCH_MATCH only means anything when there is a term to match.
+                "sort": ["SEARCH_MATCH"] if query.strip() else ["POPULARITY_DESC"],
+            },
         )
+        nodes = ((data.get("Page") or {}).get("media")) or []
+        return [self._to_record(n) for n in nodes]
+
+    async def trending(self, type: str, limit: int = 12) -> list[MediaRecord]:
+        data = await self._post(TRENDING_QUERY, {"type": type.upper(), "perPage": limit})
         nodes = ((data.get("Page") or {}).get("media")) or []
         return [self._to_record(n) for n in nodes]
 

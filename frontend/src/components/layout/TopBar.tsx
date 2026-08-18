@@ -5,6 +5,7 @@ import { cx } from "../../lib/cx";
 import { useInstance } from "../../features/instance/useInstance";
 import { useLogout, useMe } from "../../features/auth/useAuth";
 import { useFriends } from "../../features/social/useSocial";
+import { Avatar } from "../ui/Avatar";
 import { IconButton } from "../ui/Button";
 
 function SearchIcon() {
@@ -33,12 +34,6 @@ function Badge({ count }: { count: number }) {
       {count}
     </span>
   );
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
-  const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : name.slice(0, 2);
-  return letters.toUpperCase();
 }
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -127,13 +122,15 @@ export function TopBar() {
             </IconButton>
           </div>
 
+          {/* The account control is the viewer's own face, drawn by the same
+              component as every other one — so uploading a picture changes it
+              here too, without this file knowing that pictures exist. */}
           <NavLink
             to="/settings"
             aria-label={t("nav.settings")}
-            className="font-mono flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-medium text-ink-950 transition hover:brightness-110 pointer-coarse:h-11 pointer-coarse:w-11 pointer-coarse:text-[13px]"
-            style={{ background: "linear-gradient(135deg, var(--stamp), #8a6e1c)" }}
+            className="flex items-center justify-center rounded-full transition hover:brightness-110 pointer-coarse:min-h-[44px] pointer-coarse:min-w-[44px]"
           >
-            {initials(user?.username ?? "?")}
+            <Avatar user={user ?? { username: "?" }} size={32} decorative />
           </NavLink>
         </div>
       </div>

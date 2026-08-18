@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app import avatars
 from app.config import settings
 from app.license import validate as validate_license
 from app.providers.registry import ProviderRegistry
@@ -74,6 +75,37 @@ async def health() -> dict:
 app.include_router(api)
 
 
+# --- Uploaded media --------------------------------------------------------
+# Outside the API prefix because these are plain files an <img> asks for, and
+# outside the static block because they exist whether or not a bundle was built.
+
+AVATAR_HEADERS = {
+    # Every upload is written under a new random name, so a stored file never
+    # changes and a replacement arrives as a different URL. That makes it safe to
+    # cache forever, and is what makes a new picture appear without a hard refresh.
+    "Cache-Control": "public, max-age=31536000, immutable",
+    # Defence in depth for a directory holding user-supplied content: nothing here
+    # may be sniffed into another type, and nothing it references may load. Only
+    # re-encoded WebP is ever written, so neither should matter -- which is exactly
+    # why they cost nothing to state.
+    "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": "default-src 'none'; sandbox",
+}
+
+
+@app.get("/media/avatars/{filename}", include_in_schema=False)
+async def avatar_file(filename: str) -> FileResponse:
+    # `path_for` returns None for anything this server did not generate, so a
+    # traversal attempt is a 404 rather than a read.
+    path = avatars.path_for(filename)
+    if path is None:
+        raise StarletteHTTPException(status_code=404)
+    # Stated rather than guessed from the suffix: `mimetypes` has no entry for
+    # `.webp` on a slim base image, so the guess is `application/octet-stream` --
+    # which, with the `nosniff` above, is a picture no browser will draw.
+    return FileResponse(path, media_type="image/webp", headers=AVATAR_HEADERS)
+
+
 # --- Static frontend -------------------------------------------------------
 # The React bundle is copied into app/static at image build time. Serving it from
 # the backend removes an entire nginx container from the compose file.
@@ -100,6 +132,10 @@ if STATIC_DIR.is_dir():
             # JavaScript, and the module fails to parse — a blank page instead of a
             # 404 the client could recover from.
             and not request.url.path.startswith("/assets")
+            # Same reasoning for uploads: a missing avatar must read as missing, so
+            # the browser draws its broken-image state and the client falls back to
+            # initials, rather than being handed a page of HTML for an <img>.
+            and not request.url.path.startswith("/media")
         ):
             return FileResponse(STATIC_DIR / "index.html", headers=INDEX_HEADERS)
         # `exc.headers` carries things the client needs to act on — `Retry-After` on

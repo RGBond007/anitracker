@@ -54,17 +54,40 @@ def clean_synopsis(text: str | None) -> str | None:
 
 
 async def search(
-    registry: ProviderRegistry, query: str, type: str, page: int = 1, per_page: int = 20
+    registry: ProviderRegistry,
+    query: str,
+    type: str,
+    page: int = 1,
+    per_page: int = 20,
+    genres: list[str] | None = None,
 ) -> list[MediaRecord]:
     """Search results are cached in-process only -- they are not written to media_cache.
 
     Per spec: don't persist full detail until a user actually adds or opens an entry.
     """
-    key = f"{type}:{page}:{per_page}:{query.strip().lower()}"
+    # Genres are part of the question, so they are part of the key -- sorted, so
+    # picking the same two in either order is one cache entry rather than two.
+    facet = ",".join(sorted(g.lower() for g in genres or []))
+    key = f"{type}:{page}:{per_page}:{facet}:{query.strip().lower()}"
     cached = await _search_cache.get(key)
     if cached is not None:
         return cached
-    results = await registry.search(query, type, page, per_page)
+    results = await registry.search(query, type, page, per_page, genres)
+    await _search_cache.set(key, results)
+    return results
+
+
+async def trending(registry: ProviderRegistry, type: str, limit: int = 12) -> list[MediaRecord]:
+    """
+    The search page's resting state. Cached like a search, and for the same
+    reason: every miss is an outbound call, and this one is the same answer for
+    every user on the instance.
+    """
+    key = f"trending:{type}:{limit}"
+    cached = await _search_cache.get(key)
+    if cached is not None:
+        return cached
+    results = await registry.trending(type, limit)
     await _search_cache.set(key, results)
     return results
 

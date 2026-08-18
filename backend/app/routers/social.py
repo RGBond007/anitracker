@@ -37,10 +37,14 @@ from app.schemas import (
     FriendSummary,
     LeaderboardOut,
     LeaderboardRow,
+    MediaOut,
     ProfileOut,
     PublicUser,
+    Recommendation,
+    RecommendationsOut,
     StatusCount,
     TypeStats,
+    WatchingItem,
 )
 
 router = APIRouter(tags=["social"])
@@ -549,3 +553,214 @@ async def leaderboard(user: CurrentUser, db: DbSession) -> LeaderboardOut:
     # Default order; the client re-sorts when you switch metric.
     rows.sort(key=lambda r: r.episodes_watched, reverse=True)
     return LeaderboardOut(rows=rows)
+
+
+# --- What friends are watching, and what to watch next --------------------
+
+#: A friend's endorsement, on the 1-10 scale the entry form uses. Eight is "liked
+#: it"; nine is "go and watch this", which is the only thing strong enough to put
+#: a title at the top of someone else's page.
+GOOD_SCORE = 8
+GREAT_SCORE = 9
+
+WATCHING_LIMIT = 24
+PERSONAL_LIMIT = 6
+
+#: The provider's own marker for adult titles. There is no separate rating flag in
+#: the data model, so this genre is the whole filter -- named here rather than
+#: buried in a query, because it is a policy rather than an implementation detail.
+ADULT_GENRES = frozenset({"Hentai"})
+
+
+def _is_adult(media: MediaCache) -> bool:
+    return any(genre in ADULT_GENRES for genre in media.genres or [])
+
+
+async def _library_keys(db, user_id: int) -> tuple[set[int], set[str]]:
+    """
+    What is already on a list: the media rows, and the series they belong to.
+
+    The second set is what stops a recommendation being season 2 of something the
+    viewer is already watching. A row that has never had its chain resolved has no
+    root, and stands in for itself.
+    """
+    rows = (
+        await db.execute(
+            select(ListEntry.media_cache_id, MediaCache.root_provider_id, MediaCache.provider_id)
+            .join(MediaCache, MediaCache.id == ListEntry.media_cache_id)
+            .where(ListEntry.user_id == user_id)
+        )
+    ).all()
+    return {r[0] for r in rows}, {r[1] or r[2] for r in rows}
+
+
+@router.get("/friends/watching", response_model=list[WatchingItem])
+async def friends_watching(user: CurrentUser, db: DbSession) -> list[WatchingItem]:
+    """
+    What each friend is part-way through -- one title each, most recently touched
+    first.
+
+    One per friend on purpose. This is a row of people, and a friend working
+    through five shows at once should not push everyone else off the end of it.
+    Friendship alone grants this, exactly as it does the feed: `profile_public`
+    widens who may browse a whole list, it does not gate what friends see.
+    """
+    friend_ids = await _friend_ids(db, user.id)
+    if not friend_ids:
+        return []
+
+    rows = list(
+        (
+            await db.execute(
+                select(ListEntry, User)
+                .join(User, User.id == ListEntry.user_id)
+                .options(selectinload(ListEntry.media))
+                .where(
+                    ListEntry.user_id.in_(friend_ids),
+                    ListEntry.status == EntryStatus.current,
+                )
+                .order_by(ListEntry.updated_at.desc())
+                .limit(FEED_LIMIT * 2)
+            )
+        ).all()
+    )
+
+    out: list[WatchingItem] = []
+    seen: set[int] = set()
+    for entry, owner in rows:
+        if owner.id in seen or _is_adult(entry.media):
+            continue
+        seen.add(owner.id)
+        out.append(WatchingItem(user=PublicUser.model_validate(owner), entry=entry))
+        if len(out) >= WATCHING_LIMIT:
+            break
+    return out
+
+
+@router.get("/recommendations", response_model=RecommendationsOut)
+async def recommendations(user: CurrentUser, db: DbSession) -> RecommendationsOut:
+    """
+    Titles to try next, argued for from data the instance already holds.
+
+    Nothing here is predicted. A recommendation is a title some of your friends
+    scored highly and you have not got, and the reason offered is the genres it
+    shares with something you scored highly yourself. That makes every suggestion
+    explainable in one line -- and means an instance with no friends and no scores
+    honestly returns nothing rather than filler.
+    """
+    friend_ids = await _friend_ids(db, user.id)
+    if not friend_ids:
+        return RecommendationsOut()
+
+    mine, my_roots = await _library_keys(db, user.id)
+
+    rated = list(
+        (
+            await db.execute(
+                select(ListEntry, User)
+                .join(User, User.id == ListEntry.user_id)
+                .options(selectinload(ListEntry.media))
+                .where(
+                    ListEntry.user_id.in_(friend_ids),
+                    ListEntry.score.is_not(None),
+                    ListEntry.score >= GOOD_SCORE,
+                )
+                .order_by(ListEntry.score.desc())
+            )
+        ).all()
+    )
+
+    # Collapse to one row per title, carrying who liked it and how much.
+    candidates: dict[int, dict] = {}
+    for entry, owner in rated:
+        media = entry.media
+        if media.id in mine or (media.root_provider_id or media.provider_id) in my_roots:
+            continue
+        if _is_adult(media):
+            continue
+        bucket = candidates.setdefault(
+            media.id, {"media": media, "fans": [], "top": 0, "root": media.root_provider_id}
+        )
+        bucket["top"] = max(bucket["top"], entry.score or 0)
+        if (entry.score or 0) >= GREAT_SCORE:
+            bucket["fans"].append(owner)
+
+    def community(bucket: dict) -> int:
+        return bucket["media"].average_score or 0
+
+    # --- the featured pick: whatever the most friends were most sure about ---
+    endorsed = [b for b in candidates.values() if b["fans"]]
+    endorsed.sort(key=lambda b: (len(b["fans"]), b["top"], community(b)), reverse=True)
+    featured = (
+        Recommendation(
+            media=MediaOut.model_validate(endorsed[0]["media"]),
+            fans=[PublicUser.model_validate(f) for f in endorsed[0]["fans"]],
+            top_score=endorsed[0]["top"],
+        )
+        if endorsed
+        else None
+    )
+
+    # --- the personal list: "because you liked ..." ---
+    favourite = (
+        (
+            await db.execute(
+                select(ListEntry)
+                .options(selectinload(ListEntry.media))
+                .where(
+                    ListEntry.user_id == user.id,
+                    ListEntry.score.is_not(None),
+                    ListEntry.score > 0,
+                )
+                .order_by(ListEntry.score.desc(), ListEntry.updated_at.desc())
+                .limit(1)
+            )
+        )
+        .scalars()
+        .first()
+    )
+
+    if favourite is None:
+        return RecommendationsOut(featured=featured)
+
+    basis = favourite.media
+    basis_genres = set(basis.genres or [])
+    featured_id = endorsed[0]["media"].id if endorsed else None
+
+    scored: list[tuple[tuple, dict, list[str]]] = []
+    for bucket in candidates.values():
+        media = bucket["media"]
+        if media.id == featured_id or media.type != basis.type:
+            continue
+        shared = [g for g in media.genres or [] if g in basis_genres]
+        if not shared:
+            continue
+        scored.append(((len(shared), bucket["top"], community(bucket)), bucket, shared))
+
+    scored.sort(key=lambda row: row[0], reverse=True)
+
+    personal: list[Recommendation] = []
+    # One per series: two seasons of the same show are one recommendation.
+    used_roots: set[str] = set()
+    for _, bucket, shared in scored:
+        media = bucket["media"]
+        root = media.root_provider_id or media.provider_id
+        if root in used_roots:
+            continue
+        used_roots.add(root)
+        personal.append(
+            Recommendation(
+                media=MediaOut.model_validate(media),
+                fans=[PublicUser.model_validate(f) for f in bucket["fans"]],
+                top_score=bucket["top"],
+                shared_genres=shared[:3],
+            )
+        )
+        if len(personal) >= PERSONAL_LIMIT:
+            break
+
+    return RecommendationsOut(
+        featured=featured,
+        because=MediaOut.model_validate(basis),
+        personal=personal,
+    )

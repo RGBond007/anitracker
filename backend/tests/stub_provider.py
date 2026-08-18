@@ -18,7 +18,7 @@ CATALOG = {
         format="TV",
         status="FINISHED",
         season_year=2013,
-        genres=["Action"],
+        genres=["Action", "Drama"],
         average_score=84,
         duration=24,
     ),
@@ -31,6 +31,9 @@ CATALOG = {
         title_english="Death Note",
         total_units=37,
         duration=23,
+        # Overlaps "Drama" with Attack on Titan, which is what the recommendation
+        # tests reason about: shared genres are the whole basis for a suggestion.
+        genres=["Mystery", "Drama"],
     ),
     # A three-season chain, linked only through its immediate neighbours the way a
     # real provider reports it. Each season carries its own cover and episode count,
@@ -91,6 +94,7 @@ CATALOG = {
         total_units=1,
         format="MOVIE",
         start_date=date(2021, 7, 2),
+        genres=["Adventure", "Drama"],
         related=[Related(provider_id="900", relation="PARENT", format="TV")],
     ),
     ("911", "anime"): MediaRecord(
@@ -139,13 +143,18 @@ class StubProvider(MediaProvider):
 
     name = "stub"
 
-    async def search(self, query, type, page=1, per_page=20):
+    async def search(self, query, type, page=1, per_page=20, genres=None):
+        # `genres` is deliberately ignored, the way Jikan and Kitsu ignore it:
+        # the caller filters the results too, so the hint is never load-bearing.
         needle = query.lower()
         return [
             r
             for (pid, t), r in CATALOG.items()
             if t == type and needle in (r.title_romaji or "").lower()
         ]
+
+    async def trending(self, type, limit=12):
+        return [r for (pid, t), r in CATALOG.items() if t == type][:limit]
 
     async def get_by_id(self, provider_id, type):
         record = CATALOG.get((provider_id, type))

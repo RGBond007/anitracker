@@ -25,6 +25,20 @@ def fixture():
 
 
 @pytest.fixture(autouse=True)
+def _isolated_media_root(tmp_path, monkeypatch):
+    """
+    Uploads land in the test's own directory.
+
+    Autouse and unconditional: the default media root is a relative path, so
+    without this a test that uploads an avatar would write one into the working
+    tree and leave it there.
+    """
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "media_root", str(tmp_path / "media"))
+
+
+@pytest.fixture(autouse=True)
 def _fresh_rate_limits():
     """
     Rate-limit buckets are module-level, so without this they accumulate across

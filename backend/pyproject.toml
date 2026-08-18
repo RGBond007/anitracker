@@ -17,6 +17,9 @@ dependencies = [
     "argon2-cffi>=23.1",
     "httpx>=0.28",
     "python-multipart>=0.0.20",
+    # Decodes uploaded avatars so validation can be about what a file *is* rather
+    # than what it is named, and re-encodes them to one square without metadata.
+    "pillow>=11.0",
 ]
 
 [project.optional-dependencies]

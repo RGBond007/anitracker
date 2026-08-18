@@ -28,6 +28,18 @@ class Settings(BaseSettings):
     logo_url: str = ""
     accent_color: str = "#8b5cf6"
 
+    # --- Uploads ---
+    # Where user-uploaded files live. A directory rather than the database: an
+    # avatar is served straight off disk on every page, and the compose file backs
+    # it with a named volume so it survives `up -d --build` like the database does.
+    # The default is relative so a checkout runs without root-owned paths; the
+    # container sets it to the mounted volume.
+    media_root: str = "data/media"
+    max_avatar_bytes: int = 5 * 1024 * 1024
+    #: Every stored avatar is re-encoded to this square, so one size serves every
+    #: place one is drawn and nothing on the page depends on what was uploaded.
+    avatar_pixels: int = 512
+
     # --- Licensing (no-op stub; see app/license.py) ---
     license_key: str = ""
 

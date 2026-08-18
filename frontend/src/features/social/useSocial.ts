@@ -13,6 +13,24 @@ export function useFeed() {
   return useQuery({ queryKey: queryKeys.feed, queryFn: api.feed });
 }
 
+/** One current title per friend. Empty until you have friends. */
+export function useFriendsWatching() {
+  return useQuery({ queryKey: queryKeys.friendsWatching, queryFn: api.friendsWatching });
+}
+
+/**
+ * What to watch next, argued for from friends' scores and your own favourite.
+ * Cheap to recompute but not free, and it only changes when a list does — which
+ * is exactly when `listEntryScopes` invalidates it.
+ */
+export function useRecommendations() {
+  return useQuery({
+    queryKey: queryKeys.recommendations,
+    queryFn: api.recommendations,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 /** Accounts you have no link with yet. Empty on a single-user instance. */
 export function useDiscover() {
   return useQuery({ queryKey: queryKeys.discover, queryFn: api.discover });

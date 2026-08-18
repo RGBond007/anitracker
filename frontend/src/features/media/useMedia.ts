@@ -4,12 +4,25 @@ import { api, type Entry, type EntryStatus, type MediaType } from "../../lib/api
 import { listEntryScopes, queryKeys } from "../../lib/queryKeys";
 import { useUiStore } from "../../stores/uiStore";
 
-export function useSearch(query: string, type: MediaType) {
+export function useSearch(query: string, type: MediaType, genres: string[] = []) {
   return useQuery({
-    queryKey: queryKeys.search(query, type),
-    queryFn: () => api.search(query, type),
-    enabled: query.trim().length > 0,
+    queryKey: queryKeys.search(query, type, genres),
+    queryFn: () => api.search(query, type, 1, genres),
+    // A genre on its own is a search: picking one with an empty box browses it.
+    enabled: query.trim().length > 0 || genres.length > 0,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * The titles shown while the search box is empty. One answer for the whole
+ * instance and cached upstream too, so it is deliberately stale-tolerant.
+ */
+export function useTrending(type: MediaType) {
+  return useQuery({
+    queryKey: queryKeys.trending(type),
+    queryFn: () => api.trending(type),
+    staleTime: 30 * 60 * 1000,
   });
 }
 

@@ -30,6 +30,8 @@ class UserOut(ORM):
     theme: str
     profile_public: bool
     must_change_password: bool
+    #: None until one is uploaded; the client draws initials in that case.
+    avatar_url: str | None = None
     created_at: datetime
 
 
@@ -114,7 +116,16 @@ class MediaOut(ORM):
     #: Both null until the chain has been resolved, or for a standalone title.
     season_number: int | None = None
     root_provider_id: str | None = None
+    #: The provider's own relation edges. Present on search results, where nothing
+    #: has been cached and therefore nothing has a resolved chain yet -- they are
+    #: what lets the client group seasons of one show without guessing from titles.
+    prequel_id: str | None = None
     sequel_id: str | None = None
+    parent_id: str | None = None
+    related_ids: list[str] = []
+    #: The real air date where the provider has one. `season_year` alone puts two
+    #: cours of the same year in an arbitrary order.
+    start_date: date | None = None
     genres: list[str] = []
     average_score: int | None = None
     duration: int | None = None
@@ -227,6 +238,9 @@ class PublicUser(ORM):
     id: int
     username: str
     profile_public: bool
+    #: A profile picture is as public as the username it belongs to -- it is drawn
+    #: beside the name everywhere the name appears.
+    avatar_url: str | None = None
     created_at: datetime
 
 
@@ -295,6 +309,46 @@ class ComparisonOut(BaseModel):
 class FeedItem(BaseModel):
     user: PublicUser
     entry: EntryOut
+
+
+class WatchingItem(BaseModel):
+    """
+    One friend and the thing they are part-way through.
+
+    The entry carries its own media row, so the season number and episode count
+    behind "S3 · 7/12" are the season's own rather than the show's.
+    """
+
+    user: PublicUser
+    entry: EntryOut
+
+
+class Recommendation(BaseModel):
+    """
+    A title worth a look, and the evidence for saying so.
+
+    No score is invented and nothing is predicted: `fans` are friends who actually
+    rated it highly, and `shared_genres` are the genres it has in common with
+    something the viewer already rated highly. The client turns those into the
+    sentence it shows, so the reason shown is always the reason used.
+    """
+
+    media: MediaOut
+    #: Friends who rated it at least 9. Ordered, so the avatar stack is stable.
+    fans: list[PublicUser] = []
+    #: The best score any friend gave it.
+    top_score: int | None = None
+    #: Genres it shares with `RecommendationsOut.because`.
+    shared_genres: list[str] = []
+
+
+class RecommendationsOut(BaseModel):
+    #: The strongest single pick from friends' ratings, or None when friends have
+    #: not rated anything the viewer is missing.
+    featured: Recommendation | None = None
+    #: What the personal list is reasoning from -- the viewer's own favourite.
+    because: MediaOut | None = None
+    personal: list[Recommendation] = []
 
 
 class DiscoverUser(BaseModel):
