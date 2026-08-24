@@ -2,7 +2,7 @@
 
 <img src=".github/assets/AniTracker-GitHub-banner.svg" alt="AniTracker" width="100%">
 
-[![CI](https://github.com/RGBond007/anitrack/actions/workflows/ci.yml/badge.svg)](https://github.com/RGBond007/anitrack/actions/workflows/ci.yml)
+[![CI](https://github.com/RGBond007/anitracker/actions/workflows/ci.yml/badge.svg)](https://github.com/RGBond007/anitracker/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 ![Deploy: Docker Compose](https://img.shields.io/badge/deploy-docker%20compose-2496ED?logo=docker&logoColor=white)
 ![Backend: FastAPI + Postgres](https://img.shields.io/badge/backend-FastAPI%20%2B%20Postgres-009688?logo=fastapi&logoColor=white)
@@ -24,8 +24,8 @@
 Run AniTracker with two containers. No third-party account or API key is required.
 
 ```bash
-git clone https://github.com/RGBond007/anitrack.git
-cd anitrack
+git clone https://github.com/RGBond007/anitracker.git
+cd anitracker
 cp .env.example .env
 printf '\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env
 docker compose up -d --build

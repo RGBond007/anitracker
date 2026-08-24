@@ -16,8 +16,9 @@ services:
       retries: 10
 
   app:
-    # Builds from this checkout. Once you publish an image, swap these two lines:
-    #   image: ghcr.io/<you>/anitrack:latest
+    # Builds from this checkout. To run a published image instead, drop the
+    # `build:` line and point `image:` at the registry:
+    #   image: ghcr.io/rgbond007/anitracker:latest
     build: .
     image: anitrack:latest
     restart: unless-stopped

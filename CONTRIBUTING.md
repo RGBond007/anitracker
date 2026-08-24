@@ -28,9 +28,9 @@ relevant code. Ask on the issue before starting if its scope is unclear.
 Fork the repository, then clone your fork:
 
 ```bash
-git clone https://github.com/<your-user>/anitrack.git
-cd anitrack
-git remote add upstream https://github.com/RGBond007/anitrack.git
+git clone https://github.com/<your-user>/anitracker.git
+cd anitracker
+git remote add upstream https://github.com/RGBond007/anitracker.git
 ```
 
 Create a branch from the latest `main`:

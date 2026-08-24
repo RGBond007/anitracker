@@ -4,9 +4,9 @@ import { useInstance } from "../../features/instance/useInstance";
 import { ICONS, Icon, SectionHeading } from "./parts";
 
 const LINKS = [
-  { key: "docs", href: "https://github.com/RGBond007/anitrack#readme" },
-  { key: "source", href: "https://github.com/RGBond007/anitrack" },
-  { key: "licence", href: "https://github.com/RGBond007/anitrack/blob/main/LICENSE" },
+  { key: "docs", href: "https://github.com/RGBond007/anitracker#readme" },
+  { key: "source", href: "https://github.com/RGBond007/anitracker" },
+  { key: "licence", href: "https://github.com/RGBond007/anitracker/blob/main/LICENSE" },
 ] as const;
 
 /** Four facts and three links. Anything more would be a page about a page. */
