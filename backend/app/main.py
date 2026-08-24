@@ -9,7 +9,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import avatars
 from app.config import settings
-from app.license import validate as validate_license
 from app.providers.registry import ProviderRegistry
 from app.routers import (
     admin,
@@ -34,12 +33,10 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 async def lifespan(app: FastAPI):
     app.state.registry = ProviderRegistry()
     app.state.background_tasks = set()
-    app.state.license = validate_license()
     log.info(
-        "AniTracker %s starting -- providers: %s, license tier: %s",
+        "AniTracker %s starting -- providers: %s",
         VERSION,
         ", ".join(p.name for p in app.state.registry.providers),
-        app.state.license.tier,
     )
     yield
     for task in list(app.state.background_tasks):

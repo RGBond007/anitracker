@@ -70,7 +70,7 @@ class InstanceInfo(BaseModel):
     setup_complete: bool
     allow_signup: bool
     version: str
-    license_tier: str
+    license: str
 
 
 class SetupIn(RegisterIn):

@@ -9,8 +9,8 @@
 ## 2. Install from source
 
 ```bash
-git clone https://github.com/RGBond007/anitrack.git
-cd anitrack
+git clone https://github.com/RGBond007/anitracker.git
+cd anitracker
 cp .env.example .env
 ```
 
@@ -80,7 +80,7 @@ containers on a shared Docker network instead.
 ## 5. Upgrading
 
 ```bash
-cd /path/to/anitrack
+cd /path/to/anitracker
 git pull --ff-only
 docker compose up -d --build
 ```

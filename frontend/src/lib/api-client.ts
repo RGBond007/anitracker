@@ -127,7 +127,7 @@ export interface Instance {
   setup_complete: boolean;
   allow_signup: boolean;
   version: string;
-  license_tier: string;
+  license: string;
 }
 
 /** Another user, as seen by you. Never carries email or role — the API strips them. */
@@ -334,7 +334,7 @@ const body = (value: unknown) => JSON.stringify(value);
 export const api = {
   instance: () => request<Instance>("/instance"),
   updateInstance: (patch: Record<string, unknown>) =>
-    request<Omit<Instance, "setup_complete" | "version" | "license_tier">>("/admin/instance", {
+    request<Omit<Instance, "setup_complete" | "version" | "license">>("/admin/instance", {
       method: "PATCH",
       body: body(patch),
     }),

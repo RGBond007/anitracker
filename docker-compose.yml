@@ -16,8 +16,9 @@ services:
       retries: 10
 
   app:
-    # Builds from this checkout. Once you publish an image, swap these two lines:
-    #   image: ghcr.io/<you>/anitrack:latest
+    # Builds from this checkout. To run a published image instead, drop the
+    # `build:` line and point `image:` at the registry:
+    #   image: ghcr.io/rgbond007/anitracker:latest
     build: .
     image: anitrack:latest
     restart: unless-stopped
@@ -34,7 +35,6 @@ services:
       INSTANCE_NAME: ${INSTANCE_NAME:-AniTracker}
       LOGO_URL: ${LOGO_URL:-}
       ACCENT_COLOR: ${ACCENT_COLOR:-#8b5cf6}
-      LICENSE_KEY: ${LICENSE_KEY:-}
       MEDIA_CACHE_TTL_DAYS: ${MEDIA_CACHE_TTL_DAYS:-7}
       PROVIDER_ORDER: ${PROVIDER_ORDER:-anilist,jikan,kitsu}
       MEDIA_ROOT: /data/media
