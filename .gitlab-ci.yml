@@ -144,4 +144,6 @@ publish:
     - docker push "$CI_REGISTRY_IMAGE:$MINOR"
     - docker push "$CI_REGISTRY_IMAGE:latest"
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v/
+    # Restricted to semver-shaped tags: the version arithmetic above assumes
+    # X.Y.Z, so a tag like v-beta would push nonsense tags.
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+/
