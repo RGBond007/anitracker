@@ -139,7 +139,12 @@ publish:
     # run the arm64 stages. A large share of self-hosters are on ARM boards and
     # NAS units that cannot use an amd64-only image at all.
     - docker run --privileged --rm tonistiigi/binfmt --install all
-    - docker buildx create --use --name multiarch
+    # buildx refuses to inherit the daemon's TLS settings from DOCKER_HOST and
+    # friends, so the connection is handed to it as an explicit context instead.
+    - |
+      docker context create dind \
+        --docker "host=${DOCKER_HOST},ca=${DOCKER_CERT_PATH}/ca.pem,cert=${DOCKER_CERT_PATH}/cert.pem,key=${DOCKER_CERT_PATH}/key.pem"
+    - docker buildx create --use --name multiarch dind
     # CI_COMMIT_TAG is v2.1.0; publish 2.1.0, 2.1 and latest to match the
     # GitHub side so a compose file can track either registry the same way.
     - VERSION="${CI_COMMIT_TAG#v}"
