@@ -6,6 +6,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] — 2026-08-24
+
+A packaging release: prebuilt container images, so installing no longer means
+compiling the frontend and backend on the target machine.
+
+### Added
+- **Container images**, published to GHCR and to GitLab's registry on each version
+  tag as `{version}`, `{major}.{minor}` and `latest`. Built for **linux/amd64 and
+  linux/arm64**, so ARM single-board machines and ARM NAS units can run AniTracker
+  without building it themselves.
+- A link to the browser-local demo from the README.
+
+### Changed
+- **`GET /api/instance` reports `license` instead of `license_tier`.** The field now
+  carries the licence itself (`AGPL-3.0-only`) rather than a tier name. The bundled
+  frontend is the only consumer and ships in the same image, so an upgrade needs no
+  action — but a script reading `license_tier` from that endpoint must be updated.
+- Documentation, issue-template contact links and the in-app About links point at
+  `github.com/RGBond007/anitracker`; the repository was renamed and the old URLs had
+  been resolving only through GitHub's rename redirect.
+
+### Removed
+- The licence-key stub: `LICENSE_KEY`, the `app/license.py` validator, and the
+  feature list naming `multi_user`, `import` and `share_links` as gateable. Nothing
+  gated anything, and AniTracker is AGPL-3.0-only with no paid tier — the machinery
+  only implied otherwise. `LICENSE_KEY` in an existing `.env` is now ignored and can
+  be deleted.
+
 ## [2.0.0] — 2026-08-17
 
 ### Added
@@ -94,6 +122,7 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/RGBond007/anitracker/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/RGBond007/anitracker/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/RGBond007/anitracker/releases/tag/v1.0.0

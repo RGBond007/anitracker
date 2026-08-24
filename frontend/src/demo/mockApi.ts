@@ -162,7 +162,7 @@ const instance: Instance = {
   accent_color: "#d4af37",
   setup_complete: true,
   allow_signup: false,
-  version: "2.0.0-demo",
+  version: "2.0.1-demo",
   license: "AGPL-3.0-only",
 };
 
