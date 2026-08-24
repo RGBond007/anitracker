@@ -23,14 +23,16 @@ The demo runs entirely in your browser — no account, no server, nothing instal
 
 ## Quick start
 
-Run AniTracker with two containers. No third-party account or API key is required.
+Two containers, a prebuilt image, no third-party account or API key. Nothing is
+compiled on your machine, and `linux/amd64` and `linux/arm64` are both published,
+so a Raspberry Pi or an ARM NAS works the same as a desktop.
 
 ```bash
-git clone https://github.com/RGBond007/anitracker.git
-cd anitracker
-cp .env.example .env
+mkdir anitracker && cd anitracker
+curl -O https://raw.githubusercontent.com/RGBond007/anitracker/main/docker-compose.yml
+curl -o .env https://raw.githubusercontent.com/RGBond007/anitracker/main/.env.example
 printf '\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env
-docker compose up -d --build
+docker compose up -d
 ```
 
 Then open <http://localhost:8000> and the first-run wizard creates your admin account.
@@ -191,11 +193,10 @@ anitrack.example.com {
 
 ## Upgrading
 
-`docker-compose.yml` builds from this checkout rather than pulling a published image, so an upgrade
-is a pull and a rebuild:
+`docker-compose.yml` runs a published image, so an upgrade is a pull and a restart:
 
 ```bash
-git pull && docker compose up -d --build
+docker compose pull && docker compose up -d
 ```
 
 Migrations run automatically at startup. Your data lives in the named `anitrack-db` volume and

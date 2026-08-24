@@ -6,13 +6,22 @@
 - ~350 MB disk for images, plus your database
 - A free port (8000 by default)
 
-## 2. Install from source
+## 2. Install
+
+AniTracker runs from a published image, so there is nothing to clone or build. Fetch the
+compose file and an environment file into a directory of your choosing:
 
 ```bash
-git clone https://github.com/RGBond007/anitracker.git
-cd anitracker
-cp .env.example .env
+mkdir anitracker && cd anitracker
+curl -O https://raw.githubusercontent.com/RGBond007/anitracker/main/docker-compose.yml
+curl -o .env https://raw.githubusercontent.com/RGBond007/anitracker/main/.env.example
 ```
+
+Images are published for `linux/amd64` and `linux/arm64`.
+
+> Prefer to build it yourself? Clone the repository, add `build: .` to the `app` service in
+> `docker-compose.yml`, and use `docker compose up -d --build` wherever this guide says
+> `docker compose up -d`.
 
 Set the one required value:
 
@@ -81,20 +90,23 @@ containers on a shared Docker network instead.
 
 ```bash
 cd /path/to/anitracker
-git pull --ff-only
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+If `ANITRACKER_VERSION` is set in `.env`, change it to the release you want first — otherwise
+`docker compose pull` follows `latest`.
 
 Migrations run automatically on start; the container waits for Postgres first. Your data is in the
 named volume `anitrack-db`, which is untouched by image replacement — that is why the compose file
 uses a named volume rather than a bind mount into the install directory.
 
-**Take a backup before a major-version upgrade** (step 6). To roll back, check out the previous
-release tag and rebuild:
+**Take a backup before a major-version upgrade** (step 6). To roll back, pin the previous
+release and start it again:
 
 ```bash
-git switch --detach v1.0.0
-docker compose up -d --build
+sed -i 's/^ANITRACKER_VERSION=.*/ANITRACKER_VERSION=1.0.0/' .env
+docker compose up -d
 ```
 
 then `docker compose up -d`. Note that migrations are forward-only: restore the matching database
