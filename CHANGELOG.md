@@ -8,21 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] — 2026-08-24
 
-A packaging release: prebuilt container images, so installing no longer means
-compiling the frontend and backend on the target machine.
+Adds profile pictures, friend recommendations and genre-aware search, and ships
+prebuilt container images so installing no longer means compiling on the target
+machine.
+
+> **Upgrading from 2.0.0 runs one migration (`0008`).** It adds a single nullable
+> column, `users.avatar_filename`. No backfill, no account changes behaviour, and
+> the downgrade drops the column while deliberately leaving uploaded files on disk.
 
 ### Added
-- **Container images**, published to GHCR and to GitLab's registry on each version
-  tag as `{version}`, `{major}.{minor}` and `latest`. Built for **linux/amd64 and
-  linux/arm64**, so ARM single-board machines and ARM NAS units can run AniTracker
-  without building it themselves.
+- **Profile pictures.** `PUT /api/me/avatar` and `DELETE /api/me/avatar`. Uploads
+  are decoded to check what a file *is* rather than what it is named, re-encoded to
+  one 512×512 square with metadata stripped, and served off disk. Accounts without
+  one keep the initials fallback. Tunable with `MEDIA_ROOT`, `MAX_AVATAR_BYTES` and
+  `AVATAR_PIXELS`; the compose file backs the directory with a named volume so
+  uploads survive `up -d --build`.
+- **Recommendations and friend activity.** `GET /api/recommendations` and
+  `GET /api/friends/watching`, surfaced on a discovery page — what friends are
+  watching now, and titles they rate that are not yet in your library.
+- **Genre-aware search.** Genres are repeatable (`?genre=Action&genre=Drama` means
+  both) and a genre alone is a valid search, so picking one with an empty box
+  browses it instead of being a dead end. Providers that can filter at the source
+  do; results are filtered again locally, so a provider that ignores the hint costs
+  precision, never correctness.
+- **Settings split** into About, Appearance, Instance, Profile, Security and Users,
+  replacing the single page.
+- **Container images**, published to GHCR and GitLab's registry on each version tag
+  as `{version}`, `{major}.{minor}` and `latest`, built for **linux/amd64 and
+  linux/arm64** so ARM boards and ARM NAS units are covered:
+  ```
+  docker pull ghcr.io/rgbond007/anitracker:2.0.1
+  ```
 - A link to the browser-local demo from the README.
 
 ### Changed
-- **`GET /api/instance` reports `license` instead of `license_tier`.** The field now
+- **`GET /api/instance` reports `license` instead of `license_tier`.** The field
   carries the licence itself (`AGPL-3.0-only`) rather than a tier name. The bundled
   frontend is the only consumer and ships in the same image, so an upgrade needs no
-  action — but a script reading `license_tier` from that endpoint must be updated.
+  action — but a script reading `license_tier` must be updated.
 - Documentation, issue-template contact links and the in-app About links point at
   `github.com/RGBond007/anitracker`; the repository was renamed and the old URLs had
   been resolving only through GitHub's rename redirect.
@@ -33,6 +56,10 @@ compiling the frontend and backend on the target machine.
   gated anything, and AniTracker is AGPL-3.0-only with no paid tier — the machinery
   only implied otherwise. `LICENSE_KEY` in an existing `.env` is now ignored and can
   be deleted.
+
+### Notes
+- Versioned as a patch. The functionality above is backward-compatible and would
+  ordinarily warrant a minor release; the number understates it.
 
 ## [2.0.0] — 2026-08-17
 
