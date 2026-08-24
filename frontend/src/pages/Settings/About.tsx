@@ -17,12 +17,9 @@ export function AboutSection() {
   const facts = [
     { label: t("settings.version"), value: instance?.version ?? "—", mono: true },
     {
-      label: t("settings.edition"),
-      // The tier is served, not assumed — only the known one gets a nice name.
-      value:
-        instance?.license_tier === "community"
-          ? t("settings.communityEdition")
-          : (instance?.license_tier ?? "—"),
+      label: t("settings.license"),
+      // Served, not assumed: an instance reports its own value.
+      value: instance?.license_tier ?? "—",
     },
     { label: t("settings.telemetry"), value: t("settings.telemetryOff") },
   ];

@@ -14,7 +14,7 @@ async def setup_admin(client):
 async def test_instance_reports_setup_state(app_client):
     before = (await app_client.get("/api/instance")).json()
     assert before["setup_complete"] is False
-    assert before["license_tier"] == "community"
+    assert before["license_tier"] == "AGPL-3.0-only"
 
     await setup_admin(app_client)
     after = (await app_client.get("/api/instance")).json()

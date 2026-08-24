@@ -20,7 +20,7 @@ ALL_FEATURES = frozenset({"multi_user", "import", "share_links"})
 @dataclass(frozen=True)
 class LicenseInfo:
     valid: bool = True
-    tier: str = "community"
+    tier: str = "AGPL-3.0-only"
     holder: str | None = None
     features: frozenset[str] = field(default_factory=lambda: ALL_FEATURES)
 
