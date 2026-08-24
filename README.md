@@ -11,7 +11,9 @@
 
 **A private, self-hosted anime and manga tracker for households and small communities.**
 
-[Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Installation](INSTALL.md) · [Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md)
+[**Live demo**](https://rgbond007.github.io/anitracker/demo/) · [Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Installation](INSTALL.md) · [Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md)
+
+The demo runs entirely in your browser — no account, no server, nothing installed.
 
 <img src="frontend/screenshots/dashboard.png" alt="AniTracker dashboard: a Vinland Saga hero with continue-watching progress, tracking figures and a rail of titles in progress" width="100%">
 
