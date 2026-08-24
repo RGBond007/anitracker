@@ -19,7 +19,7 @@ export function AboutSection() {
     {
       label: t("settings.license"),
       // Served, not assumed: an instance reports its own value.
-      value: instance?.license_tier ?? "—",
+      value: instance?.license ?? "—",
     },
     { label: t("settings.telemetry"), value: t("settings.telemetryOff") },
   ];

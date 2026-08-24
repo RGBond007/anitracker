@@ -25,7 +25,7 @@ from app.security import (
     hash_password,
     verify_password,
 )
-from app.version import VERSION
+from app.version import LICENSE, VERSION
 
 router = APIRouter(tags=["auth"])
 
@@ -74,8 +74,6 @@ async def _find_user(db, identifier: str) -> User | None:
 @router.get("/instance", response_model=InstanceInfo)
 async def instance_info(db: DbSession) -> InstanceInfo:
     """Unauthenticated: tells the frontend whether to show the setup wizard or login."""
-    from app.license import validate
-
     count = await user_count(db)
     resolved = await settings_service.resolve(db)
     return InstanceInfo(
@@ -85,7 +83,7 @@ async def instance_info(db: DbSession) -> InstanceInfo:
         setup_complete=count > 0,
         allow_signup=resolved.allow_signup,
         version=VERSION,
-        license_tier=validate().tier,
+        license=LICENSE,
     )
 
 

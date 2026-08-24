@@ -163,7 +163,7 @@ const instance: Instance = {
   setup_complete: true,
   allow_signup: false,
   version: "2.0.0-demo",
-  license_tier: "AGPL-3.0-only",
+  license: "AGPL-3.0-only",
 };
 
 const friend: PublicUser = { id: 2, username: "Mika", profile_public: true, avatar_url: null, created_at: "2026-06-12T08:00:00Z" };

@@ -40,9 +40,6 @@ class Settings(BaseSettings):
     #: place one is drawn and nothing on the page depends on what was uploaded.
     avatar_pixels: int = 512
 
-    # --- Licensing (no-op stub; see app/license.py) ---
-    license_key: str = ""
-
     # --- Providers ---
     media_cache_ttl_days: int = 7
     search_cache_ttl_seconds: int = 600
