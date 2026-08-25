@@ -185,7 +185,17 @@
     "finishBody": "Episode {{total}} zu zählen schließt den Eintrag ab.",
     "finishBodyManga": "Kapitel {{total}} zu zählen schließt den Eintrag ab.",
     "finishConfirm": "Zählen und abschließen",
-    "continueBody": "Mit {{name}} weitermachen?"
+    "continueBody": "Mit {{name}} weitermachen?",
+    "milestone": {
+      "first": "Erste Episode",
+      "firstManga": "Erstes Kapitel",
+      "half": "Halbzeit",
+      "cour_one": "Erstes Cour geschafft",
+      "cour_other": "{{count}} Cours geschafft",
+      "last": "Finale als Nächstes",
+      "lastManga": "Letztes Kapitel als Nächstes",
+      "done": "Abgeschlossen"
+    }
   },
   "import": {
     "title": "Import von MyAnimeList",

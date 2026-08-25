@@ -185,7 +185,17 @@
     "finishBody": "Logging episode {{total}} marks it completed.",
     "finishBodyManga": "Logging chapter {{total}} marks it completed.",
     "finishConfirm": "Log and complete",
-    "continueBody": "Continue with {{name}}?"
+    "continueBody": "Continue with {{name}}?",
+    "milestone": {
+      "first": "First episode",
+      "firstManga": "First chapter",
+      "half": "Halfway",
+      "cour_one": "First cour done",
+      "cour_other": "{{count}} cours done",
+      "last": "Finale next",
+      "lastManga": "Final chapter next",
+      "done": "Complete"
+    }
   },
   "import": {
     "title": "Import from MyAnimeList",

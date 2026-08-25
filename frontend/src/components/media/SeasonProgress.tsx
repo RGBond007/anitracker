@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Entry } from "../../lib/api-client";
 import { useIncrementEntry } from "../../features/media/useMedia";
 import { Button } from "../ui/Button";
+import { ProgressLedger } from "./ProgressLedger";
 import { useStatusLabel } from "./statusLabels";
 
 /**
@@ -18,8 +19,7 @@ export function SeasonProgress({ entry }: { entry: Entry }) {
   const statusLabel = useStatusLabel();
   const increment = useIncrementEntry();
 
-  const total = entry.media.total_units;
-  const pct = total ? Math.min(100, (entry.progress / total) * 100) : 0;
+  const total = entry.media.total_units ?? null;
   const finished = total != null && entry.progress >= total;
 
   return (
@@ -36,12 +36,12 @@ export function SeasonProgress({ entry }: { entry: Entry }) {
         {total ? <span className="text-text-faint"> / {total}</span> : null}
       </p>
 
-      <div aria-hidden className="mt-2.5 h-[3px] overflow-hidden rounded-pill bg-line">
-        <div
-          className="h-full rounded-pill bg-stamp transition-[width] ease-out"
-          style={{ width: `${pct}%`, transitionDuration: "var(--motion-lift)" }}
-        />
-      </div>
+      <ProgressLedger
+        className="mt-2.5"
+        progress={entry.progress}
+        total={total}
+        isManga={entry.media.type === "manga"}
+      />
 
       <Button
         variant="ghost"

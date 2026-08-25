@@ -16,6 +16,7 @@ import { Menu } from "../ui/Menu";
 import { Modal } from "../ui/Modal";
 import { Sheet } from "../ui/Sheet";
 import { EntryForm } from "./EntryForm";
+import { ProgressLedger } from "./ProgressLedger";
 import { declineSeasonPrompt, nextAfter } from "./SeasonActions";
 import { useSeasonLabels } from "./seasonLabels";
 import { useStatusLabel } from "./statusLabels";
@@ -69,7 +70,6 @@ export function ViewingLog({
   const type = entry.media.type;
   const isManga = type === "manga";
   const total = entry.media.total_units ?? null;
-  const pct = total ? Math.min(100, (entry.progress / total) * 100) : 0;
   const atEnd = total != null && entry.progress >= total;
   // The last one is a decision, not a click: it completes the season server-side.
   const wouldFinish = total != null && entry.progress + 1 >= total;
@@ -166,19 +166,17 @@ export function ViewingLog({
           <Icon path={ICONS.chevronDown} size={14} className="text-text-dim" />
         </Menu>
 
-        <div className="flex min-w-0 flex-1 basis-[200px] items-center gap-3">
+        {/* basis-[260px] rather than 200: on a phone this row wraps, and a ledger
+            sharing a line with the status pill is left too narrow to draw notches
+            in. At 260 it takes a line of its own and gets the full column. */}
+        <div className="flex min-w-0 flex-1 basis-[260px] items-center gap-3">
           <p className="tabular shrink-0 text-[13px]">{progressText}</p>
-          {total ? (
-            <div
-              aria-hidden
-              className="h-[3px] w-full min-w-[48px] max-w-[220px] overflow-hidden rounded-pill bg-line"
-            >
-              <div
-                className="h-full rounded-pill bg-stamp transition-[width] ease-out"
-                style={{ width: `${pct}%`, transitionDuration: "var(--motion-lift)" }}
-              />
-            </div>
-          ) : null}
+          <ProgressLedger
+            progress={entry.progress}
+            total={total}
+            isManga={isManga}
+            className="w-full min-w-[48px] max-w-[220px]"
+          />
         </div>
 
         <p className="flex items-baseline gap-2">

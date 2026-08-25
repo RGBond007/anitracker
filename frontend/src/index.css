@@ -149,6 +149,52 @@
     }
   }
 
+  /**
+   * The notch a click just filled. It overshoots by a hair and settles — the press
+   * of a stamp onto paper, which is what the gold has meant since the first screen.
+   * Short on purpose: this plays under the pointer during an action the user is
+   * still holding, so anything longer reads as lag rather than as feedback.
+   */
+  .tick-land {
+    animation: tick-land 220ms cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+    transform-origin: bottom;
+  }
+
+  @keyframes tick-land {
+    from {
+      transform: scaleY(0.35);
+      opacity: 0.55;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  /* The caption earns a little more travel than the notch: it says something new. */
+  .milestone-land {
+    display: inline-block;
+    animation: milestone-land 240ms ease-out both;
+  }
+
+  @keyframes milestone-land {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tick-land,
+    .milestone-land {
+      animation: none;
+    }
+  }
+
   /* Horizontal rails hide the scrollbar but stay scrollable and keyboard-reachable. */
   .rail {
     scrollbar-width: none;

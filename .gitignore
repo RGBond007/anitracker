@@ -14,6 +14,9 @@ dist/
 .env
 *.sql.gz
 docker/data/
+# Per-machine compose tweaks — e.g. running a locally built image instead of the
+# published one. Compose reads this automatically; it must never be committed.
+docker-compose.override.yml
 
 # OS / editors
 .DS_Store
