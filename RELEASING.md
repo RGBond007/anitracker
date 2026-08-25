@@ -41,8 +41,14 @@ After the release commit reaches `main`:
 
 ```bash
 git tag -s vX.Y.Z -m "AniTracker X.Y.Z"
-git push origin vX.Y.Z
+git push github vX.Y.Z
+git push gitlab vX.Y.Z
 ```
+
+The remotes are named for the host they point at rather than one of them being
+`origin`, because this project is published to both and "origin" answered the
+question ambiguously. A version tag is what triggers the container image build on
+each host, so a tag pushed to only one of them publishes an image on only one.
 
 Create a GitHub release from the tag. Use the corresponding changelog section as the release notes
 and explicitly call out breaking changes, required operator actions, migrations, and security
