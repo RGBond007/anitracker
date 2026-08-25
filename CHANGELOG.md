@@ -6,10 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.1.0] — 2026-08-25
+## [2.1.1] — 2026-08-25
 
 Adds shelves, discovery and direct recommendations between friends, and closes a
 privacy hole in the existing social surfaces.
+
+> **2.1.0 was tagged from an incomplete commit and never released.** Its tag and
+> the images built from it contain only the progress-ledger work and report their
+> version as 2.0.1. Nothing was published under it; 2.1.1 is the first release of
+> everything below. If you pulled `2.1.0` or `latest` on 2026-08-25, upgrade.
 
 > **Upgrading from 2.0.1 runs three migrations (`0009`, `0010`, `0011`).** All three
 > only add tables and one column; nothing existing is altered or backfilled, and no
@@ -210,8 +215,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.1.0...HEAD
-[2.1.0]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.0
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.1
 [2.0.1]: https://github.com/RGBond007/anitracker/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/RGBond007/anitracker/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/RGBond007/anitracker/releases/tag/v1.0.0

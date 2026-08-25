@@ -2,9 +2,15 @@ export function DemoBanner() {
   if (import.meta.env.VITE_DEMO !== "true") return null;
 
   const reset = () => {
+    // Every key the demo writes. A reset that leaves one behind is worse than no
+    // reset: the visitor gets a fresh library still carrying the last person's
+    // shelves. Keep this in step with the KEY constants in mockApi.ts.
     localStorage.removeItem("anitracker-real-demo-library-v1");
     localStorage.removeItem("anitracker-real-demo-library-v2");
     localStorage.removeItem("anitracker-real-demo-user-v1");
+    localStorage.removeItem("anitracker-real-demo-shelves-v1");
+    localStorage.removeItem("anitracker-real-demo-recommendations-v1");
+    localStorage.removeItem("anitrack-discovery-dismissed");
     window.location.assign(`${import.meta.env.BASE_URL}`);
   };
 

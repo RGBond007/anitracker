@@ -103,6 +103,37 @@ own. In search, a show collapses to one card, and you choose which season or rel
 </tr>
 </table>
 
+### Shelves, and what to watch next
+
+A shelf is a collection you arrange by hand, kept independent of status so finishing something
+never moves it off one. Search, opened without a query, answers from your own library instead of a
+popularity chart — and every row says why it is there.
+
+<table>
+<tr>
+<td width="50%"><img src="frontend/screenshots/shelves.png" alt="A shelf named Comfort shows with a one-line description, three titles in a hand-arranged order, and controls to move each one earlier or later"></td>
+<td width="50%"><img src="frontend/screenshots/discovery.png" alt="The search page before anything is typed, showing rows headed Pick up where you stopped and Because you liked something similar, each poster captioned with the reason it appeared"></td>
+</tr>
+<tr>
+<td align="center"><em>A shelf, in the order its owner arranged</em></td>
+<td align="center"><em>Discovery that explains itself, drawn from your own backlog</em></td>
+</tr>
+</table>
+
+### Friends, without a timeline
+
+Someone hands you a title and says why. You can view it, dismiss it, or add it — adding puts it on
+your plan-to-watch list and marks nothing as watched.
+
+<table>
+<tr>
+<td width="100%"><img src="frontend/screenshots/friends.png" alt="A friends page with a card reading Mika sent you this, the title Mob Psycho 100, a short spoiler-free message, and Add to my list, View and Dismiss buttons"></td>
+</tr>
+<tr>
+<td align="center"><em>A recommendation from a friend, with the reason it arrived</em></td>
+</tr>
+</table>
+
 ---
 
 ## Features
@@ -118,12 +149,34 @@ own. In search, a show collapses to one card, and you choose which season or rel
   on by itself.
 - **Five list statuses** — watching/reading, completed, on hold, dropped, plan to watch/read —
   with score (0–10), progress, start/finish dates, rewatch count and notes.
+- **Shelves.** Named, ordered collections that sit *alongside* the statuses rather than inside
+  them, so a show you finished two years ago can still live on "Comfort shows". A shelf is a name,
+  an optional description and a running order you arrange by hand. Nothing is seeded: "Favorites"
+  and the rest are names offered when you make one, never rows written into your account.
+- **Discovery from your own backlog.** When you open search without a title in mind, AniTracker
+  offers what you already own: something you left on hold, a title sharing genres with one you
+  rated 9+, a complete story under thirteen episodes, a genre you rarely watch, something
+  untouched for months. Every row states *why* it appeared — "Because you rated Frieren 9/10",
+  "12 episodes · already on your watchlist" — and anything you wave away stays away.
+- **Recommendations between friends.** Hand a title to one or more friends with a short
+  spoiler-free note. They can view it, dismiss it, or add it — adding lands in *plan to watch* and
+  never marks anything as watched. Removing a friend takes the recommendations with it, both ways.
 - **A dashboard** with what you're partway through, plus counts per status, mean score,
-  episodes watched and a days-watched estimate.
+  episodes watched and a days-watched estimate — and a short recap of the month with two or three
+  things worth opening next, each labelled with the reason it came up.
+- **Progress you can see.** A season is drawn as one notch per episode rather than a percentage,
+  so logging one fills a whole cell, and the count is read back in words at the points that
+  matter: first episode, halfway, a cour done, finale next.
 - **An airing schedule** for the week, flagging the shows you've fallen behind on.
 - **Friends, if you want them** — friend requests, a feed of what they've been watching, a
   side-by-side score comparison and a household leaderboard. Lists are private to accepted friends
-  until you opt into a public profile.
+  until you opt into a public profile. A title's own page shows which friends have it, where they
+  are with it and how their score compares with yours; finishing something can be met with one of
+  five fixed reactions. There are no comment threads and nothing is counted or ranked. Notes are
+  never shared — they are the one field that can spoil a story, so no social surface carries them.
+- **Shelves you choose to show.** A shelf is private working space until you tick a box, and even
+  then only people already allowed to see your list can see it. No links, no audiences, no
+  per-person permissions.
 - **Cover art, synopses and titles cached locally** for 7 days, so browsing your list never
   touches an external API.
 - **Title language per user** — Romaji, English or Native — independent of the interface language.

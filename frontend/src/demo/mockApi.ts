@@ -166,7 +166,9 @@ const instance: Instance = {
   accent_color: "#d4af37",
   setup_complete: true,
   allow_signup: false,
-  version: "2.0.1-demo",
+  // Read from the bundle rather than hardcoded, so the demo footer cannot drift
+  // from the release the way it did between 2.0.1 and 2.1.0.
+  version: `${__APP_VERSION__}-demo`,
   license: "AGPL-3.0-only",
 };
 
