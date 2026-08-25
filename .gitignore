@@ -17,6 +17,8 @@ docker/data/
 # Per-machine compose tweaks — e.g. running a locally built image instead of the
 # published one. Compose reads this automatically; it must never be committed.
 docker-compose.override.yml
+# Running the browser-local demo on your own box. Convenience, not something the
+docker-compose.demo.yml
 
 # OS / editors
 .DS_Store
