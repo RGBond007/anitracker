@@ -6,6 +6,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] — 2026-08-25
+
+Adds shelves, discovery and direct recommendations between friends, and closes a
+privacy hole in the existing social surfaces.
+
+> **Upgrading from 2.0.1 runs three migrations (`0009`, `0010`, `0011`).** All three
+> only add tables and one column; nothing existing is altered or backfilled, and no
+> account changes behaviour until someone uses the new features. Shelf sharing
+> defaults to off for every existing shelf.
+
+### Security
+- **Private notes no longer reach other people.** The friend feed, profiles, score
+  comparisons and "friends watching" all sent the full entry, including its `notes` —
+  the one field on an entry that is working text and can spoil a story. Every social
+  surface now sends a `PublicEntryOut` that has no `notes` field at all, so a future
+  surface cannot reintroduce the leak by forgetting. Covered by `tests/test_privacy.py`.
+
+### Added
+- **Shelves.** Named, ordered collections that sit alongside the status lists and are
+  deliberately independent of them: a title finished two years ago can still live on
+  "Comfort shows". A shelf is a name, an optional description and an ordered set of
+  entries. No shelves are seeded — "Favorites" and the rest are names the client
+  offers when you create one, never rows written into an account. `GET/POST /api/shelves`,
+  `PATCH/DELETE /api/shelves/{id}`, `POST/DELETE /api/shelves/{id}/items`, and
+  `PUT /api/shelves/{id}/order`, which takes the whole running order.
+- **Discovery.** Six rows in the search idle state, each a rule over your own library
+  and each carrying the reason it surfaced: something on hold, a title sharing genres
+  with one you rated 9+, a complete story under thirteen episodes, a short show already
+  on your list, a genre you rarely watch, and something untouched for months. Nothing
+  is predicted or blended. Suggestions are dismissible and stay dismissed.
+- **Recommendations between friends.** Hand a tracked or untracked title to one or
+  more friends with an optional 280-character message. The recipient can view, dismiss,
+  or add it — adding lands in "Plan to watch" after a confirmation and never marks
+  anything as watched. Duplicate pending recommendations are skipped rather than
+  refused, so sending to five friends still reaches the four who do not have it.
+  Provider ids are resolved server-side before a row is written.
+- **Small social moments.** Which friends have a title, with their status, score and
+  the difference against yours; five fixed completion reactions with no free text, no
+  counts and no ranking; and shelves an owner has explicitly chosen to show on their
+  profile.
+- **The progress ledger.** A season is drawn as one notch per episode rather than a
+  percentage bar, so logging one episode fills a whole cell. Milestones — first
+  episode, halfway, a cour done, finale next — are read off the count and stated in a
+  line, never stored.
+- **A frontend test runner.** `npm test` in `frontend/`, running in CI on both hosts.
+
+### Fixed
+- **The header logo disappeared on instances named "AniTrack".** The header and the
+  login screen each carried their own copy of the built-in-brand rule and the header's
+  compared the same string twice, so one screen showed the logo and the other a blank
+  square. Both now call `usesBuiltInBrand` from `frontend/src/lib/brand.ts`, and a
+  test fails if any component re-implements the comparison inline.
+- **A custom logo that fails to load falls back to the bundled icon** instead of
+  leaving an empty space in the header.
+- **Gold text is legible in light mode.** `--stamp-text` was 1.7:1 against paper,
+  which was survivable while every use was a hover state and is not once a label
+  simply sits there.
+- **The test harness enforces foreign keys.** SQLite ignores them unless asked, so
+  every `ondelete=CASCADE` in the models silently did nothing under pytest while
+  Postgres enforced them in production.
+
 ## [2.0.1] — 2026-08-24
 
 Adds profile pictures, friend recommendations and genre-aware search, and ships
@@ -149,7 +210,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/RGBond007/anitracker/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/RGBond007/anitracker/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/RGBond007/anitracker/releases/tag/v1.0.0
