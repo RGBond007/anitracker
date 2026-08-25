@@ -59,6 +59,16 @@ export interface Entry {
   media: Media;
 }
 
+/**
+ * Someone else's entry, as the server actually sends it on social surfaces.
+ *
+ * `notes` is absent here because it is absent on the wire: notes are private
+ * working text and the one field that can spoil something, so the server strips
+ * them from the feed, profiles, comparisons and friends-watching. Typing those as
+ * a full `Entry` claimed a field that never arrives.
+ */
+export type PublicEntry = Omit<Entry, "notes">;
+
 /** What a member of a series is. Only a `season` carries a season number. */
 export type SeasonKind = "season" | "movie" | "ova" | "special" | "other";
 
@@ -143,7 +153,7 @@ export interface PublicUser {
 /** One friend and the thing they are part-way through. */
 export interface WatchingItem {
   user: PublicUser;
-  entry: Entry;
+  entry: PublicEntry;
 }
 
 /**
@@ -197,13 +207,13 @@ export interface Profile {
   visible: boolean;
   anime: TypeStats;
   manga: TypeStats;
-  entries: Entry[];
+  entries: PublicEntry[];
 }
 
 export interface ComparisonRow {
   media: Media;
   mine: Entry | null;
-  theirs: Entry | null;
+  theirs: PublicEntry | null;
 }
 
 export interface Comparison {
@@ -217,7 +227,7 @@ export interface Comparison {
 
 export interface FeedItem {
   user: PublicUser;
-  entry: Entry;
+  entry: PublicEntry;
 }
 
 export interface AiringEpisode {
@@ -258,6 +268,78 @@ export interface Dashboard {
   manga: TypeStats;
   in_progress: Entry[];
   recently_updated: Entry[];
+}
+
+/**
+ * A named collection, deliberately independent of status: a title finished years
+ * ago can still sit on "Comfort shows". `items` is present only on the single-shelf
+ * endpoint — the index sends `item_count` instead so opening the library does not
+ * pull every shelf's artwork with it.
+ */
+/**
+ * A title one friend handed another, with an optional line about why.
+ *
+ * Distinct from `Recommendations`, which is the *computed* kind inferred from what
+ * friends scored highly. This one was chosen by a person, and `sender` is the
+ * answer to "why am I seeing this".
+ */
+export interface FriendRecommendation {
+  id: number;
+  sender: PublicUser;
+  recipient: PublicUser;
+  provider: string;
+  provider_id: string;
+  media_type: MediaType;
+  message: string | null;
+  state: "pending" | "viewed" | "accepted" | "dismissed";
+  created_at: string;
+  /** Null when the instance has never cached the title; the client then fetches it. */
+  media: Media | null;
+}
+
+export type Reaction = "clapped" | "same" | "queued" | "envious" | "crying";
+
+export interface FriendOnTitle {
+  user: PublicUser;
+  status: EntryStatus;
+  score: number | null;
+  progress: number;
+}
+
+export interface TitleFriends {
+  friends: FriendOnTitle[];
+  my_score: number | null;
+}
+
+export interface ReactionSummary {
+  entry_id: number;
+  reactions: { user: PublicUser; kind: Reaction; created_at: string }[];
+  mine: Reaction | null;
+}
+
+export interface SendRecommendationResult {
+  sent: FriendRecommendation[];
+  already_pending: number[];
+}
+
+export interface Shelf {
+  id: number;
+  name: string;
+  description: string | null;
+  position: number;
+  /** False unless the owner shared it. Nothing infers this. */
+  is_shared: boolean;
+  items: ShelfItem[] | null;
+  /** Membership without the covers — what the index sends so a toggle can tick. */
+  entry_ids: number[];
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShelfItem {
+  entry: Entry;
+  position: number;
 }
 
 export interface ImportJob {
@@ -400,6 +482,50 @@ export const api = {
   deleteEntry: (id: number) => request<void>(`/entries/${id}`, { method: "DELETE" }),
 
   dashboard: () => request<Dashboard>("/dashboard"),
+
+  recommendInbox: () => request<FriendRecommendation[]>("/recommendations/inbox"),
+  recommendSent: () => request<FriendRecommendation[]>("/recommendations/sent"),
+  recommendSend: (input: {
+    provider: string;
+    provider_id: string;
+    media_type: MediaType;
+    recipient_ids: number[];
+    message?: string | null;
+  }) => request<SendRecommendationResult>("/recommendations", { method: "POST", body: body(input) }),
+  recommendSetState: (id: number, state: "viewed" | "accepted" | "dismissed") =>
+    request<FriendRecommendation>(`/recommendations/${id}`, {
+      method: "PATCH",
+      body: body({ state }),
+    }),
+  recommendedBy: (provider: string, providerId: string) =>
+    request<PublicUser[]>(`/recommendations/for/${provider}/${encodeURIComponent(providerId)}`),
+
+  friendsOnTitle: (provider: string, providerId: string) =>
+    request<TitleFriends>(`/media/${provider}/${encodeURIComponent(providerId)}/friends`),
+  reactions: (entryId: number) => request<ReactionSummary>(`/entries/${entryId}/reactions`),
+  react: (entryId: number, kind: Reaction) =>
+    request<ReactionSummary>(`/entries/${entryId}/reactions`, {
+      method: "PUT",
+      body: body({ kind }),
+    }),
+  unreact: (entryId: number) =>
+    request<ReactionSummary>(`/entries/${entryId}/reactions`, { method: "DELETE" }),
+  sharedShelves: (username: string) =>
+    request<Shelf[]>(`/users/${encodeURIComponent(username)}/shelves`),
+
+  shelves: () => request<Shelf[]>("/shelves"),
+  shelf: (id: number) => request<Shelf>(`/shelves/${id}`),
+  createShelf: (input: { name: string; description?: string | null }) =>
+    request<Shelf>("/shelves", { method: "POST", body: body(input) }),
+  updateShelf: (id: number, patch: Record<string, unknown>) =>
+    request<Shelf>(`/shelves/${id}`, { method: "PATCH", body: body(patch) }),
+  deleteShelf: (id: number) => request<void>(`/shelves/${id}`, { method: "DELETE" }),
+  addToShelf: (id: number, entryId: number) =>
+    request<Shelf>(`/shelves/${id}/items`, { method: "POST", body: body({ entry_id: entryId }) }),
+  removeFromShelf: (id: number, entryId: number) =>
+    request<void>(`/shelves/${id}/items/${entryId}`, { method: "DELETE" }),
+  reorderShelf: (id: number, entryIds: number[]) =>
+    request<Shelf>(`/shelves/${id}/order`, { method: "PUT", body: body({ entry_ids: entryIds }) }),
 
   importMal: (file: File) => {
     const form = new FormData();

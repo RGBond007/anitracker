@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import type { Entry, Media, TitleLanguage } from "../../lib/api-client";
+import type { Media, PublicEntry, TitleLanguage } from "../../lib/api-client";
 import { cx } from "../../lib/cx";
 import { displayTitle } from "../../lib/titles";
 import { CoverImage } from "./CoverImage";
@@ -24,7 +24,8 @@ export function Poster({
 }: {
   media: Media;
   lang: TitleLanguage;
-  entry?: Entry;
+  /** Either shape: this only reads `progress`, which both carry. */
+  entry?: PublicEntry;
   /** Caption's second line. Defaults to the progress fraction when tracked. */
   meta?: string;
 }) {

@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "build:demo": "tsc -b && vite build --config vite.demo.config.ts",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
@@ -34,6 +35,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^4.1.11"
   }
 }

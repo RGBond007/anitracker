@@ -13,6 +13,7 @@ import {
 } from "../../features/social/useSocial";
 import { useMe } from "../../features/auth/useAuth";
 import { useUiStore } from "../../stores/uiStore";
+import { RecommendationInbox } from "./Inbox";
 import { Button } from "../../components/ui/Button";
 import { Icon, ICONS } from "../../components/ui/Icon";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
@@ -205,6 +206,10 @@ export function FriendsPage() {
           {me?.profile_public ? t("friends.visibleEveryone") : t("friends.visibleFriends")}
         </p>
       </div>
+
+      {/* Above everything below it: a friend chose these deliberately, while the
+          rows further down are inferred from what friends happen to have scored. */}
+      <RecommendationInbox lang={lang} />
 
       {/* Requests first: they are the only thing on this page waiting on you. */}
       <RequestList title={t("friends.incoming")} rows={data.incoming} incoming />

@@ -16,6 +16,7 @@ import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { PosterGridSkeleton, Skeleton } from "../../components/ui/Skeleton";
 import { displayTitle } from "../../lib/titles";
 import { Avatar } from "../../components/ui/Avatar";
+import { SharedShelves } from "./SharedShelves";
 
 /**
  * Score agreement, one row per shared title. A dash on either side means that
@@ -160,6 +161,10 @@ export function ProfilePage() {
               </PosterGrid>
             </section>
           )}
+
+          {/* Above the full library: these are the ones they chose to show, which
+              says more about them than the whole list does. */}
+          <SharedShelves username={p.user.username} />
 
           <section>
             <SectionHead>{t("profile.theirLibrary", { name: p.user.username })}</SectionHead>

@@ -49,6 +49,11 @@
 [data-theme="light"] {
   --bg: var(--paper);
   --surface: #ffffff;
+  /* The gold that reads on ink is 1.7:1 on paper — invisible. Every use of it used
+     to be a hover state, where that was survivable; a label that simply sits there
+     is not. Darkened for light mode only, which clears AA on both the page and a
+     card (5.1:1 and 6.0:1) and keeps `--stamp` itself for fills and rules. */
+  --stamp-text: #7a5f14;
   --line: #ded7c8;
   --text: var(--ink-950);
   --text-dim: var(--paper-faint);

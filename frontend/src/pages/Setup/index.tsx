@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { DEFAULT_INSTANCE_NAME } from "../../lib/brand";
 
 import type { TitleLanguage } from "../../lib/api-client";
 import { useSetup } from "../../features/auth/useAuth";
@@ -52,7 +53,7 @@ export function SetupPage() {
       email: "",
       username: "",
       password: "",
-      instance_name: "AniTracker",
+      instance_name: DEFAULT_INSTANCE_NAME,
       accent_color: "#C9A227",
       title_language: "romaji",
       ui_language: i18n.language,

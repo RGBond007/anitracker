@@ -47,6 +47,30 @@ class TitleLanguage(enum.StrEnum):
     native = "native"
 
 
+class Reaction(enum.StrEnum):
+    """
+    The fixed vocabulary of a completion reaction.
+
+    A closed set rather than free text, deliberately. An open comment box on someone
+    else's finished show is a moderation surface, a spoiler surface and an argument
+    surface all at once; five words that all mean "I saw that you finished this" are
+    none of those things.
+    """
+
+    clapped = "clapped"
+    same = "same"
+    queued = "queued"
+    envious = "envious"
+    crying = "crying"
+
+
+class RecommendationState(enum.StrEnum):
+    pending = "pending"
+    viewed = "viewed"
+    accepted = "accepted"
+    dismissed = "dismissed"
+
+
 class FriendshipState(enum.StrEnum):
     pending = "pending"
     accepted = "accepted"
@@ -231,6 +255,87 @@ class Friendship(Base):
     addressee: Mapped[User] = relationship(foreign_keys=[addressee_id])
 
 
+class FriendRecommendation(Base):
+    """
+    One friend handing another a title, with a line about why.
+
+    Named `FriendRecommendation` rather than `Recommendation` because the app
+    already has one of those: `schemas.Recommendation` is the *computed* kind, a
+    title inferred from what friends scored highly. This is the opposite -- nothing
+    is inferred, someone chose it and said so -- and letting the two share a name
+    would make every import a question.
+
+    It stores the provider coordinates rather than a `media_cache_id` because the
+    sender's instance may hold a title the recipient's library has never cached;
+    resolution happens when they accept, through the same path adding any title
+    takes. That also keeps this table out of the way of cache eviction.
+
+    Privacy is not a column. A recommendation is readable by exactly two accounts,
+    and access is checked against the *current* friendship every time it is read --
+    so unfriending someone takes their recommendations away in both directions
+    without touching a row. Storing a "was a friend then" snapshot would be the
+    wrong answer to the question the reader is actually asking.
+    """
+
+    __tablename__ = "friend_recommendations"
+    __table_args__ = (
+        CheckConstraint("sender_id <> recipient_id", name="ck_recommendation_not_self"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    recipient_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    provider: Mapped[str] = mapped_column(String(32))
+    provider_id: Mapped[str] = mapped_column(String(64), index=True)
+    media_type: Mapped[MediaType] = mapped_column(Enum(MediaType, name="media_type"))
+    #: Capped in the schema as well; the column is the backstop, not the rule.
+    message: Mapped[str | None] = mapped_column(String(280))
+    state: Mapped[RecommendationState] = mapped_column(
+        Enum(RecommendationState, name="recommendation_state"),
+        default=RecommendationState.pending,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    sender: Mapped[User] = relationship(foreign_keys=[sender_id])
+    recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])
+
+
+class EntryReaction(Base):
+    """
+    One friend's reaction to another finishing something.
+
+    Points at the *entry* rather than the title, because the thing being reacted to
+    is the event -- "you finished this" -- and not the show. One reaction per person
+    per entry: this is an acknowledgement, not a tally, and letting someone stack
+    five of them would turn it into a score.
+
+    There is no reaction count on a profile and no ranking anywhere. The feature is
+    a small social moment, and the moment it becomes a number people compete on it
+    has become the thing this app is explicitly not.
+    """
+
+    __tablename__ = "entry_reactions"
+    __table_args__ = (UniqueConstraint("entry_id", "user_id", name="uq_reaction_entry_user"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    entry_id: Mapped[int] = mapped_column(
+        ForeignKey("list_entries.id", ondelete="CASCADE"), index=True
+    )
+    #: Who reacted. Cascades, so a deleted account takes its reactions with it.
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[Reaction] = mapped_column(Enum(Reaction, name="reaction"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    entry: Mapped[ListEntry] = relationship()
+    user: Mapped[User] = relationship()
+
+
 class FranchiseSelection(Base):
     """
     Which season of a series the user considers themselves to be on.
@@ -260,6 +365,76 @@ class FranchiseSelection(Base):
     )
 
     media: Mapped[MediaCache] = relationship()
+
+
+class Shelf(Base):
+    """
+    A named collection of entries, kept deliberately independent of status.
+
+    Status answers "where am I with this" and has exactly one value; a shelf answers
+    "what kind of thing is this to me" and has as many as the user likes. Keeping
+    them apart is the whole point: a title finished two years ago still belongs on
+    "Comfort shows", and putting that on the status enum would mean choosing between
+    the two facts.
+
+    There are no built-in shelves. "Favorites" and the rest are names the client
+    offers when someone creates one, not rows seeded into every account -- a shelf
+    nobody asked for is a shelf nobody curates, and an empty "Best soundtracks" on
+    a fresh install says the app expects something of you.
+
+    Ordering is explicit rather than by date added: a shelf is a running order the
+    owner arranges, which is what separates it from a filter over the list.
+    """
+
+    __tablename__ = "shelves"
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_shelf_user_name"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(64))
+    description: Mapped[str | None] = mapped_column(String(280))
+    #: Where the shelf sits among the user's own shelves, ascending.
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    #: Visible on the owner's profile to people who may see their list. Defaults to
+    #: false and every existing shelf keeps that: a shelf is private working space
+    #: until its owner says otherwise, and no upgrade may publish one for them.
+    is_shared: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    items: Mapped[list["ShelfItem"]] = relationship(
+        back_populates="shelf",
+        cascade="all, delete-orphan",
+        order_by="ShelfItem.position",
+    )
+
+
+class ShelfItem(Base):
+    """
+    One entry's place on one shelf.
+
+    It points at a `ListEntry` rather than at a `MediaCache` row so a shelf can only
+    ever hold things the user actually tracks, and so removing a title from the
+    library takes it off every shelf by cascade instead of leaving a dangling name.
+    """
+
+    __tablename__ = "shelf_items"
+    __table_args__ = (UniqueConstraint("shelf_id", "list_entry_id", name="uq_shelf_item"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    shelf_id: Mapped[int] = mapped_column(ForeignKey("shelves.id", ondelete="CASCADE"), index=True)
+    list_entry_id: Mapped[int] = mapped_column(
+        ForeignKey("list_entries.id", ondelete="CASCADE"), index=True
+    )
+    #: Position within the shelf, ascending. Gaps are fine; the API rewrites the
+    #: whole run on reorder rather than trying to shuffle neighbours.
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    shelf: Mapped[Shelf] = relationship(back_populates="items")
+    entry: Mapped[ListEntry] = relationship()
 
 
 class TitleOverride(Base):

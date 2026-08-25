@@ -8,6 +8,8 @@ from app.models import (
     FriendshipState,
     ImportState,
     MediaType,
+    Reaction,
+    RecommendationState,
     Role,
     TitleLanguage,
 )
@@ -184,6 +186,80 @@ class EntryOut(ORM):
     media: MediaOut
 
 
+class PublicEntryOut(ORM):
+    """
+    Someone else's entry, as other people are allowed to see it.
+
+    `notes` is absent, and its absence is the entire reason this class exists.
+    Notes are where a person writes "the mentor dies in 19" -- they are private
+    working text, and shipping them through the feed made friend activity both a
+    spoiler vector and a quiet leak of something never meant to be shared.
+
+    Everything else stays: a score, a progress count and a status are the facts a
+    friend is looking at, and none of them says what happens.
+    """
+
+    id: int
+    status: EntryStatus
+    score: int | None
+    progress: int
+    rewatch_count: int
+    start_date: date | None
+    finish_date: date | None
+    updated_at: datetime
+    media: MediaOut
+
+
+# --- Shelves ---
+
+
+class ShelfItemOut(ORM):
+    entry: EntryOut
+    position: int
+
+
+class ShelfOut(ORM):
+    id: int
+    name: str
+    description: str | None
+    position: int
+    #: False unless the owner has said otherwise. See `Shelf.is_shared`.
+    is_shared: bool = False
+    #: Present on the single-shelf endpoint; the index leaves it out and sends
+    #: `item_count` instead, so opening the library does not drag every shelf's
+    #: entries along with it.
+    items: list[ShelfItemOut] | None = None
+    #: Membership without the artwork. The index needs to answer "is this title on
+    #: this shelf" for the toggle in the entry menu, and sending ids costs a list of
+    #: integers where sending `items` would cost every cover on every shelf.
+    entry_ids: list[int] = []
+    item_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+
+class ShelfCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=64)
+    description: str | None = Field(default=None, max_length=280)
+
+
+class ShelfUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=64)
+    description: str | None = Field(default=None, max_length=280)
+    position: int | None = Field(default=None, ge=0)
+    is_shared: bool | None = None
+
+
+class ShelfItemIn(BaseModel):
+    entry_id: int
+
+
+class ShelfReorder(BaseModel):
+    """The shelf's whole running order, as entry ids. Anything omitted is removed."""
+
+    entry_ids: list[int] = Field(max_length=1000)
+
+
 # --- Dashboard ---
 
 
@@ -288,13 +364,14 @@ class ProfileOut(BaseModel):
     visible: bool
     anime: TypeStats
     manga: TypeStats
-    entries: list[EntryOut]
+    entries: list[PublicEntryOut]
 
 
 class ComparisonRow(BaseModel):
     media: MediaOut
+    #: The viewer's own row keeps its notes; the other person's never had them.
     mine: EntryOut | None
-    theirs: EntryOut | None
+    theirs: PublicEntryOut | None
 
 
 class ComparisonOut(BaseModel):
@@ -308,7 +385,7 @@ class ComparisonOut(BaseModel):
 
 class FeedItem(BaseModel):
     user: PublicUser
-    entry: EntryOut
+    entry: PublicEntryOut
 
 
 class WatchingItem(BaseModel):
@@ -320,7 +397,7 @@ class WatchingItem(BaseModel):
     """
 
     user: PublicUser
-    entry: EntryOut
+    entry: PublicEntryOut
 
 
 class Recommendation(BaseModel):
@@ -372,6 +449,101 @@ class LeaderboardRow(BaseModel):
 
 class LeaderboardOut(BaseModel):
     rows: list[LeaderboardRow]
+
+
+# --- Recommendations between friends ---
+
+
+class FriendRecommendationCreate(BaseModel):
+    """
+    One title, one or more friends, one optional line.
+
+    The message is capped at 280 characters and stripped: it is a nudge, not a
+    review, and the column behind it is sized to match so a client that ignores
+    this cannot write something the database will not hold.
+    """
+
+    provider: str = Field(min_length=1, max_length=32)
+    provider_id: str = Field(min_length=1, max_length=64)
+    media_type: MediaType
+    recipient_ids: list[int] = Field(min_length=1, max_length=25)
+    message: str | None = Field(default=None, max_length=280)
+
+
+class FriendRecommendationOut(ORM):
+    id: int
+    #: Who sent it, so the recipient can see the answer to "why am I seeing this".
+    sender: PublicUser
+    recipient: PublicUser
+    provider: str
+    provider_id: str
+    media_type: MediaType
+    message: str | None
+    state: RecommendationState
+    created_at: datetime
+    #: The cached title, when the instance happens to hold one. Null is normal --
+    #: a friend can recommend something nobody here has looked up yet, and the
+    #: client falls back to fetching it from the provider.
+    media: MediaOut | None = None
+
+
+class RecommendationStateIn(BaseModel):
+    """Only the recipient moves a recommendation, and only along these edges."""
+
+    state: Literal["viewed", "accepted", "dismissed"]
+
+
+class SendResult(BaseModel):
+    sent: list[FriendRecommendationOut]
+    #: Recipients skipped because an identical recommendation is already waiting.
+    already_pending: list[int] = []
+
+
+# --- Small social moments ---
+
+
+class FriendOnTitle(BaseModel):
+    """
+    One friend's relationship with the title being looked at.
+
+    Exactly the three facts a comparison needs — where they are, what they gave it,
+    and whether they finished — and nothing that says what happens in it.
+    """
+
+    user: PublicUser
+    status: EntryStatus
+    score: int | None
+    progress: int
+
+
+class TitleFriends(BaseModel):
+    friends: list[FriendOnTitle] = []
+    #: The viewer's own score, so the client can draw the comparison without a
+    #: second request. Null when they have not scored it or do not track it.
+    my_score: int | None = None
+
+
+class ReactionIn(BaseModel):
+    kind: Reaction
+
+
+class ReactionOut(ORM):
+    user: PublicUser
+    kind: Reaction
+    created_at: datetime
+
+
+class ReactionSummary(BaseModel):
+    """Who reacted to a completion, and which of the five they picked."""
+
+    entry_id: int
+    reactions: list[ReactionOut] = []
+    #: The viewer's own pick, so the control can render as a toggle.
+    mine: Reaction | None = None
+
+
+class ShelfShareIn(BaseModel):
+    is_shared: bool
 
 
 # --- Seasons ---

@@ -54,6 +54,7 @@ frontend:
     - npm ci
   script:
     - npm run lint
+    - npm test
     - npm run build
 
 # Named docker-image rather than image: a top-level `image:` key is the reserved

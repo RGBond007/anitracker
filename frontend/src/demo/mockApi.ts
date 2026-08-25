@@ -6,6 +6,7 @@ import type {
   Entry,
   EntryStatus,
   FeedItem,
+  FriendRecommendation,
   Friends,
   Instance,
   LeaderboardRow,
@@ -15,11 +16,14 @@ import type {
   Recommendations,
   Season,
   Series,
+  Shelf,
   User,
 } from "../lib/api-client";
 
 const LIBRARY_KEY = "anitracker-real-demo-library-v2";
 const USER_KEY = "anitracker-real-demo-user-v1";
+const SHELVES_KEY = "anitracker-real-demo-shelves-v1";
+const RECS_KEY = "anitracker-real-demo-recommendations-v1";
 
 // These are provider-owned URLs, exactly like the cover/banner URLs returned to
 // a normal AniTracker instance. Keeping them out of the repository avoids
@@ -181,6 +185,75 @@ function writeEntries(entries: Entry[]) {
   localStorage.setItem(LIBRARY_KEY, JSON.stringify(entries));
 }
 
+/**
+ * Shelves start empty here, exactly as they do on a real instance: the point of
+ * the feature is that nobody is given a shelf they did not ask for, and seeding
+ * the demo with three would misrepresent what a fresh install looks like.
+ */
+function readShelves(): Shelf[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(SHELVES_KEY) ?? "null") as Shelf[] | null;
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeShelves(shelves: Shelf[]) {
+  localStorage.setItem(SHELVES_KEY, JSON.stringify(shelves));
+}
+
+/** The stored shape holds ids; `items` is filled in from the library on read. */
+function shelfOut(shelf: Shelf, entries: Entry[], withItems: boolean): Shelf {
+  const live = shelf.entry_ids.filter((id) => entries.some((entry) => entry.id === id));
+  return {
+    ...shelf,
+    entry_ids: live,
+    item_count: live.length,
+    items: withItems
+      ? live.map((id, position) => ({
+          entry: entries.find((entry) => entry.id === id) as Entry,
+          position,
+        }))
+      : null,
+  };
+}
+
+/**
+ * The demo ships one waiting recommendation from Mika, because an empty inbox
+ * renders nothing at all and the whole point of the demo is to show the feature.
+ * Everything after that is whatever the visitor does in their own browser.
+ */
+function seededRecommendations(): FriendRecommendation[] {
+  return [
+    {
+      id: 1,
+      sender: friend,
+      recipient: { id: 1, username: demoUser.username, profile_public: true, avatar_url: null, created_at: demoUser.created_at },
+      provider: "demo",
+      provider_id: "mob-psycho",
+      media_type: "anime",
+      message: "Twelve episodes and the animation goes somewhere else entirely. No spoilers.",
+      state: "pending",
+      created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+      media: catalogue.find((item) => item.provider_id === "mob-psycho") ?? null,
+    },
+  ];
+}
+
+function readRecommendations(): FriendRecommendation[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(RECS_KEY) ?? "null") as FriendRecommendation[] | null;
+    return Array.isArray(stored) ? stored : seededRecommendations();
+  } catch {
+    return seededRecommendations();
+  }
+}
+
+function writeRecommendations(rows: FriendRecommendation[]) {
+  localStorage.setItem(RECS_KEY, JSON.stringify(rows));
+}
+
 function readUser(): User {
   try {
     return { ...demoUser, ...JSON.parse(localStorage.getItem(USER_KEY) ?? "{}") } as User;
@@ -335,9 +408,110 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
     return json(undefined, 204);
   }
 
+  // --- Recommendations between friends ---
+  let recs = readRecommendations();
+  const recMatch = path.match(/^\/recommendations\/(\d+)$/);
+  const recFor = path.match(/^\/recommendations\/for\/([^/]+)\/([^/]+)$/);
+
+  if (path === "/recommendations/inbox" && method === "GET") {
+    return json(recs.filter((row) => row.state !== "dismissed"));
+  }
+  if (path === "/recommendations/sent" && method === "GET") return json([]);
+  if (path === "/recommendations" && method === "POST") {
+    const input = payload(init) as Record<string, unknown>;
+    const ids = (input.recipient_ids as number[]) ?? [];
+    // Mirrors the server: an id that resolves to nothing is refused before a row
+    // exists, rather than becoming a card with no title.
+    const media = catalogue.find((item) => item.provider_id === input.provider_id) ?? null;
+    if (!media) return json({ detail: "No such title" }, 404);
+    const already = recs.some(
+      (row) => row.provider_id === input.provider_id && row.state === "pending",
+    );
+    if (already) return json({ sent: [], already_pending: ids }, 201);
+    const row: FriendRecommendation = {
+      id: Math.max(0, ...recs.map((r) => r.id)) + 1,
+      sender: { id: 1, username: demoUser.username, profile_public: true, avatar_url: null, created_at: demoUser.created_at },
+      recipient: friend,
+      provider: String(input.provider ?? "demo"),
+      provider_id: String(input.provider_id ?? ""),
+      media_type: (input.media_type as "anime" | "manga") ?? "anime",
+      message: (String(input.message ?? "").trim() || null) as string | null,
+      state: "pending",
+      created_at: now(),
+      media,
+    };
+    // Sent recommendations leave this browser in a real instance; here they simply
+    // are not added to the visitor's own inbox, which is the truthful stand-in.
+    return json({ sent: [row], already_pending: [] }, 201);
+  }
+  if (recMatch && method === "PATCH") {
+    const row = recs.find((item) => item.id === Number(recMatch[1]));
+    if (!row) return json({ detail: "Recommendation not found" }, 404);
+    row.state = (payload(init).state as FriendRecommendation["state"]) ?? row.state;
+    writeRecommendations(recs);
+    return json(row);
+  }
+  if (recFor && method === "GET") {
+    return json(
+      recs
+        .filter((row) => row.provider_id === decodeURIComponent(recFor[2]) && row.state !== "dismissed")
+        .map((row) => row.sender),
+    );
+  }
+
+  // --- Small social moments ---
+  const onTitle = path.match(/^\/media\/([^/]+)\/([^/]+)\/friends$/);
+  const reactions = path.match(/^\/entries\/(\d+)\/reactions$/);
+  const sharedShelves = path.match(/^\/users\/([^/]+)\/shelves$/);
+
+  if (onTitle && method === "GET") {
+    const providerId = decodeURIComponent(onTitle[2]);
+    const media = catalogue.find((item) => item.provider_id === providerId);
+    const own = entries.find((entry) => entry.media.provider_id === providerId);
+    // Mika has an opinion on a handful of titles, so the comparison has something
+    // to compare. Everything else honestly returns nobody.
+    const hers: Record<string, { status: EntryStatus; score: number | null; progress: number }> = {
+      frieren: { status: "completed", score: 10, progress: 28 },
+      "vinland-saga": { status: "current", score: 8, progress: 12 },
+      "mob-psycho": { status: "completed", score: 9, progress: 12 },
+    };
+    const her = media ? hers[providerId] : undefined;
+    return json({
+      friends: her ? [{ user: friend, ...her }] : [],
+      my_score: own?.score ?? null,
+    });
+  }
+  if (reactions && method === "GET") {
+    return json({ entry_id: Number(reactions[1]), reactions: [], mine: null });
+  }
+  if (reactions && (method === "PUT" || method === "DELETE")) {
+    const kind = method === "PUT" ? (payload(init).kind as string) : null;
+    return json({
+      entry_id: Number(reactions[1]),
+      reactions: kind ? [{ user: { id: 1, username: demoUser.username, profile_public: true, avatar_url: null, created_at: demoUser.created_at }, kind, created_at: now() }] : [],
+      mine: kind,
+    });
+  }
+  if (sharedShelves && method === "GET") {
+    const who = decodeURIComponent(sharedShelves[1]);
+    if (who === demoUser.username) {
+      return json(readShelves().filter((shelf) => shelf.is_shared).map((shelf) => shelfOut(shelf, entries, false)));
+    }
+    // Mika shares one, so a profile has something to show.
+    return json([
+      {
+        id: 900, name: "Comfort rewatches", description: "The ones that always work.",
+        position: 0, is_shared: true, items: null, entry_ids: [], item_count: 6,
+        created_at: now(), updated_at: now(),
+      },
+    ]);
+  }
+
   if (path === "/dashboard") return json(dashboard(entries));
   if (path === "/schedule") return json([] satisfies AiringEpisode[]);
-  if (path === "/feed") return json([{ user: friend, entry: makeEntry(90, "mob-psycho", "current", 6, 9) }] satisfies FeedItem[]);
+  // Completed rather than mid-watch: completion reactions only appear on a finish,
+  // and a demo feed with nothing finished would never show them.
+  if (path === "/feed") return json([{ user: friend, entry: makeEntry(90, "mob-psycho", "completed", 12, 9) }] satisfies FeedItem[]);
   if (path === "/friends") return json({ friends: [{ id: 1, user: friend, state: "accepted", stats: { tracked: 42, mean_score: 8.4, in_common: 3 }, direction: "outgoing", created_at: "2026-07-01T10:00:00Z" }], incoming: [], outgoing: [] } satisfies Friends);
   if (path === "/friends/watching") return json([{ user: friend, entry: makeEntry(91, "eizouken", "current", 4, 8) }]);
   if (path === "/recommendations") return json({ featured: null, because: catalogue[0], personal: [] } satisfies Recommendations);
@@ -348,6 +522,98 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
   if (path === "/users/Mika/compare") return json({ user: friend, shared: [], only_theirs: [], both_scored: 0, mean_difference: null } satisfies Comparison);
   if (path === "/admin/users") return json([readUser()]);
   if (path === "/import/jobs") return json([]);
+
+  // --- Shelves ---
+  let shelves = readShelves();
+  const shelfMatch = path.match(/^\/shelves\/(\d+)$/);
+  const shelfItems = path.match(/^\/shelves\/(\d+)\/items$/);
+  const shelfItem = path.match(/^\/shelves\/(\d+)\/items\/(\d+)$/);
+  const shelfOrder = path.match(/^\/shelves\/(\d+)\/order$/);
+  const find = (raw: string) => shelves.find((shelf) => shelf.id === Number(raw));
+
+  if (path === "/shelves" && method === "GET") {
+    return json(shelves.map((shelf) => shelfOut(shelf, entries, false)));
+  }
+  if (path === "/shelves" && method === "POST") {
+    const input = payload(init);
+    const name = String(input.name ?? "").trim();
+    if (!name) return json({ detail: "Name cannot be blank" }, 422);
+    if (shelves.some((shelf) => shelf.name === name)) {
+      return json({ detail: "A shelf with that name already exists" }, 409);
+    }
+    const shelf: Shelf = {
+      id: Math.max(0, ...shelves.map((item) => item.id)) + 1,
+      name,
+      description: String(input.description ?? "").trim() || null,
+      position: shelves.length,
+      is_shared: false,
+      items: null,
+      entry_ids: [],
+      item_count: 0,
+      created_at: now(),
+      updated_at: now(),
+    };
+    shelves = [...shelves, shelf];
+    writeShelves(shelves);
+    return json(shelfOut(shelf, entries, false), 201);
+  }
+  if (shelfMatch && method === "GET") {
+    const shelf = find(shelfMatch[1]);
+    return shelf ? json(shelfOut(shelf, entries, true)) : json({ detail: "Shelf not found" }, 404);
+  }
+  if (shelfMatch && method === "PATCH") {
+    const shelf = find(shelfMatch[1]);
+    if (!shelf) return json({ detail: "Shelf not found" }, 404);
+    const input = payload(init);
+    if ("name" in input) {
+      const name = String(input.name ?? "").trim();
+      if (!name) return json({ detail: "Name cannot be blank" }, 422);
+      if (shelves.some((other) => other.name === name && other.id !== shelf.id)) {
+        return json({ detail: "A shelf with that name already exists" }, 409);
+      }
+      shelf.name = name;
+    }
+    if ("description" in input) {
+      shelf.description = String(input.description ?? "").trim() || null;
+    }
+    if ("is_shared" in input) shelf.is_shared = Boolean(input.is_shared);
+    shelf.updated_at = now();
+    writeShelves(shelves);
+    return json(shelfOut(shelf, entries, false));
+  }
+  if (shelfMatch && method === "DELETE") {
+    shelves = shelves.filter((shelf) => shelf.id !== Number(shelfMatch[1]));
+    writeShelves(shelves);
+    return json(undefined, 204);
+  }
+  if (shelfItems && method === "POST") {
+    const shelf = find(shelfItems[1]);
+    if (!shelf) return json({ detail: "Shelf not found" }, 404);
+    const entryId = Number(payload(init).entry_id);
+    if (!entries.some((entry) => entry.id === entryId)) {
+      return json({ detail: "Entry not found" }, 404);
+    }
+    if (!shelf.entry_ids.includes(entryId)) shelf.entry_ids = [...shelf.entry_ids, entryId];
+    shelf.updated_at = now();
+    writeShelves(shelves);
+    return json(shelfOut(shelf, entries, true));
+  }
+  if (shelfItem && method === "DELETE") {
+    const shelf = find(shelfItem[1]);
+    if (!shelf) return json({ detail: "Shelf not found" }, 404);
+    shelf.entry_ids = shelf.entry_ids.filter((id) => id !== Number(shelfItem[2]));
+    writeShelves(shelves);
+    return json(undefined, 204);
+  }
+  if (shelfOrder && method === "PUT") {
+    const shelf = find(shelfOrder[1]);
+    if (!shelf) return json({ detail: "Shelf not found" }, 404);
+    const wanted = (payload(init).entry_ids as number[]) ?? [];
+    shelf.entry_ids = wanted.filter((id) => shelf.entry_ids.includes(id));
+    shelf.updated_at = now();
+    writeShelves(shelves);
+    return json(shelfOut(shelf, entries, true));
+  }
 
   return json({ detail: `Demo endpoint not implemented: ${method} ${path}` }, 404);
 }

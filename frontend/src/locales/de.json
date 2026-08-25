@@ -73,6 +73,29 @@
     "filter_completed": "Abgeschlossen",
     "friendActivity": "Freunde-Aktivität"
   },
+  "recap": {
+    "heading": "Als Nächstes",
+    "finished_one": "1 Titel abgeschlossen",
+    "finished_other": "{{count}} Titel abgeschlossen",
+    "started_one": "1 begonnen",
+    "started_other": "{{count}} begonnen",
+    "ongoing_one": "1 läuft gerade",
+    "ongoing_other": "{{count}} laufen gerade",
+    "kind": {
+      "finish": "Eine übrig",
+      "nextSeason": "Nächste Staffel",
+      "stale": "Stehen geblieben",
+      "rate": "Unbewertet"
+    },
+    "reason": {
+      "finish": "Eine Episode vor dem Ende",
+      "finishManga": "Ein Kapitel vor dem Ende",
+      "nextSeason": "Du hast {{name}} abgeschlossen",
+      "stale": "Episode {{progress}}, {{when}}",
+      "staleManga": "Kapitel {{progress}}, {{when}}",
+      "rate": "Abgeschlossen, ohne Bewertung"
+    }
+  },
   "search": {
     "title": "Suche",
     "label": "Anime und Manga suchen",
@@ -114,6 +137,42 @@
     "addThis": "Hinzufügen",
     "onYourList": "Auf deiner Liste"
   },
+  "discover": {
+    "dismiss": "Kein Interesse",
+    "dismissedCount_one": "1 Vorschlag ausgeblendet.",
+    "dismissedCount_other": "{{count}} Vorschläge ausgeblendet.",
+    "restore": "Wieder anzeigen",
+    "onHold": {
+      "heading": "Mach da weiter, wo du aufgehört hast",
+      "reason": "Episode {{progress}} von {{total}} · pausiert",
+      "reasonManga": "Kapitel {{progress}} von {{total}} · pausiert"
+    },
+    "becauseYouLiked": {
+      "heading": "Weil dir Ähnliches gefallen hat",
+      "reason": "Weil du {{title}} mit {{score}}/10 bewertet hast",
+      "reasonManga": "Weil du {{title}} mit {{score}}/10 bewertet hast"
+    },
+    "shortPlanned": {
+      "heading": "Kurz und schon auf deiner Liste",
+      "reason": "{{episodes}} Episoden · schon auf deiner Liste",
+      "reasonManga": "{{episodes}} Kapitel · schon auf deiner Liste"
+    },
+    "finishedShort": {
+      "heading": "Abgeschlossene Geschichten unter 13 Episoden",
+      "reason": "{{episodes}} Episoden · abgeschlossen",
+      "reasonManga": "{{episodes}} Kapitel · abgeschlossen"
+    },
+    "rareGenre": {
+      "heading": "Ein Genre, das du selten schaust",
+      "reason": "Nur {{titles}} {{genre}}-Titel in deiner Bibliothek",
+      "reasonManga": "Nur {{titles}} {{genre}}-Titel in deiner Bibliothek"
+    },
+    "forgotten": {
+      "heading": "Auf deiner Liste vergessen",
+      "reason": "Seit {{days}} Tagen unberührt",
+      "reasonManga": "Seit {{days}} Tagen unberührt"
+    }
+  },
   "mediaStatus": {
     "FINISHED": "Abgeschlossen",
     "RELEASING": "Läuft",
@@ -144,6 +203,36 @@
     "emptyCta": "Titel suchen",
     "viewList": "Kompakte Liste",
     "viewGrid": "Cover-Raster"
+  },
+  "shelf": {
+    "heading": "Regale",
+    "new": "Neues Regal",
+    "name": "Name",
+    "nameHint": "So, wie du diesen Stapel einem Freund beschreiben würdest.",
+    "description": "Beschreibung",
+    "descriptionHint": "Optional. Eine Zeile dazu, was hierher gehört.",
+    "share": "Dieses Regal auf meinem Profil zeigen",
+    "shareHint": "Nur für Leute, die deine Liste ohnehin sehen dürfen. Standardmäßig aus; jederzeit wieder abschaltbar.",
+    "createAndAdd": "Anlegen und hinzufügen",
+    "created": "{{name}} angelegt",
+    "edit": "Regal bearbeiten",
+    "save": "Regal speichern",
+    "delete": "Regal löschen",
+    "deleteTitle": "{{name}} löschen?",
+    "deleteBody": "Das Regal verschwindet; die Titel darin bleiben in deiner Bibliothek.",
+    "count_one": "{{count}} Titel",
+    "count_other": "{{count}} Titel",
+    "empty": "Noch nichts in diesem Regal. Füge Titel auf ihrer eigenen Seite hinzu.",
+    "missing": "Dieses Regal gibt es nicht mehr.",
+    "moveEarlier": "Nach vorne",
+    "moveLater": "Nach hinten",
+    "suggest": {
+      "favorites": "Favoriten",
+      "comfort": "Wohlfühlserien",
+      "withFriends": "Mit Freunden schauen",
+      "soundtracks": "Beste Soundtracks",
+      "weekend": "Wochenend-Watchlist"
+    }
   },
   "entry": {
     "edit": "Eintrag bearbeiten",
@@ -376,6 +465,52 @@
     "becauseYouLiked": "Weil dir {{title}} gefallen hat",
     "becauseHint": "Vorgeschlagen aus den Top-Bewertungen deiner Freunde, abgeglichen über gemeinsame Genres.",
     "sharedThemes": "Gemeinsam: {{genres}}"
+  },
+  "recommend": {
+    "action": "Einem Freund empfehlen",
+    "title": "Einem Freund empfehlen",
+    "message": "Nachricht",
+    "messageHint": "Optional — und bitte ohne Spoiler.",
+    "messagePlaceholder": "Warum es ihnen gefallen würde …",
+    "send_zero": "Senden",
+    "send_one": "An 1 Freund senden",
+    "send_other": "An {{count}} Freunde senden",
+    "sent_one": "An 1 Freund gesendet",
+    "sent_other": "An {{count}} Freunde gesendet",
+    "sentWithSkips_one": "An 1 Freund gesendet · {{skipped}} hatte es schon offen",
+    "sentWithSkips_other": "An {{count}} Freunde gesendet · {{skipped}} hatten es schon offen",
+    "noFriends": "Füge zuerst einen Freund hinzu, dann kannst du hier Titel weitergeben.",
+    "inbox": "Für dich empfohlen",
+    "from": "{{name}} hat dir das geschickt",
+    "fromOne": "{{name}} hat dir das empfohlen",
+    "fromMany_one": "{{name}} und 1 weitere Person haben dir das empfohlen",
+    "fromMany_other": "{{name}} und {{count}} weitere Personen haben dir das empfohlen",
+    "view": "Ansehen",
+    "addToList": "Zu meiner Liste",
+    "confirmTitle": "{{name}} zu deiner Liste hinzufügen?",
+    "confirmBody": "Der Titel landet unter „Geplant“. Es wird nichts als gesehen markiert, und du kannst das jederzeit ändern.",
+    "confirmAdd": "Zu „Geplant“ hinzufügen",
+    "added": "Auf deiner Liste",
+    "dismiss": "Ausblenden",
+    "unknownTitle": "Ein Titel von deinem Freund",
+    "shelveTitle": "{{name}} in ein Regal legen?",
+    "shelveBody": "Der Titel steht auf deiner Liste. Ein Regal ist optional.",
+    "noShelves": "Du hast noch keine Regale — leg eines über das Menü eines Titels an.",
+    "skipShelf": "Später"
+  },
+  "moments": {
+    "friendsHeading": "Freunde, die das haben",
+    "yourScore": "Du hast {{score}} gegeben",
+    "vsYou": "Im Vergleich zu deiner Wertung",
+    "same": "gleich",
+    "sharedShelves": "Regale, die {{name}} teilt",
+    "reaction": {
+      "clapped": "Gut gemacht",
+      "same": "Fand ich auch super",
+      "queued": "Kommt auf meine Liste",
+      "envious": "Wünschte, ich könnte es nochmal sehen",
+      "crying": "Dieses Ende"
+    }
   },
   "profile": {
     "notFound": "Kein Benutzer „{{name}}“.",

@@ -19,6 +19,11 @@ export const ICONS = {
   sliders: "M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4M14 4v4M6 10v4M12 16v4",
   history: "M12 8v4l3 2M3.5 12a8.5 8.5 0 1 0 2.6-6.1M6 3v3h3",
   close: "m6 6 12 12M18 6 6 18",
+  /* Two upright volumes and a third leaning — a shelf, not a stack of paper. */
+  library: "M4 4v16M9 4v16M14.5 5.5 19 19",
+  /* Paper plane, drawn as the outline plus the fold: two subpaths on the same
+     24-unit grid, so it carries the same weight as the pencil beside it. */
+  send: "M21.5 2.5 2 9.5l8 3 3 8 8.5-18ZM10 12.5l11.5-10",
   /* Three dots: zero-length segments with round caps, so they scale with the
      stroke weight instead of needing their own radius. */
   more: "M12 5h.01M12 12h.01M12 19h.01",

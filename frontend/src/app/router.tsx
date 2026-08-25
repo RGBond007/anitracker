@@ -13,6 +13,7 @@ import { LoginPage } from "../pages/Login";
 import { MediaDetailPage } from "../pages/MediaDetail";
 import { ProfilePage } from "../pages/Profile";
 import { SearchPage } from "../pages/Search";
+import { ShelfPage } from "../pages/Shelf";
 import { SettingsPage } from "../pages/Settings";
 import { SetupPage } from "../pages/Setup";
 
@@ -68,6 +69,7 @@ export function Router() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/media/:provider/:id" element={<MediaDetailPage />} />
         <Route path="/list/:status" element={<ListViewPage />} />
+        <Route path="/shelf/:id" element={<ShelfPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/u/:username" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />

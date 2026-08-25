@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import type { Entry, FeedItem, LeaderboardRow } from "../../lib/api-client";
+import type { FeedItem, LeaderboardRow, PublicEntry } from "../../lib/api-client";
 import { useDiscover, useFeed, useLeaderboard, useSendFriendRequest } from "../../features/social/useSocial";
 import { useUiStore } from "../../stores/uiStore";
 import { CoverImage } from "../../components/media/CoverImage";
@@ -20,7 +20,7 @@ import { Avatar } from "../../components/ui/Avatar";
  */
 function useActivityLine() {
   const { t } = useTranslation();
-  return (entry: Entry): string => {
+  return (entry: PublicEntry): string => {
     const total = entry.media.total_units;
     const unit = entry.media.type === "anime" ? t("feed.ep") : t("feed.ch");
     if (entry.status === "completed") return t("feed.finished");

@@ -17,9 +17,12 @@ from app.routers import (
     entries,
     imports,
     media,
+    recommendations,
     schedule,
     seasons,
+    shelves,
     social,
+    social_moments,
 )
 from app.version import VERSION
 
@@ -60,6 +63,9 @@ api.include_router(dashboard.router)
 api.include_router(social.router)
 api.include_router(schedule.router)
 api.include_router(seasons.router)
+api.include_router(recommendations.router)
+api.include_router(shelves.router)
+api.include_router(social_moments.router)
 api.include_router(imports.router)
 api.include_router(admin.router)
 

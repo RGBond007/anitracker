@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { cx } from "../../lib/cx";
 import { useFriends } from "../../features/social/useSocial";
+import { usePendingRecommendationCount } from "../../features/recommend/useRecommend";
 
 /**
  * Phone navigation. Hidden from `sm` up, where the top bar carries the links.
@@ -42,7 +43,10 @@ const ICONS = {
 export function BottomNav() {
   const { t } = useTranslation();
   const { data: friends } = useFriends();
-  const pending = friends?.incoming.length ?? 0;
+  // Both kinds of thing waiting on you, on the one nav item that leads to them:
+  // a friend request to answer and a recommendation not yet opened.
+  const waitingRecommendations = usePendingRecommendationCount();
+  const pending = (friends?.incoming.length ?? 0) + waitingRecommendations;
 
   const items = [
     { to: "/", end: true, label: t("nav.dashboard"), icon: ICONS.home, badge: 0 },

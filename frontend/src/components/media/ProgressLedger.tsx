@@ -21,11 +21,19 @@ export function ProgressLedger({
   total,
   isManga,
   className,
+  announce = false,
 }: {
   progress: number;
   total: number | null;
   isManga: boolean;
   className?: string;
+  /**
+   * Whether this ledger's caption is a live region. Off by default and on for
+   * exactly one ledger per page: a detail page draws two of them for the same
+   * number — one beside the cover, one in the viewing log — and two live regions
+   * saying "Halfway" means a screen reader says it twice for one click.
+   */
+  announce?: boolean;
 }) {
   const { t } = useTranslation();
   const pulse = useLogPulse(progress);
@@ -73,7 +81,7 @@ export function ProgressLedger({
 
       {/* Announced politely: a milestone is worth hearing, but it arrives during a
           click the user already knows the result of. */}
-      <p aria-live="polite" className="min-h-[13px]">
+      <p aria-live={announce ? "polite" : undefined} className="min-h-[13px]">
         {milestone && (
           <span
             key={`${milestone.kind}-${milestone.count ?? 0}-${pulse}`}

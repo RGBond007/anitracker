@@ -6,6 +6,7 @@ import { PosterGrid } from "../../components/layout/Rail";
 import { Poster } from "../../components/media/Poster";
 import { Icon, ICONS } from "../../components/ui/Icon";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
+import { Discovery } from "./Discovery";
 
 const ROW =
   "flex w-full items-center gap-3 py-3 text-left text-sm text-text-dim transition-colors " +
@@ -37,6 +38,10 @@ export function SearchIdleState({
 
   return (
     <div className="space-y-10">
+      {/* Above trending on purpose: what to watch next is far more often already
+          on your own list than in a global popularity chart. */}
+      <Discovery lang={lang} />
+
       {recent.length > 0 && (
         <section>
           <div className="mb-2 flex items-baseline justify-between gap-4">

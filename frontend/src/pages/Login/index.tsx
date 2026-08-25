@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { DEFAULT_INSTANCE_NAME, usesBuiltInBrand } from "../../lib/brand";
 
 import { useInstance } from "../../features/instance/useInstance";
 import { useLogin, useRegister } from "../../features/auth/useAuth";
@@ -21,9 +22,8 @@ export function LoginPage() {
 
   const pending = login.isPending || register.isPending;
   const error = login.error ?? register.error;
-  const instanceName = instance?.instance_name ?? "AniTracker";
-  const usesDefaultBrand =
-    !instance?.logo_url && (instanceName === "AniTracker" || instanceName === "AniTrack");
+  const instanceName = instance?.instance_name ?? DEFAULT_INSTANCE_NAME;
+  const usesDefaultBrand = usesBuiltInBrand(instanceName, instance?.logo_url);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

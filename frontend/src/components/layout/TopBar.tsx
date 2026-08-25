@@ -1,10 +1,14 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { useState } from "react";
+
 import { cx } from "../../lib/cx";
+import { DEFAULT_INSTANCE_NAME, usesBuiltInBrand } from "../../lib/brand";
 import { useInstance } from "../../features/instance/useInstance";
 import { useLogout, useMe } from "../../features/auth/useAuth";
 import { useFriends } from "../../features/social/useSocial";
+import { usePendingRecommendationCount } from "../../features/recommend/useRecommend";
 import { Avatar } from "../ui/Avatar";
 import { IconButton } from "../ui/Button";
 
@@ -54,11 +58,18 @@ export function TopBar() {
   // Incoming requests are the one thing in the app that waits on you, so the
   // count rides the nav rather than only existing on the page itself.
   const { data: friends } = useFriends();
-  const pending = friends?.incoming.length ?? 0;
-  const instanceName = instance?.instance_name ?? "AniTracker";
+  // Both kinds of thing waiting on you, on the one nav item that leads to them:
+  // a friend request to answer and a recommendation not yet opened.
+  const waitingRecommendations = usePendingRecommendationCount();
+  const pending = (friends?.incoming.length ?? 0) + waitingRecommendations;
+  const instanceName = instance?.instance_name ?? DEFAULT_INSTANCE_NAME;
   const publicAsset = (name: string) => `${import.meta.env.BASE_URL}${name}`;
-  const usesDefaultBrand =
-    !instance?.logo_url && (instanceName === "AniTracker" || instanceName === "AniTracker");
+  const usesDefaultBrand = usesBuiltInBrand(instanceName, instance?.logo_url);
+  // A custom logo that fails to load leaves a hole where the brand was, and the
+  // operator who set a since-deleted URL is the last person to notice. Falling
+  // back to the bundled icon keeps the header looking like something.
+  const [customLogoFailed, setCustomLogoFailed] = useState(false);
+  const customLogo = instance?.logo_url && !customLogoFailed ? instance.logo_url : null;
 
   const links = [
     { to: "/", label: t("nav.dashboard"), end: true, badge: 0 },
@@ -90,10 +101,18 @@ export function TopBar() {
                 </span>
               </span>
             </>
-          ) : instance?.logo_url ? (
-            <img src={instance.logo_url} alt="" className="h-6 w-6 rounded-[6px]" />
+          ) : customLogo ? (
+            <img
+              src={customLogo}
+              alt=""
+              className="h-6 w-6 rounded-[6px]"
+              onError={() => setCustomLogoFailed(true)}
+            />
           ) : (
-            <span aria-hidden className="h-6 w-6 rounded-[6px] bg-stamp" />
+            // Either no logo was set or the one that was set is unreachable. The
+            // bundled icon says "this is an AniTracker instance" rather than
+            // leaving a coloured square that says nothing.
+            <img src={publicAsset("icon-192.png")} alt="" className="h-6 w-6 rounded-[6px]" />
           )}
           {!usesDefaultBrand && (
             <span className="font-display text-[15px] font-bold tracking-[0.02em]">

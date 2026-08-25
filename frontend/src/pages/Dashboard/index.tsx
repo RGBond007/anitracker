@@ -13,6 +13,8 @@ import { AddPoster, Poster } from "../../components/media/Poster";
 import { FranchiseCard } from "../../components/media/FranchiseCard";
 import { groupByFranchise } from "../../lib/franchise";
 import { Hero } from "../../components/media/Hero";
+import { Reactions } from "../../components/media/Reactions";
+import { NextUp } from "../../components/media/NextUp";
 import { Schedule, useSchedule } from "../../components/media/Schedule";
 import { Button, Chip } from "../../components/ui/Button";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
@@ -69,6 +71,16 @@ export function DashboardPage() {
   );
   // Which season each show's card should represent, when its owner has said.
   const selections = useSeasonSelections();
+
+  /**
+   * The whole list, for the recap — which has to count a month of finish dates and
+   * cannot do it from the dashboard payload's 24 in-progress and 12 recent entries.
+   * Deliberately not `library`: that one narrows with the filter chips, and a recap
+   * that changes because someone tapped "Manga" is reporting the filter, not the
+   * month. On the default filter this is the same query key as `library`, so the
+   * common case costs no extra request.
+   */
+  const everything = useEntries({ sort: "updated" });
 
   const stats = useMemo(() => {
     if (!data) return [];
@@ -160,6 +172,9 @@ export function DashboardPage() {
             run together instead of being split in half by a band of figures. */}
         <StatStrip items={stats} />
 
+        {/* Directly under the figures: it answers the question they raise. */}
+        {everything.data && <NextUp entries={everything.data} lang={lang} />}
+
         {/* Absent, not empty, when nothing you watch is still broadcasting. */}
         {schedule.data && schedule.data.length > 0 && (
           <section className="mb-8 sm:mb-14">
@@ -220,6 +235,9 @@ export function DashboardPage() {
                     lang={lang}
                     meta={`${item.user.username} · ${relativeTime(item.entry.updated_at, t)}`}
                   />
+                  {/* Only on a finish. These are *completion* reactions — offering
+                      them on episode 7 of 24 would be reacting to a number. */}
+                  {item.entry.status === "completed" && <Reactions entryId={item.entry.id} />}
                 </RailItem>
               ))}
             </Rail>

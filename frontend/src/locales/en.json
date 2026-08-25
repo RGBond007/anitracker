@@ -73,6 +73,29 @@
     "filter_completed": "Completed",
     "friendActivity": "Friend activity"
   },
+  "recap": {
+    "heading": "Next up",
+    "finished_one": "finished 1 title",
+    "finished_other": "finished {{count}} titles",
+    "started_one": "started 1",
+    "started_other": "started {{count}}",
+    "ongoing_one": "1 on the go",
+    "ongoing_other": "{{count}} on the go",
+    "kind": {
+      "finish": "One left",
+      "nextSeason": "Next season",
+      "stale": "Left off",
+      "rate": "Unrated"
+    },
+    "reason": {
+      "finish": "One episode from the end",
+      "finishManga": "One chapter from the end",
+      "nextSeason": "You finished {{name}}",
+      "stale": "Episode {{progress}}, {{when}}",
+      "staleManga": "Chapter {{progress}}, {{when}}",
+      "rate": "Finished without a score"
+    }
+  },
   "search": {
     "title": "Search",
     "label": "Search anime and manga",
@@ -114,6 +137,42 @@
     "addThis": "Add",
     "onYourList": "On your list"
   },
+  "discover": {
+    "dismiss": "Not interested",
+    "dismissedCount_one": "1 suggestion hidden.",
+    "dismissedCount_other": "{{count}} suggestions hidden.",
+    "restore": "Show them again",
+    "onHold": {
+      "heading": "Pick up where you stopped",
+      "reason": "Episode {{progress}} of {{total}} · on hold",
+      "reasonManga": "Chapter {{progress}} of {{total}} · on hold"
+    },
+    "becauseYouLiked": {
+      "heading": "Because you liked something similar",
+      "reason": "Because you rated {{title}} {{score}}/10",
+      "reasonManga": "Because you rated {{title}} {{score}}/10"
+    },
+    "shortPlanned": {
+      "heading": "Short, and already on your list",
+      "reason": "{{episodes}} episodes · already on your watchlist",
+      "reasonManga": "{{episodes}} chapters · already on your watchlist"
+    },
+    "finishedShort": {
+      "heading": "Complete stories under 13 episodes",
+      "reason": "{{episodes}} episodes · finished airing",
+      "reasonManga": "{{episodes}} chapters · complete"
+    },
+    "rareGenre": {
+      "heading": "A genre you rarely watch",
+      "reason": "Only {{titles}} {{genre}} titles in your library",
+      "reasonManga": "Only {{titles}} {{genre}} titles in your library"
+    },
+    "forgotten": {
+      "heading": "Forgotten on your list",
+      "reason": "Untouched for {{days}} days",
+      "reasonManga": "Untouched for {{days}} days"
+    }
+  },
   "mediaStatus": {
     "FINISHED": "Finished",
     "RELEASING": "Airing",
@@ -144,6 +203,36 @@
     "emptyCta": "Search titles",
     "viewList": "Compact list",
     "viewGrid": "Cover grid"
+  },
+  "shelf": {
+    "heading": "Shelves",
+    "new": "New shelf",
+    "name": "Name",
+    "nameHint": "However you'd describe this pile to a friend.",
+    "description": "Description",
+    "descriptionHint": "Optional. A line about what belongs here.",
+    "share": "Show this shelf on my profile",
+    "shareHint": "Only people who can already see your list. Off by default; you can turn it off again any time.",
+    "createAndAdd": "Create and add",
+    "created": "Created {{name}}",
+    "edit": "Edit shelf",
+    "save": "Save shelf",
+    "delete": "Delete shelf",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody": "The shelf goes; the titles on it stay in your library.",
+    "count_one": "{{count}} title",
+    "count_other": "{{count}} titles",
+    "empty": "Nothing on this shelf yet. Add titles from their own page.",
+    "missing": "That shelf no longer exists.",
+    "moveEarlier": "Move earlier",
+    "moveLater": "Move later",
+    "suggest": {
+      "favorites": "Favorites",
+      "comfort": "Comfort shows",
+      "withFriends": "Watch with friends",
+      "soundtracks": "Best soundtracks",
+      "weekend": "Weekend watchlist"
+    }
   },
   "entry": {
     "edit": "Edit entry",
@@ -376,6 +465,52 @@
     "becauseYouLiked": "Because you liked {{title}}",
     "becauseHint": "Suggested from what your friends rated highly, matched on shared genres.",
     "sharedThemes": "Shares {{genres}}"
+  },
+  "recommend": {
+    "action": "Recommend to a friend",
+    "title": "Recommend to a friend",
+    "message": "Message",
+    "messageHint": "Optional, and keep it spoiler-free.",
+    "messagePlaceholder": "Why they'd like it…",
+    "send_zero": "Send",
+    "send_one": "Send to 1 friend",
+    "send_other": "Send to {{count}} friends",
+    "sent_one": "Sent to 1 friend",
+    "sent_other": "Sent to {{count}} friends",
+    "sentWithSkips_one": "Sent to 1 friend · {{skipped}} already had it waiting",
+    "sentWithSkips_other": "Sent to {{count}} friends · {{skipped}} already had it waiting",
+    "noFriends": "Add a friend first, then you can pass titles to them here.",
+    "inbox": "Sent to you",
+    "from": "{{name}} sent you this",
+    "fromOne": "{{name}} recommended this to you",
+    "fromMany_one": "{{name}} and 1 other recommended this to you",
+    "fromMany_other": "{{name}} and {{count}} others recommended this to you",
+    "view": "View",
+    "addToList": "Add to my list",
+    "confirmTitle": "Add {{name}} to your list?",
+    "confirmBody": "It goes to Plan to watch. Nothing is marked as watched, and you can change that any time.",
+    "confirmAdd": "Add to plan to watch",
+    "added": "On your list",
+    "dismiss": "Dismiss",
+    "unknownTitle": "A title from your friend",
+    "shelveTitle": "Put {{name}} on a shelf?",
+    "shelveBody": "It is on your plan-to-watch list. A shelf is optional.",
+    "noShelves": "You have no shelves yet — make one from a title's menu.",
+    "skipShelf": "Not now"
+  },
+  "moments": {
+    "friendsHeading": "Friends who have this",
+    "yourScore": "You gave it {{score}}",
+    "vsYou": "Compared with your score",
+    "same": "same",
+    "sharedShelves": "Shelves {{name}} shares",
+    "reaction": {
+      "clapped": "Nicely done",
+      "same": "Loved it too",
+      "queued": "Adding it to my list",
+      "envious": "Wish I could watch it again",
+      "crying": "That ending"
+    }
   },
   "profile": {
     "notFound": "No user called “{{name}}”.",

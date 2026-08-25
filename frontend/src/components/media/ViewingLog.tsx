@@ -8,20 +8,31 @@ import {
   useUpdateEntry,
 } from "../../features/media/useMedia";
 import { useSetCurrentSeason } from "../../features/media/useSeasons";
+import {
+  useCreateShelf,
+  useShelveEntry,
+  useShelves,
+} from "../../features/shelves/useShelves";
 import { calendarDate } from "../../lib/time";
 import { cx } from "../../lib/cx";
 import { Button } from "../ui/Button";
 import { Icon, ICONS } from "../ui/Icon";
 import { Menu } from "../ui/Menu";
+import { Field } from "../ui/Field";
+import { Input } from "../ui/Input";
 import { Modal } from "../ui/Modal";
 import { Sheet } from "../ui/Sheet";
 import { EntryForm } from "./EntryForm";
+import { RecommendSheet } from "./RecommendSheet";
 import { ProgressLedger } from "./ProgressLedger";
 import { declineSeasonPrompt, nextAfter } from "./SeasonActions";
 import { useSeasonLabels } from "./seasonLabels";
 import { useStatusLabel } from "./statusLabels";
 
 const STATUSES: EntryStatus[] = ["current", "completed", "on_hold", "dropped", "planned"];
+
+/** Offered when creating a shelf; never written into an account on its own. */
+const SHELF_SUGGESTIONS = ["favorites", "comfort", "withFriends", "soundtracks", "weekend"];
 
 /**
  * What the viewer has done with the season they are looking at, and the two or
@@ -64,8 +75,14 @@ export function ViewingLog({
   const remove = useDeleteEntry();
   const setCurrent = useSetCurrentSeason();
 
+  const shelves = useShelves();
+  const shelve = useShelveEntry();
+  const createShelf = useCreateShelf();
+
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState<"finish" | "continue" | "remove" | null>(null);
+  const [newShelf, setNewShelf] = useState<string | null>(null);
+  const [recommending, setRecommending] = useState(false);
 
   const type = entry.media.type;
   const isManga = type === "manga";
@@ -73,6 +90,15 @@ export function ViewingLog({
   const atEnd = total != null && entry.progress >= total;
   // The last one is a decision, not a click: it completes the season server-side.
   const wouldFinish = total != null && entry.progress + 1 >= total;
+
+  // Which shelves already hold this entry. `entry_ids` is exactly why the index
+  // sends it: one request answers for every shelf, and the menu never has to open
+  // a shelf to find out whether to draw a tick.
+  const onShelf = new Set(
+    (shelves.data ?? [])
+      .filter((shelf) => shelf.entry_ids.includes(entry.id))
+      .map((shelf) => shelf.id),
+  );
 
   const next = series && viewed ? nextAfter(series, viewed) : null;
   const nextName = next && series ? seasonName(next, series.title, lang) : null;
@@ -176,6 +202,9 @@ export function ViewingLog({
             total={total}
             isManga={isManga}
             className="w-full min-w-[48px] max-w-[220px]"
+            // The page's one announcing ledger: this is the copy beside the button
+            // that changes the number, so it is the one worth hearing.
+            announce
           />
         </div>
 
@@ -217,7 +246,34 @@ export function ViewingLog({
               "flex h-9 w-9 items-center justify-center rounded-control text-text-dim",
               "transition-colors hover:bg-surface hover:text-text pointer-coarse:min-w-[44px]",
             )}
+            /* Shelving lives in the menu that already exists rather than behind a
+               control of its own. It is a toggle with a tick, which is exactly what
+               this menu draws, and a title belongs to any number of shelves — so
+               the list is as long as the user has made it, with "New shelf" at the
+               end for the case where the right one does not exist yet. */
             items={[
+              ...(shelves.data ?? []).map((shelf) => ({
+                key: `shelf-${shelf.id}`,
+                label: shelf.name,
+                selected: onShelf.has(shelf.id),
+                disabled: shelve.isPending,
+                onSelect: () =>
+                  shelve.mutate({
+                    id: shelf.id,
+                    entryId: entry.id,
+                    on: !onShelf.has(shelf.id),
+                  }),
+              })),
+              {
+                key: "new-shelf",
+                label: t("shelf.new"),
+                onSelect: () => setNewShelf(""),
+              },
+              {
+                key: "recommend",
+                label: t("recommend.action"),
+                onSelect: () => setRecommending(true),
+              },
               {
                 key: "remove",
                 label: t("entry.remove"),
@@ -291,6 +347,67 @@ export function ViewingLog({
             </Button>
             <Button variant="stamp" disabled={setCurrent.isPending} onClick={startNext}>
               {t("season.startNamed", { name: nextName })}
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {recommending && (
+        <RecommendSheet media={entry.media} onClose={() => setRecommending(false)} />
+      )}
+
+      {newShelf !== null && (
+        <Modal title={t("shelf.new")} onClose={() => setNewShelf(null)}>
+          <Field label={t("shelf.name")} hint={t("shelf.nameHint")}>
+            <Input
+              autoFocus
+              value={newShelf}
+              maxLength={64}
+              onChange={(e) => setNewShelf(e.target.value)}
+            />
+          </Field>
+          {/* The names from the brief, offered rather than seeded. Nobody starts
+              with an empty "Best soundtracks" they never asked for, but nobody has
+              to think of the word either. Already-used names are filtered out. */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {SHELF_SUGGESTIONS.filter(
+              (key) => !(shelves.data ?? []).some((s) => s.name === t(`shelf.suggest.${key}`)),
+            ).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setNewShelf(t(`shelf.suggest.${key}`))}
+                className={cx(
+                  "rounded-pill border border-line px-3 py-1 text-[12px] text-text-dim",
+                  "transition-colors hover:border-control-line hover:text-text",
+                )}
+              >
+                {t(`shelf.suggest.${key}`)}
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="quiet" onClick={() => setNewShelf(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="stamp"
+              disabled={!newShelf.trim() || createShelf.isPending}
+              onClick={() =>
+                createShelf.mutate(
+                  { name: newShelf.trim() },
+                  {
+                    // Created *and* used in one step: opening this from a title
+                    // means the title is the reason the shelf exists.
+                    onSuccess: (shelf) => {
+                      shelve.mutate({ id: shelf.id, entryId: entry.id, on: true });
+                      setNewShelf(null);
+                    },
+                  },
+                )
+              }
+            >
+              {t("shelf.createAndAdd")}
             </Button>
           </div>
         </Modal>

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import type { EntryStatus, MediaType } from "../../lib/api-client";
 import { useEntries } from "../../features/media/useMedia";
+import { useShelves } from "../../features/shelves/useShelves";
 import { useSeasonSelections } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { useStatusLabel } from "../../components/media/statusLabels";
@@ -34,6 +35,7 @@ export function ListViewPage() {
   useEffect(() => setListTab(status), [status, setListTab]);
 
   const { data, isLoading } = useEntries({ type, status: status as EntryStatus, sort });
+  const shelves = useShelves();
   // Which season each show's card should represent, when its owner has said.
   const selections = useSeasonSelections();
 
@@ -56,6 +58,29 @@ export function ListViewPage() {
           </Chip>
         ))}
       </div>
+
+      {/* Shelves sit on their own line under the statuses rather than mixed in with
+          them. They are the same kind of thing to click, but not the same kind of
+          thing to be: a title has exactly one status and any number of shelves, and
+          one run of chips would say the opposite. Absent entirely until there is
+          one, so an account that never makes a shelf never sees the row. */}
+      {shelves.data && shelves.data.length > 0 && (
+        <div className="rail -mx-5 mb-3 flex items-center gap-2 overflow-x-auto px-5 sm:mx-0 sm:flex-wrap sm:px-0">
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-text-faint">
+            {t("shelf.heading")}
+          </span>
+          {shelves.data.map((shelf) => (
+            <Chip
+              key={shelf.id}
+              className="shrink-0"
+              onClick={() => navigate(`/shelf/${shelf.id}`)}
+            >
+              {shelf.name}
+              <span className="tabular ml-1.5 text-text-faint">{shelf.item_count}</span>
+            </Chip>
+          ))}
+        </div>
+      )}
 
       <div className="mb-6 flex items-center gap-2">
         <Segmented

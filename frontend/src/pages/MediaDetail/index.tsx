@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,13 +7,18 @@ import type { MediaType, Season } from "../../lib/api-client";
 import { useAddEntry, useEntryForMedia, useMediaDetail } from "../../features/media/useMedia";
 import { useSeries } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
+import { cx } from "../../lib/cx";
 import { baseTitle } from "../../lib/franchise";
 import { queryKeys } from "../../lib/queryKeys";
 import { displayTitle } from "../../lib/titles";
+import { Icon, ICONS } from "../../components/ui/Icon";
 import { CoverImage } from "../../components/media/CoverImage";
 import { mediaHref } from "../../components/media/Poster";
 import { SeasonActions } from "../../components/media/SeasonActions";
 import { useSeasonLabels } from "../../components/media/seasonLabels";
+import { FriendsOnTitle } from "../../components/media/FriendsOnTitle";
+import { RecommendSheet } from "../../components/media/RecommendSheet";
+import { RecommendedBy } from "../../components/media/RecommendedBy";
 import { SeasonProgress } from "../../components/media/SeasonProgress";
 import { SeasonChips, SeasonSwitcher } from "../../components/media/SeasonSwitcher";
 import { ViewingLog } from "../../components/media/ViewingLog";
@@ -43,6 +49,7 @@ export function MediaDetailPage() {
   const entry = useEntryForMedia(provider, id);
   const series = useSeries(provider, id, type);
   const add = useAddEntry();
+  const [recommending, setRecommending] = useState(false);
 
   const seasons = series.data?.seasons ?? [];
   const isMultiSeason = seasons.length > 1;
@@ -132,6 +139,10 @@ export function MediaDetailPage() {
             className="season-fade aspect-2/3 w-full rounded-poster"
           />
 
+          {/* Directly under the artwork, above the progress card: it explains why
+              this page is open at all, which has to be read before anything else. */}
+          <RecommendedBy provider={provider} providerId={id} />
+
           {entry.data ? (
             <SeasonProgress entry={entry.data} />
           ) : (
@@ -152,6 +163,22 @@ export function MediaDetailPage() {
               {t("detail.addToList")}
             </Button>
           )}
+
+          {/* Beside the add button, not inside the viewing log: the log only exists
+              once a title is on your list, and telling a friend about something is
+              the main way anyone hears of it in the first place. Requiring the
+              sender to track it first would rule out exactly that case. */}
+          <button
+            type="button"
+            onClick={() => setRecommending(true)}
+            className={cx(
+              "flex w-full items-center justify-center gap-1.5 rounded-control px-2.5 py-2",
+              "text-[12.5px] text-text-dim transition-colors hover:text-text",
+            )}
+          >
+            <Icon path={ICONS.send} size={14} />
+            {t("recommend.action")}
+          </button>
         </div>
 
         {/* `min-w-0` is load-bearing: a grid item's automatic minimum size is its
@@ -278,6 +305,14 @@ export function MediaDetailPage() {
           carousel above rather than as a panel bolted to the bottom of the page.
           Keyed on the entry so changing season shows that season's numbers rather
           than the last one's. */}
+      {recommending && media.data && (
+        <RecommendSheet media={media.data} onClose={() => setRecommending(false)} />
+      )}
+
+      {/* Between the viewing log and the seasons: it is about this title, but about
+          other people, so it reads after your own record of it. */}
+      <FriendsOnTitle provider={provider} providerId={id} isManga={type === "manga"} />
+
       {entry.data && (
         <ViewingLog
           key={entry.data.id}

@@ -57,6 +57,7 @@ def _fresh_rate_limits():
 async def app_client():
     """Full app over an in-memory SQLite DB with a stubbed provider registry."""
     import httpx
+    from sqlalchemy import event
     from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
     from sqlalchemy.pool import StaticPool
 
@@ -69,6 +70,18 @@ async def app_client():
 
     # StaticPool keeps every session on the *same* in-memory database.
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", poolclass=StaticPool)
+
+    # SQLite ignores foreign keys unless asked not to, so without this the harness is
+    # a *different database* to the Postgres the app runs on: every `ondelete=CASCADE`
+    # in models.py silently does nothing, and a test asserting that deleting a row
+    # cleans up what points at it passes or fails for the wrong reason. Turning it on
+    # makes the two agree.
+    @event.listens_for(engine.sync_engine, "connect")
+    def _enforce_foreign_keys(dbapi_connection, _record):  # pragma: no cover - setup
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
