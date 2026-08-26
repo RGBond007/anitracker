@@ -15,7 +15,6 @@ import { useTranslation } from "react-i18next";
 
 import { cx } from "../../lib/cx";
 import { Button } from "../../components/ui/Button";
-import { Modal } from "../../components/ui/Modal";
 
 /**
  * The pieces the settings sections are built from.
@@ -250,41 +249,3 @@ export function SaveRow({
   );
 }
 
-/**
- * Destructive confirmation. A real dialog rather than `window.confirm`, so the
- * wording, the focus trap and the button labels are ours — "Delete Ada", not
- * "OK".
- */
-export function ConfirmDialog({
-  title,
-  body,
-  confirmLabel,
-  pending,
-  onConfirm,
-  onCancel,
-}: {
-  title: string;
-  body: string;
-  confirmLabel: string;
-  pending?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Modal title={title} onClose={onCancel}>
-      <p className="text-sm leading-relaxed text-text-dim">{body}</p>
-      <div className="mt-6 flex flex-wrap justify-end gap-3">
-        <Button onClick={onCancel}>{t("common.cancel")}</Button>
-        <Button
-          variant="ghost"
-          disabled={pending}
-          onClick={onConfirm}
-          className="border-stamp-text/60 text-stamp-text hover:border-stamp-text"
-        >
-          {confirmLabel}
-        </Button>
-      </div>
-    </Modal>
-  );
-}

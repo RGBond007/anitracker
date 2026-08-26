@@ -11,6 +11,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { Field } from "../../components/ui/Field";
 import { Icon, ICONS } from "../../components/ui/Icon";
 import { Input } from "../../components/ui/Input";
+import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import { Modal } from "../../components/ui/Modal";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { cx } from "../../lib/cx";
@@ -204,23 +205,23 @@ export function ShelfPage() {
       )}
 
       {confirmDelete && (
-        <Modal title={t("shelf.deleteTitle", { name: shelf.name })} onClose={() => setConfirmDelete(false)}>
-          {/* Says what is and is not lost: people hesitate here because they cannot
-              tell whether deleting a shelf deletes what is on it. */}
-          <p className="text-sm text-text-dim">{t("shelf.deleteBody")}</p>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="quiet" onClick={() => setConfirmDelete(false)}>
-              {t("common.cancel")}
-            </Button>
-            <Button
-              variant="stamp"
-              disabled={remove.isPending}
-              onClick={() => remove.mutate(shelf.id, { onSuccess: () => navigate("/list/current") })}
-            >
-              {t("shelf.delete")}
-            </Button>
-          </div>
-        </Modal>
+        <ConfirmDestructive
+          title={t("shelf.deleteTitle", { name: shelf.name })}
+          /* Says what is and is not lost: people hesitate here because they cannot
+             tell whether deleting a shelf deletes what is on it. */
+          body={t("shelf.deleteBody")}
+          consequences={[
+            t("shelf.deleteAffectedOrder"),
+            // Only claimed where it is true — an unshared shelf has nobody to lose.
+            ...(shelf.is_shared ? [t("shelf.deleteAffectedShared")] : []),
+          ]}
+          confirmLabel={t("shelf.delete")}
+          pendingLabel={t("confirm.deleting")}
+          pending={remove.isPending}
+          error={remove.error ? String(remove.error) : undefined}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={() => remove.mutate(shelf.id, { onSuccess: () => navigate("/list/current") })}
+        />
       )}
     </div>
   );

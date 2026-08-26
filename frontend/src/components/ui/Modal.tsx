@@ -1,14 +1,22 @@
 import { useEffect, useRef } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 
 /** Escape closes, focus lands inside, background click closes. Nothing fancier. */
 export function Modal({
   title,
   onClose,
+  initialFocusRef,
   children,
 }: {
   title: string;
   onClose: () => void;
+  /**
+   * What to focus instead of the panel. A destructive dialog points this at its
+   * Cancel button, so the first thing under a pressed Return is the way out
+   * rather than the deletion — the panel itself is the right default everywhere
+   * the dialog is a form and the answer is not already dangerous.
+   */
+  initialFocusRef?: RefObject<HTMLElement | null>;
   children: ReactNode;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -16,8 +24,10 @@ export function Modal({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    panelRef.current?.focus();
+    (initialFocusRef?.current ?? panelRef.current)?.focus();
     return () => window.removeEventListener("keydown", onKey);
+    // Deliberately not keyed on the ref: it is stable, and re-running would
+    // steal focus back from whatever the user tabbed to after the dialog opened.
   }, [onClose]);
 
   return (

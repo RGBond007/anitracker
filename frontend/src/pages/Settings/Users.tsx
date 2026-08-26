@@ -9,7 +9,8 @@ import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
-import { ConfirmDialog, ICONS, Icon, SectionHeading, errorMessage } from "./parts";
+import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
+import { ICONS, Icon, SectionHeading, errorMessage } from "./parts";
 
 /**
  * The people on this instance.
@@ -139,17 +140,25 @@ export function UsersSection({ me }: { me: User }) {
       {creating && <CreateUserSheet onClose={() => setCreating(false)} />}
 
       {deleting && (
-        <ConfirmDialog
-          title={t("settings.deleteUser")}
-          body={t("settings.deleteUserConfirm", { name: deleting.username })}
+        /* The one place that asks for the name back. This deletes a *person's*
+           library — years of someone else's records, by the hand of an admin who
+           is not them and cannot undo it. Everywhere else, a confirm button is
+           enough; here the cost of a misclick is not recoverable. */
+        <ConfirmDestructive
+          title={t("settings.deleteUserTitle", { name: deleting.username })}
+          body={t("settings.deleteUserBody")}
+          consequences={[
+            t("settings.deleteUserAffected1"),
+            t("settings.deleteUserAffected2"),
+            t("settings.deleteUserAffected3"),
+          ]}
+          requireTyped={deleting.username}
           confirmLabel={t("settings.deleteUser")}
+          pendingLabel={t("confirm.deleting")}
           pending={remove.isPending}
+          error={errorMessage(remove.error)}
           onCancel={() => setDeleting(null)}
-          onConfirm={() =>
-            remove.mutate(deleting.id, {
-              onSettled: () => setDeleting(null),
-            })
-          }
+          onConfirm={() => remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
         />
       )}
     </section>

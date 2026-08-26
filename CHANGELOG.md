@@ -6,6 +6,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.4] — 2026-08-26
+
+### Changed
+- **Deleting something now says what it is deleting.** Every destructive action goes
+  through one dialog, and that dialog has to name the object: "Remove Frieren:
+  Beyond Journey's End from your library?", not "Remove this title from your list?".
+  Under it sits a short list of what actually goes — your progress, score and notes,
+  every journal entry you wrote about that title, and its place on any shelf — because
+  the thing being deleted is usually something someone spent months on, and the old
+  wording did not mention the journal at all.
+- **`window.confirm` is gone from the app.** It could not be made to do this job: the
+  browser's dialog cannot name the title, cannot list what goes with it, cannot be
+  styled to match anything around it, and puts "OK" — a word that describes nothing —
+  under the pointer. A source-scan test now fails the build if a `confirm()` or an
+  `alert()` reappears anywhere in `src`, the same way one already guards the
+  built-in-brand rule.
+- **Cancel is what the dialog opens on.** Focus lands on the way out rather than on the
+  deletion, so a reflexive Return closes the dialog instead of confirming it.
+- **The destructive button cannot be pressed twice.** It latches on the first press
+  rather than waiting for the request to report itself in flight — the gap between
+  those two moments is at least one render, which is exactly long enough for a
+  double-click to send the same delete twice. It names what it is doing while it
+  works ("Removing…"), and a failed attempt unlocks so it can be tried again.
+- **Removing a friend and deleting a journal entry now ask first.** Both fired straight
+  off the button. Unfriending is silently mutual, and a journal note is the one thing
+  in the app with no copy anywhere else.
+- **Deleting somebody else's account asks for their username back.** An admin deleting
+  a user destroys a person's whole library — years of someone else's records, by a hand
+  that is not theirs and with nothing that can undo it. It is the only action in the app
+  that asks for typing, deliberately: making a routine removal cost a typing exercise
+  only teaches people to type without reading.
+- The four hand-rolled confirmation dialogs and the settings-only `ConfirmDialog` were
+  replaced by the shared one, so the wording, the focus behaviour and the pending state
+  cannot drift apart again.
+
+### Notes
+- The consequence lists are claims about what the database actually cascades, and the
+  two that matter are already pinned by `test_deleting_an_entry_takes_it_off_every_shelf`
+  and `test_deleting_a_title_takes_its_journal_with_it`. If a migration ever changes what
+  a delete reaches, those fail before the copy quietly becomes a lie.
+- Withdrawing a friend request, declining one, and removing your own avatar still act
+  immediately. Nothing is destroyed by any of them, and a modal there is friction
+  without a purpose.
+
 ## [2.5.3] — 2026-08-26
 
 ### Added
@@ -414,7 +458,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.3...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.4...HEAD
+[2.5.4]: https://github.com/RGBond007/anitracker/compare/v2.5.3...v2.5.4
 [2.5.3]: https://github.com/RGBond007/anitracker/compare/v2.5.2...v2.5.3
 [2.5.2]: https://github.com/RGBond007/anitracker/compare/v2.5.1...v2.5.2
 [2.5.1]: https://github.com/RGBond007/anitracker/compare/v2.5.0...v2.5.1

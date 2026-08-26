@@ -10,7 +10,8 @@ import { InstanceSection } from "./Instance";
 import { ProfileSection } from "./Profile";
 import { SecuritySection } from "./Security";
 import { UsersSection } from "./Users";
-import { ConfirmDialog, DirtyContext, ICONS, Icon } from "./parts";
+import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
+import { DirtyContext, ICONS, Icon } from "./parts";
 
 /**
  * Settings, as one page showing one section at a time.
@@ -234,7 +235,7 @@ export function SettingsPage() {
       </div>
 
       {pendingJump && (
-        <ConfirmDialog
+        <ConfirmDestructive
           title={t("settings.discardTitle")}
           body={t("settings.discardBody")}
           confirmLabel={t("settings.discard")}

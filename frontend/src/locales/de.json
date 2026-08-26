@@ -34,6 +34,15 @@
     "copy": "Kopieren",
     "copied": "Kopiert"
   },
+  "confirm": {
+    "affected": "Wird mitgelöscht",
+    "typedLabel": "Zum Bestätigen {{value}} eingeben",
+    "removing": "Wird entfernt…",
+    "deleting": "Wird gelöscht…",
+    "leaving": "Wird verlassen…",
+    "closing": "Wird geschlossen…",
+    "signingOut": "Wird abgemeldet…"
+  },
   "spoiler": {
     "reveal": "Trotzdem anzeigen",
     "seasonTitle": "Eine Staffel öffnen, bei der du noch nicht bist?",
@@ -303,7 +312,10 @@
     "pageEmpty": "Dein Journal ist leer. Öffne einen Titel, den du schaust, und schreib eine Zeile zu einer Episode.",
     "noFavorites": "Noch keine Favoriten markiert.",
     "all": "Alles",
-    "favorites": "Favoriten"
+    "favorites": "Favoriten",
+    "deleteTitle": "Deine Notiz zu Episode {{n}} löschen?",
+    "deleteTitleChapter": "Deine Notiz zu Kapitel {{n}} löschen?",
+    "deleteBody": "Die Notiz verschwindet, zusammen mit ihrer Stimmung und ihrer Markierung als Favorit. Dein Fortschritt beim Titel bleibt unberührt."
   },
   "list": {
     "statusTabs": "Listenstatus",
@@ -331,7 +343,7 @@
     "edit": "Regal bearbeiten",
     "save": "Regal speichern",
     "delete": "Regal löschen",
-    "deleteTitle": "{{name}} löschen?",
+    "deleteTitle": "Das Regal {{name}} löschen?",
     "deleteBody": "Das Regal verschwindet; die Titel darin bleiben in deiner Bibliothek.",
     "count_one": "{{count}} Titel",
     "count_other": "{{count}} Titel",
@@ -345,7 +357,9 @@
       "withFriends": "Mit Freunden schauen",
       "soundtracks": "Beste Soundtracks",
       "weekend": "Wochenend-Watchlist"
-    }
+    },
+    "deleteAffectedShared": "Alle, mit denen du es geteilt hast, verlieren den Zugriff",
+    "deleteAffectedOrder": "Das Regal und die Reihenfolge, die du festgelegt hast"
   },
   "entry": {
     "edit": "Eintrag bearbeiten",
@@ -360,7 +374,12 @@
     "notes": "Notizen",
     "save": "Eintrag speichern",
     "remove": "Von Liste entfernen",
-    "removeConfirm": "Diesen Titel von deiner Liste entfernen? Fortschritt und Notizen werden mitgelöscht."
+    "removeTitle": "{{title}} aus deiner Bibliothek entfernen?",
+    "removeBody": "Der Titel verschwindet von deiner Liste. Der Titel selbst bleibt bestehen und du kannst ihn wieder hinzufügen — was du dazu festgehalten hast, kommt aber nicht zurück.",
+    "removeAffected1": "Dein Fortschritt, deine Bewertung und deine Notizen dazu",
+    "removeAffected2": "Jeder Journaleintrag, den du dazu geschrieben hast",
+    "removeAffected3": "Sein Platz auf allen Regalen",
+    "removeAction": "Titel entfernen"
   },
   "log": {
     "heading": "Sehprotokoll",
@@ -441,7 +460,6 @@
     "makeAdmin": "Zu Admin machen",
     "makeUser": "Zu Benutzer machen",
     "deleteUser": "Löschen",
-    "deleteUserConfirm": "{{name}} und alle erfassten Einträge löschen?",
     "about": "Über",
     "noTelemetry": "keine Telemetrie",
     "visibility": "Sichtbarkeit der Liste",
@@ -455,7 +473,6 @@
     "pendingFirstLogin": "erste Anmeldung ausstehend",
     "revoke": "Überall abmelden",
     "revokeHint": "Beendet alle anderen angemeldeten Sitzungen. Dieses Gerät bleibt angemeldet.",
-    "revokeConfirm": "Von allen anderen Geräten abmelden?",
     "revoked": "Alle anderen Sitzungen beendet",
     "passwordHint": "Mindestens 8 Zeichen.",
     "subtitle": "Dein Konto, diese Instanz und wie AniTracker aussieht.",
@@ -526,7 +543,14 @@
     "spoilers": "Spoilerschutz",
     "spoilersHint": "Hält zurück, wo du noch nicht bist — die Nachricht eines Freundes, eine Staffel, bei der du noch nicht angekommen bist. Anzeigen geht immer mit einem Tipp.",
     "spoilersOn": "An",
-    "spoilersOff": "Aus"
+    "spoilersOff": "Aus",
+    "deleteUserTitle": "Das Konto {{name}} löschen?",
+    "deleteUserBody": "Das Konto und alles darin wird sofort gelöscht. Das lässt sich nicht rückgängig machen, und nichts hier holt es zurück.",
+    "deleteUserAffected1": "Die gesamte Bibliothek — jeder Titel, jede Bewertung, jeder Fortschritt",
+    "deleteUserAffected2": "Das Journal, die Regale und die Reaktionen",
+    "deleteUserAffected3": "Die Freundschaften und alles, was empfohlen wurde",
+    "revokeTitle": "Auf allen anderen Geräten abmelden?",
+    "revokeBody": "Alle anderen Sitzungen enden sofort. Es wird nichts gelöscht — dieses Gerät bleibt angemeldet, überall sonst muss man sich neu anmelden."
   },
   "hero": {
     "updateProgress": "Fortschritt aktualisieren",
@@ -581,7 +605,11 @@
     "showFewer": "Weniger anzeigen",
     "becauseYouLiked": "Weil dir {{title}} gefallen hat",
     "becauseHint": "Vorgeschlagen aus den Top-Bewertungen deiner Freunde, abgeglichen über gemeinsame Genres.",
-    "sharedThemes": "Gemeinsam: {{genres}}"
+    "sharedThemes": "Gemeinsam: {{genres}}",
+    "removeTitle": "{{name}} aus deinen Freunden entfernen?",
+    "removeBody": "Ihr seht beide die Liste des anderen nicht mehr. An keiner Bibliothek ändert sich etwas, und ihr könnt euch danach neu anfragen.",
+    "removeAffected": "Notizen und Fortschritt sind für dich wieder verborgen",
+    "removeAction": "Freund entfernen"
   },
   "recommend": {
     "action": "Einem Freund empfehlen",
@@ -659,16 +687,17 @@
     "clearTarget": "Zurücksetzen",
     "inviteMore": "Jemanden einladen",
     "leave": "Gruppe verlassen",
-    "leaveTitle": "Gruppe verlassen?",
+    "leaveTitle": "Die Gruppe zu {{title}} verlassen?",
     "leaveBody": "Du siehst den Fortschritt der anderen nicht mehr und sie deinen nicht. Deine eigene Liste bleibt unberührt.",
     "close": "Gruppe schließen",
-    "closeTitle": "Gruppe schließen?",
+    "closeTitle": "Die Gruppe zu {{title}} schließen?",
     "closeBody": "Sie endet für alle. Niemandes Liste oder Fortschritt ändert sich — die Gruppe hört einfach auf.",
     "closed": "geschlossen",
     "wouldPassOne": "Episode {{n}} zu schauen setzt dich vor {{name}}.",
     "wouldPassMany_one": "Episode {{n}} zu schauen setzt dich vor {{name}} und 1 weitere Person.",
     "wouldPassMany_other": "Episode {{n}} zu schauen setzt dich vor {{name}} und {{count}} weitere Personen.",
-    "pastTarget": "Das ist über die vereinbarte Episode {{n}} hinaus."
+    "pastTarget": "Das ist über die vereinbarte Episode {{n}} hinaus.",
+    "thisTitle": "diesem Titel"
   },
   "profile": {
     "notFound": "Kein Benutzer „{{name}}“.",

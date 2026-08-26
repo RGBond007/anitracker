@@ -15,6 +15,7 @@ import { useMe } from "../../features/auth/useAuth";
 import { useUiStore } from "../../stores/uiStore";
 import { RecommendationInbox } from "./Inbox";
 import { Button } from "../../components/ui/Button";
+import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import { Icon, ICONS } from "../../components/ui/Icon";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
@@ -173,6 +174,7 @@ export function FriendsPage() {
   const lang = useUiStore((s) => s.titleLanguage);
   const remove = useRemoveFriend();
   const statsLine = useStatsLine();
+  const [unfriending, setUnfriending] = useState<PublicUser | null>(null);
 
   if (isLoading) {
     return (
@@ -249,7 +251,7 @@ export function FriendsPage() {
                 <Button
                   variant="quiet"
                   className="px-3 py-1.5 text-xs"
-                  onClick={() => remove.mutate(f.user.id)}
+                  onClick={() => setUnfriending(f.user)}
                 >
                   {t("friends.remove")}
                 </Button>
@@ -264,6 +266,25 @@ export function FriendsPage() {
       <div className="mt-8">
         <Discover />
       </div>
+
+      {/* Unfriending used to fire straight off the button. Nothing is deleted by
+          it, but it is silently mutual and it is not obvious from the row that a
+          stray tap ends both directions at once. */}
+      {unfriending && (
+        <ConfirmDestructive
+          title={t("friends.removeTitle", { name: unfriending.username })}
+          body={t("friends.removeBody")}
+          consequences={[t("friends.removeAffected")]}
+          confirmLabel={t("friends.removeAction")}
+          pendingLabel={t("confirm.removing")}
+          pending={remove.isPending}
+          error={remove.error ? String(remove.error) : undefined}
+          onCancel={() => setUnfriending(null)}
+          onConfirm={() =>
+            remove.mutate(unfriending.id, { onSuccess: () => setUnfriending(null) })
+          }
+        />
+      )}
     </div>
   );
 }

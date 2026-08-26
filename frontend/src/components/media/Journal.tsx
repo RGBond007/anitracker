@@ -10,6 +10,7 @@ import {
 } from "../../features/journal/useJournal";
 import { calendarDate } from "../../lib/time";
 import { Button } from "../ui/Button";
+import { ConfirmDestructive } from "../ui/ConfirmDestructive";
 import { Field } from "../ui/Field";
 import { Icon, ICONS } from "../ui/Icon";
 import { Modal } from "../ui/Modal";
@@ -176,6 +177,7 @@ function WriteSheet({
   const write = useWriteJournal();
   const remove = useDeleteJournal();
 
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [n, setN] = useState(String(unit));
   const existing =
     rows.find((r) => r.unit === Number(n) && r.rewatch_index === pass) ?? null;
@@ -202,6 +204,30 @@ function WriteSheet({
     setMood(existing?.mood ?? null);
     setFavorite(existing?.is_favorite ?? false);
     setSpoilers(existing?.has_spoilers ?? false);
+  }
+
+  /**
+   * Rendered *instead of* the sheet rather than on top of it. Both are `Modal`s,
+   * and `Modal` listens for Escape on the window — stacked, one keypress would
+   * dismiss the confirmation and the note behind it together. Swapping keeps a
+   * single dialog on screen; the sheet's own state stays mounted, so cancelling
+   * comes back to a form with everything still typed into it.
+   */
+  if (confirmingDelete && existing) {
+    return (
+      <ConfirmDestructive
+        title={t(isManga ? "journal.deleteTitleChapter" : "journal.deleteTitle", {
+          n: existing.unit,
+        })}
+        body={t("journal.deleteBody")}
+        confirmLabel={t("journal.delete")}
+        pendingLabel={t("confirm.deleting")}
+        pending={remove.isPending}
+        error={remove.error ? String(remove.error) : undefined}
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={() => remove.mutate(existing.id, { onSuccess: onClose })}
+      />
+    );
   }
 
   return (
@@ -275,11 +301,7 @@ function WriteSheet({
 
       <div className="mt-4 flex items-center justify-between gap-2">
         {existing ? (
-          <Button
-            variant="quiet"
-            disabled={remove.isPending}
-            onClick={() => remove.mutate(existing.id, { onSuccess: onClose })}
-          >
+          <Button variant="quiet" onClick={() => setConfirmingDelete(true)}>
             {t("journal.delete")}
           </Button>
         ) : (

@@ -16,6 +16,7 @@ import {
 import { calendarDate } from "../../lib/time";
 import { cx } from "../../lib/cx";
 import { Button } from "../ui/Button";
+import { ConfirmDestructive } from "../ui/ConfirmDestructive";
 import { Icon, ICONS } from "../ui/Icon";
 import { Menu } from "../ui/Menu";
 import { Field } from "../ui/Field";
@@ -423,21 +424,21 @@ export function ViewingLog({
       )}
 
       {confirming === "remove" && (
-        <Modal title={t("entry.remove")} onClose={() => setConfirming(null)}>
-          <p className="text-sm text-text-dim">{t("entry.removeConfirm")}</p>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="quiet" onClick={() => setConfirming(null)}>
-              {t("common.cancel")}
-            </Button>
-            <Button
-              variant="stamp"
-              disabled={remove.isPending}
-              onClick={() => remove.mutate(entry.id, { onSuccess: () => setConfirming(null) })}
-            >
-              {t("entry.remove")}
-            </Button>
-          </div>
-        </Modal>
+        <ConfirmDestructive
+          title={t("entry.removeTitle", { title })}
+          body={t("entry.removeBody")}
+          consequences={[
+            t("entry.removeAffected1"),
+            t("entry.removeAffected2"),
+            t("entry.removeAffected3"),
+          ]}
+          confirmLabel={t("entry.removeAction")}
+          pendingLabel={t("confirm.removing")}
+          pending={remove.isPending}
+          error={remove.error ? String(remove.error) : undefined}
+          onCancel={() => setConfirming(null)}
+          onConfirm={() => remove.mutate(entry.id, { onSuccess: () => setConfirming(null) })}
+        />
       )}
     </section>
   );

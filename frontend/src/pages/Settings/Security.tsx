@@ -5,8 +5,8 @@ import { useChangePassword, useRevokeSessions } from "../../features/auth/useAut
 import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
+import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import {
-  ConfirmDialog,
   SavedNote,
   SectionHeading,
   errorMessage,
@@ -130,13 +130,17 @@ export function SecuritySection() {
       </div>
 
       {confirming && (
-        <ConfirmDialog
-          title={t("settings.revokeOthers")}
-          body={t("settings.revokeConfirm")}
+        /* Disruptive rather than destructive: nothing is deleted, so there is no
+           consequence list to draw — only the reach of it, which the body says. */
+        <ConfirmDestructive
+          title={t("settings.revokeTitle")}
+          body={t("settings.revokeBody")}
           confirmLabel={t("settings.revokeOthers")}
+          pendingLabel={t("confirm.signingOut")}
           pending={revoke.isPending}
+          error={errorMessage(revoke.error)}
           onCancel={() => setConfirming(false)}
-          onConfirm={() => revoke.mutate(undefined, { onSettled: () => setConfirming(false) })}
+          onConfirm={() => revoke.mutate(undefined, { onSuccess: () => setConfirming(false) })}
         />
       )}
     </section>

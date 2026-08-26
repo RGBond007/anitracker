@@ -12,8 +12,11 @@ import {
   useWatchGroupForTitle,
 } from "../../features/watch/useWatch";
 import { useFriends } from "../../features/social/useSocial";
+import { useUiStore } from "../../stores/uiStore";
+import { displayTitle } from "../../lib/titles";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
+import { ConfirmDestructive } from "../ui/ConfirmDestructive";
 import { Icon, ICONS } from "../ui/Icon";
 import { Modal } from "../ui/Modal";
 import { NumberInput } from "../ui/Input";
@@ -125,6 +128,10 @@ function StartSheet({ media, onClose }: { media: Media; onClose: () => void }) {
 /** The roster, the target, and the ways out. */
 function GroupPanel({ group }: { group: WatchGroup }) {
   const { t } = useTranslation();
+  const lang = useUiStore((s) => s.titleLanguage);
+  // The group knows its title only once the instance has cached it; until then
+  // the dialog says "this title" rather than naming an empty string.
+  const groupTitle = group.media ? displayTitle(group.media, lang) : t("watch.thisTitle");
   const join = useJoinWatchGroup();
   const leave = useLeaveWatchGroup();
   const closeGroup = useCloseWatchGroup();
@@ -339,30 +346,30 @@ function GroupPanel({ group }: { group: WatchGroup }) {
       )}
 
       {confirmLeave && (
-        <Modal
-          title={group.i_own_it ? t("watch.closeTitle") : t("watch.leaveTitle")}
-          onClose={() => setConfirmLeave(false)}
-        >
-          <p className="text-sm text-text-dim">
-            {group.i_own_it ? t("watch.closeBody") : t("watch.leaveBody")}
-          </p>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="quiet" onClick={() => setConfirmLeave(false)}>
-              {t("common.cancel")}
-            </Button>
-            <Button
-              variant="stamp"
-              disabled={leave.isPending || closeGroup.isPending}
-              onClick={() =>
-                group.i_own_it
-                  ? closeGroup.mutate(group.id, { onSuccess: () => setConfirmLeave(false) })
-                  : leave.mutate(group.id, { onSuccess: () => setConfirmLeave(false) })
-              }
-            >
-              {group.i_own_it ? t("watch.close") : t("watch.leave")}
-            </Button>
-          </div>
-        </Modal>
+        /* No consequence list: nothing here is deleted, and the body already says
+           exactly what stops and what is left alone. */
+        <ConfirmDestructive
+          title={
+            group.i_own_it
+              ? t("watch.closeTitle", { title: groupTitle })
+              : t("watch.leaveTitle", { title: groupTitle })
+          }
+          body={group.i_own_it ? t("watch.closeBody") : t("watch.leaveBody")}
+          confirmLabel={group.i_own_it ? t("watch.close") : t("watch.leave")}
+          pendingLabel={group.i_own_it ? t("confirm.closing") : t("confirm.leaving")}
+          pending={leave.isPending || closeGroup.isPending}
+          error={
+            (group.i_own_it ? closeGroup.error : leave.error)
+              ? String(group.i_own_it ? closeGroup.error : leave.error)
+              : undefined
+          }
+          onCancel={() => setConfirmLeave(false)}
+          onConfirm={() =>
+            group.i_own_it
+              ? closeGroup.mutate(group.id, { onSuccess: () => setConfirmLeave(false) })
+              : leave.mutate(group.id, { onSuccess: () => setConfirmLeave(false) })
+          }
+        />
       )}
     </section>
   );

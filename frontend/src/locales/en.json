@@ -34,6 +34,15 @@
     "copy": "Copy",
     "copied": "Copied"
   },
+  "confirm": {
+    "affected": "Deleted with it",
+    "typedLabel": "Type {{value}} to confirm",
+    "removing": "Removing…",
+    "deleting": "Deleting…",
+    "leaving": "Leaving…",
+    "closing": "Closing…",
+    "signingOut": "Signing out…"
+  },
   "spoiler": {
     "reveal": "Show anyway",
     "seasonTitle": "Open a season you haven't reached?",
@@ -303,7 +312,10 @@
     "pageEmpty": "Your journal is empty. Open a title you're watching and write a line about an episode.",
     "noFavorites": "No favourites marked yet.",
     "all": "Everything",
-    "favorites": "Favourites"
+    "favorites": "Favourites",
+    "deleteTitle": "Delete your note on episode {{n}}?",
+    "deleteTitleChapter": "Delete your note on chapter {{n}}?",
+    "deleteBody": "The note goes, along with its mood and its favourite marker. Your progress on the title is not affected."
   },
   "list": {
     "statusTabs": "List status",
@@ -331,7 +343,7 @@
     "edit": "Edit shelf",
     "save": "Save shelf",
     "delete": "Delete shelf",
-    "deleteTitle": "Delete {{name}}?",
+    "deleteTitle": "Delete the shelf {{name}}?",
     "deleteBody": "The shelf goes; the titles on it stay in your library.",
     "count_one": "{{count}} title",
     "count_other": "{{count}} titles",
@@ -345,7 +357,9 @@
       "withFriends": "Watch with friends",
       "soundtracks": "Best soundtracks",
       "weekend": "Weekend watchlist"
-    }
+    },
+    "deleteAffectedShared": "Anyone you shared it with loses access",
+    "deleteAffectedOrder": "The shelf and the order you put it in"
   },
   "entry": {
     "edit": "Edit entry",
@@ -360,7 +374,12 @@
     "notes": "Notes",
     "save": "Save entry",
     "remove": "Remove from list",
-    "removeConfirm": "Remove this title from your list? Progress and notes are deleted with it."
+    "removeTitle": "Remove {{title}} from your library?",
+    "removeBody": "It comes off your list. The title itself is untouched and you can add it again — but what you recorded about it does not come back.",
+    "removeAffected1": "Your progress, score and notes for it",
+    "removeAffected2": "Every journal entry you wrote about it",
+    "removeAffected3": "Its place on any shelf",
+    "removeAction": "Remove title"
   },
   "log": {
     "heading": "Viewing log",
@@ -441,7 +460,6 @@
     "makeAdmin": "Make admin",
     "makeUser": "Make user",
     "deleteUser": "Delete",
-    "deleteUserConfirm": "Delete {{name}} and everything they tracked?",
     "about": "About",
     "noTelemetry": "no telemetry",
     "visibility": "List visibility",
@@ -455,7 +473,6 @@
     "pendingFirstLogin": "pending first login",
     "revoke": "Sign out everywhere",
     "revokeHint": "Ends every other signed-in session. This device stays signed in.",
-    "revokeConfirm": "Sign out of all other devices?",
     "revoked": "All other sessions ended",
     "passwordHint": "At least 8 characters.",
     "subtitle": "Your account, this instance, and how AniTracker looks.",
@@ -526,7 +543,14 @@
     "spoilers": "Spoiler protection",
     "spoilersHint": "Hold back what you haven't reached — a friend's message, a season you're not up to. Revealing is always one tap.",
     "spoilersOn": "On",
-    "spoilersOff": "Off"
+    "spoilersOff": "Off",
+    "deleteUserTitle": "Delete the account {{name}}?",
+    "deleteUserBody": "The account and everything in it is deleted immediately. This cannot be undone, and nothing here can bring it back.",
+    "deleteUserAffected1": "Their whole library — every title, score and progress",
+    "deleteUserAffected2": "Their journal, their shelves and their reactions",
+    "deleteUserAffected3": "Their friendships and anything they recommended",
+    "revokeTitle": "Sign out of every other device?",
+    "revokeBody": "Every other session ends at once. Nothing is deleted — this device stays signed in, and everywhere else has to sign in again."
   },
   "hero": {
     "updateProgress": "Update progress",
@@ -581,7 +605,11 @@
     "showFewer": "Show fewer",
     "becauseYouLiked": "Because you liked {{title}}",
     "becauseHint": "Suggested from what your friends rated highly, matched on shared genres.",
-    "sharedThemes": "Shares {{genres}}"
+    "sharedThemes": "Shares {{genres}}",
+    "removeTitle": "Remove {{name}} from your friends?",
+    "removeBody": "You both stop seeing each other's lists. Neither library changes, and either of you can send a new request afterwards.",
+    "removeAffected": "Their notes and progress go back to being hidden from you",
+    "removeAction": "Remove friend"
   },
   "recommend": {
     "action": "Recommend to a friend",
@@ -659,16 +687,17 @@
     "clearTarget": "Clear",
     "inviteMore": "Invite someone else",
     "leave": "Leave group",
-    "leaveTitle": "Leave this group?",
+    "leaveTitle": "Leave the group for {{title}}?",
     "leaveBody": "You'll stop seeing everyone's progress, and they'll stop seeing yours. Your own list is untouched.",
     "close": "Close group",
-    "closeTitle": "Close this group?",
+    "closeTitle": "Close the group for {{title}}?",
     "closeBody": "It stops for everyone. Nobody's list or progress changes — the group simply ends.",
     "closed": "closed",
     "wouldPassOne": "Watching episode {{n}} puts you ahead of {{name}}.",
     "wouldPassMany_one": "Watching episode {{n}} puts you ahead of {{name}} and 1 other.",
     "wouldPassMany_other": "Watching episode {{n}} puts you ahead of {{name}} and {{count}} others.",
-    "pastTarget": "That's past the agreed episode {{n}}."
+    "pastTarget": "That's past the agreed episode {{n}}.",
+    "thisTitle": "this title"
   },
   "profile": {
     "notFound": "No user called “{{name}}”.",
