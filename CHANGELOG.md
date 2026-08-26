@@ -6,6 +6,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] — 2026-08-26
+
+A journal: what you thought, episode by episode.
+
+> **Upgrading from 2.4.0 runs one migration (`0015`).** One new table. Nothing
+> existing is touched, and `list_entries.notes` in particular is left alone.
+
+### Added
+- **A note about one episode**, with an optional mood from a fixed set, a favourite
+  marker and a spoiler flag. Everything but the episode number is optional — a mood
+  on its own is a real entry, and so is a star with nothing written.
+- **A timeline** at `/journal`, newest first and grouped by day, filterable to
+  favourites. The notes are worth keeping because they are worth rereading, and one
+  you can only find by opening the title it belongs to is not really findable.
+- **A rewatch writes a new memory rather than editing the old one.** Rows are keyed
+  by which pass you are on, so watching episode 7 again sits beside what you thought
+  the first time. The pass comes from the entry's own rewatch count, not from the
+  client, so a request cannot aim at an older pass and overwrite it.
+- A note you flagged stays covered when you reread your own journal later.
+
+### Security
+- **Private, with no way to share it.** No visibility column, and no endpoint that
+  returns a journal entry to anyone but its author — being someone's friend opens
+  their list, not their diary. That is a decision rather than an omission: this is
+  not a review platform, and the surest way to keep it from becoming one is to give
+  the data nowhere else to go.
+
+### Unchanged
+- `list_entries.notes` is untouched. A scratchpad for a whole title and a series of
+  dated moments answer different questions, and neither overwrites the other.
+
 ## [2.4.0] — 2026-08-26
 
 Holds back what you have not reached yet, and decides what that is from your own
@@ -292,7 +323,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/RGBond007/anitracker/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/RGBond007/anitracker/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/RGBond007/anitracker/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/RGBond007/anitracker/compare/v2.1.1...v2.2.0

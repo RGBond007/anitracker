@@ -316,6 +316,28 @@ export interface FriendRecommendation {
   media: Media | null;
 }
 
+export type Mood = "loved" | "moved" | "tense" | "funny" | "lost" | "dull";
+
+/**
+ * One dated note about one episode. Private: no endpoint returns another
+ * person's, and there is no shape here that could carry one.
+ */
+export interface JournalEntry {
+  id: number;
+  list_entry_id: number;
+  unit: number;
+  /** Which pass through the title; 0 is the first watch. */
+  rewatch_index: number;
+  note: string | null;
+  mood: Mood | null;
+  is_favorite: boolean;
+  has_spoilers: boolean;
+  created_at: string;
+  updated_at: string;
+  /** Present on the timeline, absent on a title's own page. */
+  media: Media | null;
+}
+
 export type WatchGroupState = "invited" | "joined" | "left";
 
 export interface WatchMember {
@@ -551,6 +573,23 @@ export const api = {
     }),
   recommendedBy: (provider: string, providerId: string) =>
     request<PublicUser[]>(`/recommendations/for/${provider}/${encodeURIComponent(providerId)}`),
+
+  journalFor: (entryId: number) => request<JournalEntry[]>(`/entries/${entryId}/journal`),
+  journalWrite: (
+    entryId: number,
+    input: {
+      unit: number;
+      note?: string | null;
+      mood?: Mood | null;
+      is_favorite?: boolean;
+      has_spoilers?: boolean;
+    },
+  ) => request<JournalEntry>(`/entries/${entryId}/journal`, { method: "PUT", body: body(input) }),
+  journalAmend: (id: number, patch: Record<string, unknown>) =>
+    request<JournalEntry>(`/journal/${id}`, { method: "PATCH", body: body(patch) }),
+  journalDelete: (id: number) => request<void>(`/journal/${id}`, { method: "DELETE" }),
+  journalTimeline: (favoritesOnly = false) =>
+    request<JournalEntry[]>(`/journal${favoritesOnly ? "?favorites_only=true" : ""}`),
 
   watchGroups: () => request<WatchGroup[]>("/watch-groups"),
   watchGroup: (id: number) => request<WatchGroup>(`/watch-groups/${id}`),

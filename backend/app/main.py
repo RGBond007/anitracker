@@ -16,6 +16,7 @@ from app.routers import (
     dashboard,
     entries,
     imports,
+    journal,
     media,
     recommendations,
     schedule,
@@ -60,6 +61,7 @@ api = APIRouter(prefix="/api")
 api.include_router(auth.router)
 api.include_router(media.router)
 api.include_router(entries.router)
+api.include_router(journal.router)
 api.include_router(dashboard.router)
 api.include_router(social.router)
 api.include_router(schedule.router)

@@ -22,6 +22,8 @@ export const queryKeys = {
   recommendInbox: ["recommend-inbox"] as const,
   recommendSent: ["recommend-sent"] as const,
   recommendedBy: (provider: string, id: string) => ["recommended-by", provider, id] as const,
+  journalFor: (entryId: number) => ["journal-for", entryId] as const,
+  journalTimeline: (favoritesOnly: boolean) => ["journal-timeline", favoritesOnly] as const,
   watchGroups: ["watch-groups"] as const,
   watchGroup: (id: number) => ["watch-group", id] as const,
   watchGroupForTitle: (provider: string, id: string) =>

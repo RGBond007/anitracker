@@ -7,6 +7,7 @@ import type {
   EntryStatus,
   FeedItem,
   FriendRecommendation,
+  JournalEntry,
   Friends,
   Instance,
   LeaderboardRow,
@@ -26,6 +27,7 @@ const USER_KEY = "anitracker-real-demo-user-v1";
 const SHELVES_KEY = "anitracker-real-demo-shelves-v1";
 const RECS_KEY = "anitracker-real-demo-recommendations-v1";
 const WATCH_KEY = "anitracker-real-demo-watch-groups-v1";
+const JOURNAL_KEY = "anitracker-real-demo-journal-v1";
 
 // These are provider-owned URLs, exactly like the cover/banner URLs returned to
 // a normal AniTracker instance. Keeping them out of the repository avoids
@@ -310,6 +312,20 @@ function watchOut(group: WatchGroup, entries: Entry[]): WatchGroup {
   };
 }
 
+/** The visitor's own journal. Empty until they write something, as it should be. */
+function readJournal(): JournalEntry[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(JOURNAL_KEY) ?? "null") as JournalEntry[] | null;
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeJournal(rows: JournalEntry[]) {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(rows));
+}
+
 function readUser(): User {
   try {
     return { ...demoUser, ...JSON.parse(localStorage.getItem(USER_KEY) ?? "{}") } as User;
@@ -515,6 +531,73 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
         .filter((row) => row.provider_id === decodeURIComponent(recFor[2]) && row.state !== "dismissed")
         .map((row) => row.sender),
     );
+  }
+
+  // --- Viewing journal ---
+  let journal = readJournal();
+  const journalFor = path.match(/^\/entries\/(\d+)\/journal$/);
+  const journalOne = path.match(/^\/journal\/(\d+)$/);
+
+  if (journalFor && method === "GET") {
+    const id = Number(journalFor[1]);
+    return json(
+      journal
+        .filter((r) => r.list_entry_id === id)
+        .sort((a, b) => a.rewatch_index - b.rewatch_index || a.unit - b.unit),
+    );
+  }
+  if (journalFor && method === "PUT") {
+    const id = Number(journalFor[1]);
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return json({ detail: "Entry not found" }, 404);
+    const input = payload(init) as Record<string, unknown>;
+    const unit = Number(input.unit);
+    // The pass comes from the entry, exactly as the server derives it.
+    const pass = entry.rewatch_count ?? 0;
+    const existing = journal.find(
+      (r) => r.list_entry_id === id && r.unit === unit && r.rewatch_index === pass,
+    );
+    const media = catalogue.find((c) => c.provider_id === entry.media.provider_id) ?? null;
+    const row: JournalEntry = existing ?? {
+      id: Math.max(0, ...journal.map((r) => r.id)) + 1,
+      list_entry_id: id,
+      unit,
+      rewatch_index: pass,
+      note: null,
+      mood: null,
+      is_favorite: false,
+      has_spoilers: false,
+      created_at: now(),
+      updated_at: now(),
+      media,
+    };
+    row.note = (String(input.note ?? "").trim() || null) as string | null;
+    row.mood = (input.mood as JournalEntry["mood"]) ?? null;
+    row.is_favorite = Boolean(input.is_favorite);
+    row.has_spoilers = Boolean(input.has_spoilers);
+    row.updated_at = now();
+    if (!existing) journal = [...journal, row];
+    writeJournal(journal);
+    return json(row);
+  }
+  if (journalOne && method === "PATCH") {
+    const row = journal.find((r) => r.id === Number(journalOne[1]));
+    if (!row) return json({ detail: "Journal entry not found" }, 404);
+    Object.assign(row, payload(init), { updated_at: now() });
+    writeJournal(journal);
+    return json(row);
+  }
+  if (journalOne && method === "DELETE") {
+    journal = journal.filter((r) => r.id !== Number(journalOne[1]));
+    writeJournal(journal);
+    return json(undefined, 204);
+  }
+  if (path.startsWith("/journal") && method === "GET") {
+    const favouritesOnly = new URLSearchParams(rawPath.split("?")[1] ?? "").get("favorites_only");
+    const rows = [...journal]
+      .filter((r) => (favouritesOnly === "true" ? r.is_favorite : true))
+      .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    return json(rows);
   }
 
   // --- Watch-together groups ---

@@ -47,6 +47,23 @@ class TitleLanguage(enum.StrEnum):
     native = "native"
 
 
+class Mood(enum.StrEnum):
+    """
+    A short reaction to one episode, from a closed set.
+
+    Fixed words rather than free text for the same reason completion reactions are:
+    a mood is a glance, and an open field invites the review nobody asked for. The
+    note beside it is where anything longer goes.
+    """
+
+    loved = "loved"
+    moved = "moved"
+    tense = "tense"
+    funny = "funny"
+    lost = "lost"
+    dull = "dull"
+
+
 class WatchGroupState(enum.StrEnum):
     """Where one person stands with one group."""
 
@@ -110,9 +127,6 @@ class User(Base):
     # Off by default: a list is visible to accepted friends only until its owner
     # opts in. A self-hosted instance may be reachable from outside the house.
     profile_public: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
-    # Set when an admin creates the account with a one-time password. While true the
-    # API serves nothing but /me and the password change, so the temporary secret
-    # cannot be used to actually operate the account.
     #: Hold back what the viewer has not reached yet, and make revealing it an
     #: explicit act. Defaults to *on*: the cost of protection nobody wanted is one
     #: extra tap, and the cost of missing protection somebody wanted is the story.
@@ -328,6 +342,59 @@ class FriendRecommendation(Base):
 
     sender: Mapped[User] = relationship(foreign_keys=[sender_id])
     recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])
+
+
+class JournalEntry(Base):
+    """
+    One person's note about one episode.
+
+    Separate from `ListEntry.notes` on purpose. That field is a single scratchpad
+    for a whole title -- "watching with Kaito", "dubbed version" -- and overwriting
+    it every episode would destroy the thing it is for. A journal is a series of
+    dated moments, and the two answer different questions.
+
+    **Private, with no way to share it.** There is no visibility column and no
+    endpoint that returns one of these to anyone but its author. That is deliberate
+    rather than unfinished: the brief that asked for this also asked that it not
+    become a review platform, and the surest way to keep that promise is to give
+    the data nowhere else to go. Sharing would be a later decision, made once,
+    rather than a flag that quietly defaults wrong.
+
+    `rewatch_index` is what makes a rewatch its own memory instead of an edit: the
+    row is keyed by the pass you were on, so watching episode 7 again writes a
+    second entry beside the first rather than over it.
+    """
+
+    __tablename__ = "journal_entries"
+    __table_args__ = (
+        UniqueConstraint(
+            "list_entry_id", "unit", "rewatch_index", name="uq_journal_entry_unit_pass"
+        ),
+        CheckConstraint("unit >= 1", name="ck_journal_unit_positive"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    list_entry_id: Mapped[int] = mapped_column(
+        ForeignKey("list_entries.id", ondelete="CASCADE"), index=True
+    )
+    #: Episode or chapter number. Which of the two is read from the title's type.
+    unit: Mapped[int] = mapped_column(Integer)
+    #: Which pass through the title this belongs to. 0 is the first watch.
+    rewatch_index: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[str | None] = mapped_column(String(1000))
+    mood: Mapped[Mood | None] = mapped_column(Enum(Mood, name="mood"))
+    #: "This is the one." At most a handful per title, and never a score.
+    is_favorite: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    #: Covered on the reader's own timeline too -- a journal is often reread years
+    #: later, next to titles they have since forgotten the shape of.
+    has_spoilers: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    entry: Mapped[ListEntry] = relationship()
 
 
 class WatchGroup(Base):

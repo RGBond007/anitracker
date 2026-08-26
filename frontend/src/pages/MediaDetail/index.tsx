@@ -19,6 +19,7 @@ import { mediaHref } from "../../components/media/Poster";
 import { SeasonActions } from "../../components/media/SeasonActions";
 import { useSeasonLabels } from "../../components/media/seasonLabels";
 import { EpisodeList } from "../../components/media/EpisodeList";
+import { Journal } from "../../components/media/Journal";
 import { FriendsOnTitle } from "../../components/media/FriendsOnTitle";
 import { RecommendSheet } from "../../components/media/RecommendSheet";
 import { WatchTogether } from "../../components/media/WatchTogether";
@@ -350,14 +351,6 @@ export function MediaDetailPage() {
         <RecommendSheet media={media.data} onClose={() => setRecommending(false)} />
       )}
 
-      {/* After the viewing log, which is where the reader's own position is set:
-          this list is read relative to that number. */}
-      {media.data && <EpisodeList media={media.data} entry={entry.data ?? null} />}
-
-      {/* Between the viewing log and the seasons: it is about this title, but about
-          other people, so it reads after your own record of it. */}
-      <FriendsOnTitle provider={provider} providerId={id} isManga={type === "manga"} />
-
       {pendingSeason && (
         <Modal title={t("spoiler.seasonTitle")} onClose={() => setPendingSeason(null)}>
           <p className="text-sm text-text-dim">
@@ -389,6 +382,10 @@ export function MediaDetailPage() {
       {/* After the viewing log, which is where the reader's own position is set:
           this list is read relative to that number. */}
       {media.data && <EpisodeList media={media.data} entry={entry.data ?? null} />}
+
+      {/* Only for a title you track — there is nothing to journal about a show
+          that is not on your list. */}
+      {entry.data && <Journal entry={entry.data} isManga={type === "manga"} />}
 
       {/* Between the viewing log and the seasons: it is about this title, but about
           other people, so it reads after your own record of it. */}

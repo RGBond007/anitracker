@@ -8,6 +8,7 @@ import { ChangePasswordPage } from "../pages/ChangePassword";
 import { DashboardPage } from "../pages/Dashboard";
 import { FriendsPage } from "../pages/Friends";
 import { ImportPage } from "../pages/Import";
+import { JournalPage } from "../pages/Journal";
 import { ListViewPage } from "../pages/ListView";
 import { LoginPage } from "../pages/Login";
 import { MediaDetailPage } from "../pages/MediaDetail";
@@ -70,6 +71,7 @@ export function Router() {
         <Route path="/media/:provider/:id" element={<MediaDetailPage />} />
         <Route path="/list/:status" element={<ListViewPage />} />
         <Route path="/shelf/:id" element={<ShelfPage />} />
+        <Route path="/journal" element={<JournalPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/u/:username" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />

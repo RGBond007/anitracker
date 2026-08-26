@@ -8,6 +8,7 @@ from app.models import (
     FriendshipState,
     ImportState,
     MediaType,
+    Mood,
     Reaction,
     RecommendationState,
     Role,
@@ -525,6 +526,56 @@ class SendResult(BaseModel):
     sent: list[FriendRecommendationOut]
     #: Recipients skipped because an identical recommendation is already waiting.
     already_pending: list[int] = []
+
+
+# --- Viewing journal ---
+
+
+class JournalOut(ORM):
+    """
+    One dated moment from one episode.
+
+    Only ever sent to its author. There is no public variant of this class and no
+    endpoint that returns it to anyone else -- see `JournalEntry` for why that is
+    a decision rather than an omission.
+    """
+
+    id: int
+    list_entry_id: int
+    unit: int
+    rewatch_index: int
+    note: str | None
+    mood: Mood | None
+    is_favorite: bool
+    has_spoilers: bool
+    created_at: datetime
+    updated_at: datetime
+    #: Present on the timeline, so a row can name the title it belongs to without
+    #: the client holding the whole library. Omitted on a title's own page.
+    media: MediaOut | None = None
+
+
+class JournalWrite(BaseModel):
+    """
+    What one journal row can say.
+
+    Everything is optional except the episode: a mood on its own is a legitimate
+    entry, and so is a favourite marker with nothing written. Requiring prose would
+    make the quick case the expensive one.
+    """
+
+    unit: int = Field(ge=1)
+    note: str | None = Field(default=None, max_length=1000)
+    mood: Mood | None = None
+    is_favorite: bool = False
+    has_spoilers: bool = False
+
+
+class JournalPatch(BaseModel):
+    note: str | None = Field(default=None, max_length=1000)
+    mood: Mood | None = None
+    is_favorite: bool | None = None
+    has_spoilers: bool | None = None
 
 
 # --- Watch-together groups ---

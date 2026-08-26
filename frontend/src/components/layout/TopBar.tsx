@@ -74,6 +74,7 @@ export function TopBar() {
   const links = [
     { to: "/", label: t("nav.dashboard"), end: true, badge: 0 },
     { to: "/list/current", label: t("nav.library"), end: false, badge: 0 },
+    { to: "/journal", label: t("nav.journal"), end: false, badge: 0 },
     { to: "/friends", label: t("nav.friends"), end: false, badge: pending },
     { to: "/import", label: t("nav.import"), end: false, badge: 0 },
   ];

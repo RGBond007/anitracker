@@ -7,7 +7,8 @@
     "logout": "Abmelden",
     "friends": "Freunde",
     "primary": "Hauptnavigation",
-    "search": "Suche"
+    "search": "Suche",
+    "journal": "Journal"
   },
   "common": {
     "anime": "Anime",
@@ -249,6 +250,46 @@
     "hidden": "Titel, bei denen du noch nicht bist, sind verdeckt.",
     "untitled": "Kein Titel bekannt",
     "notReached": "du bist noch nicht so weit"
+  },
+  "journal": {
+    "heading": "Journal",
+    "add": "Notiz hinzufügen",
+    "seeAll": "Alles ansehen",
+    "empty": "Noch nichts geschrieben. Eine Zeile zur letzten Episode reicht.",
+    "emptyManga": "Noch nichts geschrieben. Eine Zeile zum letzten Kapitel reicht.",
+    "episodeWatched": "Episode {{n}} gesehen",
+    "chapterRead": "Kapitel {{n}} gelesen",
+    "pass": "Durchgang {{n}}",
+    "favorite": "Ein Favorit",
+    "edit": "Notiz bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "writeTitle": "Was hast du gedacht?",
+    "episode": "Episode",
+    "chapter": "Kapitel",
+    "note": "Notiz",
+    "noteHint": "Das liest nur du.",
+    "placeholder": "Starke Charakterfolge.",
+    "markFavorite": "Einer meiner Favoriten",
+    "markSpoiler": "Das verrät etwas",
+    "markSpoilerHint": "Bleibt verdeckt, wenn du dein Journal später wieder liest.",
+    "markedSpoiler": "so markiert",
+    "writingPass": "Du schreibst zu Durchgang {{n}} — frühere Notizen bleiben erhalten.",
+    "mood": {
+      "label": "Stimmung",
+      "loved": "geliebt",
+      "moved": "berührt",
+      "tense": "spannend",
+      "funny": "lustig",
+      "lost": "verwirrt",
+      "dull": "zäh"
+    },
+    "pageTitle": "Dein Journal",
+    "pageHint": "Alles, was du geschrieben hast, neueste zuerst. Niemand sonst sieht davon etwas.",
+    "pageEmpty": "Dein Journal ist leer. Öffne einen Titel, den du schaust, und schreib eine Zeile zu einer Episode.",
+    "noFavorites": "Noch keine Favoriten markiert.",
+    "all": "Alles",
+    "favorites": "Favoriten"
   },
   "list": {
     "statusTabs": "Listenstatus",
