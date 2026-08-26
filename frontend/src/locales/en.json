@@ -24,6 +24,16 @@
     "loading": "Loading {{name}}",
     "slow": "This is taking longer than expected."
   },
+  "error": {
+    "kicker": "Something broke",
+    "title": "This screen stopped part-way through drawing.",
+    "body": "The app hit an error it could not recover from on its own, so it stopped here instead of showing you something half-built. Nothing in your library was touched — this went wrong in the browser, not on the server.",
+    "home": "Return to dashboard",
+    "details": "Technical details",
+    "detailsHint": "Safe to paste into a bug report: the query string, session tokens and email addresses have been removed.",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
   "spoiler": {
     "reveal": "Show anyway",
     "seasonTitle": "Open a season you haven't reached?",

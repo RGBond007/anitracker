@@ -5,7 +5,11 @@ import { BrowserRouter, HashRouter } from "react-router-dom";
 import { ToastViewport } from "../components/ui/Toast";
 import "../lib/i18n";
 
-const queryClient = new QueryClient({
+/**
+ * Exported so the root error boundary can empty it on "Try again": a render that
+ * threw over a payload it did not expect would meet the same cached copy again.
+ */
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,

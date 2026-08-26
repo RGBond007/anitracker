@@ -6,6 +6,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.3] — 2026-08-26
+
+### Added
+- **A rendering error no longer takes the whole page with it.** React's answer to
+  an exception thrown while drawing is to unmount the entire tree: not a broken
+  panel on a working page, but an empty document with nothing in it and nothing
+  saying why. On a self-hosted instance that is indistinguishable from a container
+  that died, which sends someone to `docker logs` for a fault that only ever
+  happened in the browser. The app is now wrapped in an error boundary above every
+  provider, so a crash lands on a screen that explains itself and offers a way out.
+- **Two ways back.** "Try again" rebuilds the interface from scratch and empties
+  the query cache on the way — the likeliest cause of a render crash is a component
+  meeting a payload it did not expect, and retrying against the same cached copy of
+  it would only fail in the same place. "Return to dashboard" is a full load of the
+  home route, which drops every piece of state the crash happened in.
+- **A technical reference that is safe to send.** The screen carries a collapsed
+  block with the version, the moment, the route, the browser, the stack and the
+  React component stack — enough to act on a bug report from someone who cannot
+  reproduce it on demand, without asking anyone to open the developer console.
+  What is shown is exactly what the copy button copies; there is no fuller version
+  travelling to the clipboard that nobody has read. The button is left out entirely
+  where the Clipboard API does not exist, which is any instance reached over plain
+  `http` — the trace is still there to select, and a button that silently does
+  nothing is worse than no button.
+- **Nothing private goes with it.** Query strings, session tokens, `Authorization`
+  headers, anything naming itself a password or a key, email addresses and unnamed
+  opaque blobs are stripped from the report before it is shown. The rules are
+  deliberately narrow in the other direction too: file paths, frame positions and
+  ordinary error messages survive intact, because a report whose stack is entirely
+  `[redacted]` cannot be acted on. Seventeen tests pin both halves.
+
+### Accessibility
+- **The failure is announced.** The heading and the explanation sit in an alert
+  region, so a screen reader says what happened when the screen replaces the app
+  rather than leaving someone on a page that silently changed underneath them. The
+  stack trace is deliberately outside that region — an alert is read out whole, and
+  a recited stack trace is not an announcement.
+
+### Known limits
+- The boundary catches what React can catch: a throw during render, in a lifecycle,
+  or in a constructor. An event handler that throws and a rejected promise never
+  reach a boundary in any React version, and this one does not pretend otherwise.
+- One broken component still replaces the whole screen. Per-route boundaries would
+  buy that back and can be added without changing anything here.
+
 ## [2.5.2] — 2026-08-26
 
 ### Changed
@@ -36,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Accessibility
 - **Loading is announced, once.** The startup screen carries a single polite
-  live region holding one sentence at a time: "Loading <instance>", replaced
+  live region holding one sentence at a time: `Loading <instance name>`, replaced
   after eight seconds by "This is taking longer than expected." — so a delayed
   request reads as a slow server rather than a crash. Both messages are visible
   text as well, and the indicator stops moving under `prefers-reduced-motion`
@@ -369,7 +414,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.2...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.3...HEAD
+[2.5.3]: https://github.com/RGBond007/anitracker/compare/v2.5.2...v2.5.3
 [2.5.2]: https://github.com/RGBond007/anitracker/compare/v2.5.1...v2.5.2
 [2.5.1]: https://github.com/RGBond007/anitracker/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/RGBond007/anitracker/compare/v2.4.0...v2.5.0

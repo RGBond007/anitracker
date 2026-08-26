@@ -24,6 +24,16 @@
     "loading": "{{name}} wird geladen",
     "slow": "Das dauert länger als erwartet."
   },
+  "error": {
+    "kicker": "Etwas ist kaputtgegangen",
+    "title": "Diese Seite konnte nicht fertig aufgebaut werden.",
+    "body": "Die App ist auf einen Fehler gestoßen, von dem sie sich nicht selbst erholen konnte, und hat hier abgebrochen, statt dir etwas Halbfertiges zu zeigen. An deiner Bibliothek wurde nichts verändert — das ist im Browser schiefgegangen, nicht auf dem Server.",
+    "home": "Zurück zur Übersicht",
+    "details": "Technische Details",
+    "detailsHint": "Kann bedenkenlos in einen Fehlerbericht kopiert werden: Query-String, Sitzungs-Token und E-Mail-Adressen sind entfernt.",
+    "copy": "Kopieren",
+    "copied": "Kopiert"
+  },
   "spoiler": {
     "reveal": "Trotzdem anzeigen",
     "seasonTitle": "Eine Staffel öffnen, bei der du noch nicht bist?",
