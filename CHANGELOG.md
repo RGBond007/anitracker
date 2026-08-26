@@ -6,6 +6,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-08-26
+
+Watching one show with a few friends, at roughly the same pace.
+
+> **Upgrading from 2.2.0 runs one migration (`0012`).** Two new tables, nothing
+> existing touched, and no account behaves differently until somebody starts a group.
+
+### Added
+- **Watch-together groups.** Mark a title, invite friends, and see where everyone is
+  with it. Coordination only — nothing streams, syncs or plays, and the app never
+  learns whether a session happened.
+- **Progress is not stored in the group.** Each member's position is read from their
+  own list at request time, so the group cannot drift out of step with the library
+  and leaving takes nothing with it.
+- **A spoiler check beside the button that matters.** Logging the next episode shows
+  who it would leave behind, by name: "Watching episode 19 puts you ahead of Mika."
+  It reports and never blocks.
+- An optional target episode for the next session, changeable by any joined member.
+- Leaving, and closing. The owner leaving closes the group rather than orphaning it.
+
+### Security
+- A group's roster and everyone's episode are visible to its members and to nobody
+  else. A friend outside the group, an invitee who has not accepted, and someone who
+  left all get a 404 — the roster of a private group is itself private. An invitation
+  is not consent to publish your position, so `progress` stays null until you join.
+
 ## [2.2.0] — 2026-08-26
 
 Answers "what should I watch tonight?" from your own library.
@@ -231,7 +257,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/RGBond007/anitracker/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/RGBond007/anitracker/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.1
 [2.0.1]: https://github.com/RGBond007/anitracker/compare/v2.0.0...v2.0.1

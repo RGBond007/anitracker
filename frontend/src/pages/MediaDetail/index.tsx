@@ -18,6 +18,7 @@ import { SeasonActions } from "../../components/media/SeasonActions";
 import { useSeasonLabels } from "../../components/media/seasonLabels";
 import { FriendsOnTitle } from "../../components/media/FriendsOnTitle";
 import { RecommendSheet } from "../../components/media/RecommendSheet";
+import { WatchTogether } from "../../components/media/WatchTogether";
 import { RecommendedBy } from "../../components/media/RecommendedBy";
 import { SeasonProgress } from "../../components/media/SeasonProgress";
 import { SeasonChips, SeasonSwitcher } from "../../components/media/SeasonSwitcher";
@@ -168,6 +169,10 @@ export function MediaDetailPage() {
               once a title is on your list, and telling a friend about something is
               the main way anyone hears of it in the first place. Requiring the
               sender to track it first would rule out exactly that case. */}
+          {/* Under the progress card, above the other affordances: it is about
+              this title and these people, which is nearer than anything else. */}
+          {media.data && <WatchTogether media={media.data} />}
+
           <button
             type="button"
             onClick={() => setRecommending(true)}

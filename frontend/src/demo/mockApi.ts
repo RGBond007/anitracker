@@ -18,12 +18,14 @@ import type {
   Series,
   Shelf,
   User,
+  WatchGroup,
 } from "../lib/api-client";
 
 const LIBRARY_KEY = "anitracker-real-demo-library-v2";
 const USER_KEY = "anitracker-real-demo-user-v1";
 const SHELVES_KEY = "anitracker-real-demo-shelves-v1";
 const RECS_KEY = "anitracker-real-demo-recommendations-v1";
+const WATCH_KEY = "anitracker-real-demo-watch-groups-v1";
 
 // These are provider-owned URLs, exactly like the cover/banner URLs returned to
 // a normal AniTracker instance. Keeping them out of the repository avoids
@@ -256,6 +258,37 @@ function writeRecommendations(rows: FriendRecommendation[]) {
   localStorage.setItem(RECS_KEY, JSON.stringify(rows));
 }
 
+/**
+ * Watch-together groups. Empty until the visitor starts one -- the same as a real
+ * instance, where a group exists because somebody proposed it.
+ */
+function readWatchGroups(): WatchGroup[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(WATCH_KEY) ?? "null") as WatchGroup[] | null;
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeWatchGroups(groups: WatchGroup[]) {
+  localStorage.setItem(WATCH_KEY, JSON.stringify(groups));
+}
+
+/** Fills each joined member's episode from the library, as the server does. */
+function watchOut(group: WatchGroup, entries: Entry[]): WatchGroup {
+  const own = entries.find((e) => e.media.provider_id === group.provider_id);
+  return {
+    ...group,
+    members: group.members.map((m) =>
+      m.state !== "joined"
+        ? { ...m, progress: null }
+        : { ...m, progress: m.user.id === 1 ? (own?.progress ?? null) : m.progress },
+    ),
+    media: catalogue.find((c) => c.provider_id === group.provider_id) ?? null,
+  };
+}
+
 function readUser(): User {
   try {
     return { ...demoUser, ...JSON.parse(localStorage.getItem(USER_KEY) ?? "{}") } as User;
@@ -459,6 +492,116 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
         .filter((row) => row.provider_id === decodeURIComponent(recFor[2]) && row.state !== "dismissed")
         .map((row) => row.sender),
     );
+  }
+
+  // --- Watch-together groups ---
+  let watch = readWatchGroups();
+  const watchFor = path.match(/^\/watch-groups\/for\/([^/]+)\/([^/]+)$/);
+  const watchOne = path.match(/^\/watch-groups\/(\d+)$/);
+  const watchAct = path.match(/^\/watch-groups\/(\d+)\/(join|leave|invite)$/);
+  const watchSpoil = path.match(/^\/watch-groups\/(\d+)\/spoiler$/);
+  const me = { id: 1, username: demoUser.username, profile_public: true, avatar_url: null, created_at: demoUser.created_at };
+
+  if (path === "/watch-groups" && method === "GET") {
+    return json(watch.map((g) => watchOut(g, entries)));
+  }
+  if (path === "/watch-groups" && method === "POST") {
+    const input = payload(init) as Record<string, unknown>;
+    const invited = ((input.invite_ids as number[]) ?? []).includes(friend.id);
+    const group: WatchGroup = {
+      id: Math.max(0, ...watch.map((g) => g.id)) + 1,
+      provider: String(input.provider ?? "demo"),
+      provider_id: String(input.provider_id ?? ""),
+      media_type: (input.media_type as "anime" | "manga") ?? "anime",
+      target_unit: null,
+      is_closed: false,
+      my_state: "joined",
+      i_own_it: true,
+      members: [
+        { user: me, state: "joined", progress: null, is_owner: true },
+        // Mika joins straight away and sits two episodes back. In a real instance
+        // she would be `invited` until she accepted, but nobody can accept inside
+        // a one-browser demo -- and an invitation nobody can act on would hide the
+        // roster and the spoiler warning, which are the whole feature.
+        ...(invited
+          ? [
+              {
+                user: friend,
+                state: "joined" as const,
+                progress: Math.max(
+                  0,
+                  (entries.find((e) => e.media.provider_id === String(input.provider_id))?.progress ?? 3) - 2,
+                ),
+                is_owner: false,
+              },
+            ]
+          : []),
+      ],
+      media: null,
+      created_at: now(),
+    };
+    watch = [...watch, group];
+    writeWatchGroups(watch);
+    return json(watchOut(group, entries), 201);
+  }
+  if (watchFor && method === "GET") {
+    const pid = decodeURIComponent(watchFor[2]);
+    const group = watch.find((g) => g.provider_id === pid && !g.is_closed);
+    return json(group ? watchOut(group, entries) : null);
+  }
+  if (watchSpoil && method === "GET") {
+    const group = watch.find((g) => g.id === Number(watchSpoil[1]));
+    if (!group) return json({ detail: "Group not found" }, 404);
+    const unit = Number(new URLSearchParams(rawPath.split("?")[1] ?? "").get("unit") ?? 0);
+    const behind = group.members
+      .filter((m) => m.state === "joined" && m.user.id !== 1 && (m.progress ?? 0) < unit)
+      .map((m) => m.user);
+    return json({
+      unit,
+      behind,
+      past_target: group.target_unit != null && unit > group.target_unit,
+      target_unit: group.target_unit,
+    });
+  }
+  if (watchOne && method === "GET") {
+    const group = watch.find((g) => g.id === Number(watchOne[1]));
+    return group ? json(watchOut(group, entries)) : json({ detail: "Group not found" }, 404);
+  }
+  if (watchOne && method === "PATCH") {
+    const group = watch.find((g) => g.id === Number(watchOne[1]));
+    if (!group) return json({ detail: "Group not found" }, 404);
+    group.target_unit = (payload(init).target_unit as number | null) ?? null;
+    writeWatchGroups(watch);
+    return json(watchOut(group, entries));
+  }
+  if (watchOne && method === "DELETE") {
+    const group = watch.find((g) => g.id === Number(watchOne[1]));
+    if (group) { group.is_closed = true; writeWatchGroups(watch); }
+    return json(undefined, 204);
+  }
+  if (watchAct) {
+    const group = watch.find((g) => g.id === Number(watchAct[1]));
+    if (!group) return json({ detail: "Group not found" }, 404);
+    if (watchAct[2] === "leave") {
+      watch = watch.filter((g) => g.id !== group.id);
+      writeWatchGroups(watch);
+      return json(undefined, 204);
+    }
+    if (watchAct[2] === "invite") {
+      // Mika accepts immediately here and sits a couple of episodes back, so the
+      // spoiler warning has something true to say.
+      const own = entries.find((e) => e.media.provider_id === group.provider_id);
+      if (!group.members.some((m) => m.user.id === friend.id)) {
+        group.members.push({
+          user: friend,
+          state: "joined",
+          progress: Math.max(0, (own?.progress ?? 3) - 2),
+          is_owner: false,
+        });
+      }
+    }
+    writeWatchGroups(watch);
+    return json(watchOut(group, entries));
   }
 
   // --- Small social moments ---

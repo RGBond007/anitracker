@@ -12,6 +12,7 @@ from app.models import (
     RecommendationState,
     Role,
     TitleLanguage,
+    WatchGroupState,
 )
 
 
@@ -497,6 +498,79 @@ class SendResult(BaseModel):
     sent: list[FriendRecommendationOut]
     #: Recipients skipped because an identical recommendation is already waiting.
     already_pending: list[int] = []
+
+
+# --- Watch-together groups ---
+
+
+class WatchMember(BaseModel):
+    """
+    One member, and where they are with the title.
+
+    `progress` is the member's own count read from their list at request time. It
+    is only ever populated for a *joined* member, and only ever sent to another
+    member of the same group -- inside the group people have agreed to share a
+    pace; outside it, nobody has agreed to anything.
+    """
+
+    user: PublicUser
+    state: WatchGroupState
+    #: Null for someone who has not accepted yet, or who does not track the title.
+    progress: int | None = None
+    is_owner: bool = False
+
+
+class WatchGroupOut(ORM):
+    id: int
+    provider: str
+    provider_id: str
+    media_type: MediaType
+    target_unit: int | None
+    is_closed: bool
+    #: The viewer's own standing, so the client knows which controls to offer.
+    my_state: WatchGroupState
+    i_own_it: bool
+    members: list[WatchMember] = []
+    #: The cached title when the instance has one; null is normal.
+    media: MediaOut | None = None
+    created_at: datetime
+
+
+class WatchGroupCreate(BaseModel):
+    provider: str = Field(min_length=1, max_length=32)
+    provider_id: str = Field(min_length=1, max_length=64)
+    media_type: MediaType
+    #: Friends to invite up front. May be empty -- a group of one is a group
+    #: waiting for someone, not an error.
+    invite_ids: list[int] = Field(default_factory=list, max_length=25)
+
+
+class WatchInviteIn(BaseModel):
+    user_ids: list[int] = Field(min_length=1, max_length=25)
+
+
+class WatchTargetIn(BaseModel):
+    """Null clears the target, which is how a group says "no plan yet"."""
+
+    target_unit: int | None = Field(default=None, ge=1)
+
+
+class SpoilerCheck(BaseModel):
+    """
+    What logging one more unit would do to the people you are watching with.
+
+    Answered for a specific prospective position rather than in the abstract, so
+    the client can ask "if I watch episode 9, who does that leave behind?" and put
+    the real names in front of someone before they press the button.
+    """
+
+    #: The position being considered.
+    unit: int
+    #: Joined members whose own progress is below `unit`.
+    behind: list[PublicUser] = []
+    #: True when `unit` goes past what the group agreed to watch next.
+    past_target: bool = False
+    target_unit: int | None = None
 
 
 # --- Small social moments ---

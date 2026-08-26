@@ -19,6 +19,8 @@ export const ICONS = {
   sliders: "M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4M14 4v4M6 10v4M12 16v4",
   history: "M12 8v4l3 2M3.5 12a8.5 8.5 0 1 0 2.6-6.1M6 3v3h3",
   close: "m6 6 12 12M18 6 6 18",
+  /* Two heads and two shoulders: a group, at the same weight as the rest. */
+  friends: "M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5M20 20v-1.5a3.5 3.5 0 0 0-2.6-3.4M15.5 5.2a3.25 3.25 0 0 1 0 6.1",
   /* Two upright volumes and a third leaning — a shelf, not a stack of paper. */
   library: "M4 4v16M9 4v16M14.5 5.5 19 19",
   /* Paper plane, drawn as the outline plus the fold: two subpaths on the same

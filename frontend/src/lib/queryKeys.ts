@@ -22,6 +22,11 @@ export const queryKeys = {
   recommendInbox: ["recommend-inbox"] as const,
   recommendSent: ["recommend-sent"] as const,
   recommendedBy: (provider: string, id: string) => ["recommended-by", provider, id] as const,
+  watchGroups: ["watch-groups"] as const,
+  watchGroup: (id: number) => ["watch-group", id] as const,
+  watchGroupForTitle: (provider: string, id: string) =>
+    ["watch-group-for", provider, id] as const,
+  watchSpoiler: (id: number, unit: number) => ["watch-spoiler", id, unit] as const,
   friendsOnTitle: (provider: string, id: string) => ["friends-on-title", provider, id] as const,
   reactions: (entryId: number) => ["reactions", entryId] as const,
   sharedShelves: (username: string) => ["shared-shelves", username] as const,

@@ -297,6 +297,38 @@ export interface FriendRecommendation {
   media: Media | null;
 }
 
+export type WatchGroupState = "invited" | "joined" | "left";
+
+export interface WatchMember {
+  user: PublicUser;
+  state: WatchGroupState;
+  /** Only ever present for a joined member, and only to another member. */
+  progress: number | null;
+  is_owner: boolean;
+}
+
+export interface WatchGroup {
+  id: number;
+  provider: string;
+  provider_id: string;
+  media_type: MediaType;
+  target_unit: number | null;
+  is_closed: boolean;
+  my_state: WatchGroupState;
+  i_own_it: boolean;
+  members: WatchMember[];
+  media: Media | null;
+  created_at: string;
+}
+
+/** Who a prospective position would leave behind. Reports; never blocks. */
+export interface SpoilerCheck {
+  unit: number;
+  behind: PublicUser[];
+  past_target: boolean;
+  target_unit: number | null;
+}
+
 export type Reaction = "clapped" | "same" | "queued" | "envious" | "crying";
 
 export interface FriendOnTitle {
@@ -499,6 +531,33 @@ export const api = {
     }),
   recommendedBy: (provider: string, providerId: string) =>
     request<PublicUser[]>(`/recommendations/for/${provider}/${encodeURIComponent(providerId)}`),
+
+  watchGroups: () => request<WatchGroup[]>("/watch-groups"),
+  watchGroup: (id: number) => request<WatchGroup>(`/watch-groups/${id}`),
+  watchGroupForTitle: (provider: string, providerId: string) =>
+    request<WatchGroup | null>(`/watch-groups/for/${provider}/${encodeURIComponent(providerId)}`),
+  createWatchGroup: (input: {
+    provider: string;
+    provider_id: string;
+    media_type: MediaType;
+    invite_ids: number[];
+  }) => request<WatchGroup>("/watch-groups", { method: "POST", body: body(input) }),
+  joinWatchGroup: (id: number) => request<WatchGroup>(`/watch-groups/${id}/join`, { method: "POST" }),
+  leaveWatchGroup: (id: number) =>
+    request<void>(`/watch-groups/${id}/leave`, { method: "POST" }),
+  closeWatchGroup: (id: number) => request<void>(`/watch-groups/${id}`, { method: "DELETE" }),
+  inviteToWatchGroup: (id: number, userIds: number[]) =>
+    request<WatchGroup>(`/watch-groups/${id}/invite`, {
+      method: "POST",
+      body: body({ user_ids: userIds }),
+    }),
+  setWatchTarget: (id: number, target: number | null) =>
+    request<WatchGroup>(`/watch-groups/${id}`, {
+      method: "PATCH",
+      body: body({ target_unit: target }),
+    }),
+  watchSpoilerCheck: (id: number, unit: number) =>
+    request<SpoilerCheck>(`/watch-groups/${id}/spoiler?unit=${unit}`),
 
   friendsOnTitle: (provider: string, providerId: string) =>
     request<TitleFriends>(`/media/${provider}/${encodeURIComponent(providerId)}/friends`),

@@ -47,6 +47,14 @@ class TitleLanguage(enum.StrEnum):
     native = "native"
 
 
+class WatchGroupState(enum.StrEnum):
+    """Where one person stands with one group."""
+
+    invited = "invited"
+    joined = "joined"
+    left = "left"
+
+
 class Reaction(enum.StrEnum):
     """
     The fixed vocabulary of a completion reaction.
@@ -304,6 +312,80 @@ class FriendRecommendation(Base):
 
     sender: Mapped[User] = relationship(foreign_keys=[sender_id])
     recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])
+
+
+class WatchGroup(Base):
+    """
+    A few friends agreeing to watch one title at roughly the same pace.
+
+    Coordination, not playback: the group holds a title, a roster, and optionally
+    the episode everyone is aiming at next. Nothing here streams, syncs or plays
+    anything, and the app never learns whether a session actually happened.
+
+    Scoped to a title rather than to a shelf. A shared shelf would need permissions
+    on a collection that changes under you; a group is one show, one roster, and it
+    ends when the show does.
+
+    Progress is *not* stored here. Each member's position is read from their own
+    `ListEntry` at request time, so a group can never disagree with the library and
+    leaving a group takes nothing with it.
+    """
+
+    __tablename__ = "watch_groups"
+    __table_args__ = (
+        UniqueConstraint(
+            "owner_id", "provider", "provider_id", "closed_at", name="uq_group_owner_title_open"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(32))
+    provider_id: Mapped[str] = mapped_column(String(64), index=True)
+    media_type: Mapped[MediaType] = mapped_column(Enum(MediaType, name="media_type"))
+    #: The episode the group is aiming at next. Null until somebody proposes one.
+    target_unit: Mapped[int | None] = mapped_column(Integer)
+    #: Set when the owner closes it. Kept rather than deleted so members who were
+    #: in it are not surprised by a row vanishing mid-request.
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    owner: Mapped[User] = relationship()
+    members: Mapped[list["WatchGroupMember"]] = relationship(
+        back_populates="group", cascade="all, delete-orphan"
+    )
+
+
+class WatchGroupMember(Base):
+    """
+    One person's standing in one group.
+
+    `left` is a state rather than a deleted row: it stops a closed invitation from
+    being re-sent as though it were new, and it means "was in this" is answerable
+    without keeping a separate log.
+    """
+
+    __tablename__ = "watch_group_members"
+    __table_args__ = (UniqueConstraint("group_id", "user_id", name="uq_group_member"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    group_id: Mapped[int] = mapped_column(
+        ForeignKey("watch_groups.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    state: Mapped[WatchGroupState] = mapped_column(
+        Enum(WatchGroupState, name="watch_group_state"), default=WatchGroupState.invited, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    group: Mapped[WatchGroup] = relationship(back_populates="members")
+    user: Mapped[User] = relationship()
 
 
 class EntryReaction(Base):

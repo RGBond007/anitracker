@@ -24,6 +24,7 @@ import { Modal } from "../ui/Modal";
 import { Sheet } from "../ui/Sheet";
 import { EntryForm } from "./EntryForm";
 import { RecommendSheet } from "./RecommendSheet";
+import { SpoilerWarning } from "./SpoilerWarning";
 import { ProgressLedger } from "./ProgressLedger";
 import { declineSeasonPrompt, nextAfter } from "./SeasonActions";
 import { useSeasonLabels } from "./seasonLabels";
@@ -286,6 +287,14 @@ export function ViewingLog({
           </Menu>
         </div>
       </div>
+
+      {/* Directly under the row holding "+ Episode": a warning about a button is
+          worth nothing if it is somewhere the reader is not looking. */}
+      <SpoilerWarning
+        provider={entry.media.provider}
+        providerId={entry.media.provider_id}
+        nextUnit={entry.progress + 1}
+      />
 
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-text-faint">
         {metadata.map((line, index) => (

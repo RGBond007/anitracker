@@ -23,6 +23,7 @@ from app.routers import (
     shelves,
     social,
     social_moments,
+    watch_groups,
 )
 from app.version import VERSION
 
@@ -66,6 +67,7 @@ api.include_router(seasons.router)
 api.include_router(recommendations.router)
 api.include_router(shelves.router)
 api.include_router(social_moments.router)
+api.include_router(watch_groups.router)
 api.include_router(imports.router)
 api.include_router(admin.router)
 
