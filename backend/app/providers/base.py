@@ -100,6 +100,9 @@ class MediaRecord:
     # series without being a numbered season of it.
     related: list[Related] = field(default_factory=list)
     genres: list[str] = field(default_factory=list)
+    # Per-episode titles in order, where a provider has them. Most do not, and an
+    # empty list is the ordinary answer rather than a missing one.
+    episode_titles: list[str] = field(default_factory=list)
     average_score: int | None = None
     duration: int | None = None
 

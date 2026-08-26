@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import type { MediaType, Season } from "../../lib/api-client";
 import { useAddEntry, useEntryForMedia, useMediaDetail } from "../../features/media/useMedia";
+import { useMe } from "../../features/auth/useAuth";
 import { useSeries } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { cx } from "../../lib/cx";
@@ -12,10 +13,12 @@ import { baseTitle } from "../../lib/franchise";
 import { queryKeys } from "../../lib/queryKeys";
 import { displayTitle } from "../../lib/titles";
 import { Icon, ICONS } from "../../components/ui/Icon";
+import { Modal } from "../../components/ui/Modal";
 import { CoverImage } from "../../components/media/CoverImage";
 import { mediaHref } from "../../components/media/Poster";
 import { SeasonActions } from "../../components/media/SeasonActions";
 import { useSeasonLabels } from "../../components/media/seasonLabels";
+import { EpisodeList } from "../../components/media/EpisodeList";
 import { FriendsOnTitle } from "../../components/media/FriendsOnTitle";
 import { RecommendSheet } from "../../components/media/RecommendSheet";
 import { WatchTogether } from "../../components/media/WatchTogether";
@@ -50,6 +53,7 @@ export function MediaDetailPage() {
   const entry = useEntryForMedia(provider, id);
   const series = useSeries(provider, id, type);
   const add = useAddEntry();
+  const { data: me } = useMe();
   const [recommending, setRecommending] = useState(false);
 
   const seasons = series.data?.seasons ?? [];
@@ -70,9 +74,41 @@ export function MediaDetailPage() {
    * itself all arrived together, so they are written into the caches the new URL
    * will read and the swap paints from data already in hand.
    */
+  /**
+   * Ask before opening a season the reader has not reached.
+   *
+   * Decided from progress rather than from anything anyone labelled: a season is
+   * risky when the one before it is unfinished, because its poster, synopsis and
+   * episode count all say something about how the previous one ends. Confirming
+   * once per season is enough -- asking again on the way back is nagging.
+   */
+  const [pendingSeason, setPendingSeason] = useState<Season | null>(null);
+  const [allowed, setAllowed] = useState<string[]>([]);
+
+  const wouldSpoil = (season: Season): boolean => {
+    if (!me?.spoiler_protection || !series.data) return false;
+    if (allowed.includes(season.media.provider_id)) return false;
+    const number = season.media.season_number;
+    if (number == null || number <= 1) return false;
+
+    // Every earlier numbered season you own must be finished. Not owning one at
+    // all counts as unfinished -- you certainly have not seen it.
+    return series.data.seasons.some((other) => {
+      const otherNumber = other.media.season_number;
+      if (otherNumber == null || otherNumber >= number) return false;
+      const total = other.media.total_units;
+      const progress = other.entry?.progress ?? 0;
+      return total == null ? progress === 0 : progress < total;
+    });
+  };
+
   const view = (season: Season) => {
     const target = season.media.provider_id;
     if (target === id || !series.data) return;
+    if (wouldSpoil(season)) {
+      setPendingSeason(season);
+      return;
+    }
 
     queryClient.setQueryData(queryKeys.media(provider, target, type), season.media);
     queryClient.setQueryData(queryKeys.entryForMedia(provider, target), season.entry);
@@ -313,6 +349,46 @@ export function MediaDetailPage() {
       {recommending && media.data && (
         <RecommendSheet media={media.data} onClose={() => setRecommending(false)} />
       )}
+
+      {/* After the viewing log, which is where the reader's own position is set:
+          this list is read relative to that number. */}
+      {media.data && <EpisodeList media={media.data} entry={entry.data ?? null} />}
+
+      {/* Between the viewing log and the seasons: it is about this title, but about
+          other people, so it reads after your own record of it. */}
+      <FriendsOnTitle provider={provider} providerId={id} isManga={type === "manga"} />
+
+      {pendingSeason && (
+        <Modal title={t("spoiler.seasonTitle")} onClose={() => setPendingSeason(null)}>
+          <p className="text-sm text-text-dim">
+            {t("spoiler.seasonBody", {
+              n: pendingSeason.media.season_number ?? 0,
+            })}
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="quiet" onClick={() => setPendingSeason(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="stamp"
+              onClick={() => {
+                const target = pendingSeason;
+                // Remembered for the session, so stepping back and forth through
+                // a series asks once rather than every time.
+                setAllowed((current) => [...current, target.media.provider_id]);
+                setPendingSeason(null);
+                view(target);
+              }}
+            >
+              {t("spoiler.seasonConfirm", { n: pendingSeason.media.season_number ?? 0 })}
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* After the viewing log, which is where the reader's own position is set:
+          this list is read relative to that number. */}
+      {media.data && <EpisodeList media={media.data} entry={entry.data ?? null} />}
 
       {/* Between the viewing log and the seasons: it is about this title, but about
           other people, so it reads after your own record of it. */}

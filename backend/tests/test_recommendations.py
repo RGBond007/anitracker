@@ -43,6 +43,21 @@ async def setup_three(client):
     return ids
 
 
+async def add(client, provider_id=S1, **fields) -> int:
+    resp = await client.post(
+        "/api/entries",
+        json={
+            "provider": "stub",
+            "provider_id": provider_id,
+            "type": "anime",
+            "status": "current",
+            **fields,
+        },
+    )
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
 async def send(client, recipient_ids, provider_id=S1, **extra):
     return await client.post(
         "/api/recommendations",
@@ -274,3 +289,56 @@ async def test_only_pending_counts_as_waiting(app_client):
     # Still two cards, but only one of them is still waiting on the reader.
     assert len(inbox) == 2
     assert len([r for r in inbox if r["state"] == "pending"]) == 1
+
+
+async def test_the_sender_can_declare_a_spoiler(app_client):
+    ids = await setup_three(app_client)
+    plain = await send(app_client, [ids["bob"]], message="just watch it")
+    assert plain.json()["sent"][0]["has_spoilers"] is False
+
+    flagged = await send(
+        app_client, [ids["bob"]], provider_id=S2, message="the ending!", has_spoilers=True
+    )
+    assert flagged.json()["sent"][0]["has_spoilers"] is True
+
+
+async def test_a_sender_further_in_is_flagged_without_declaring_anything(app_client):
+    """
+    The heart of it: someone ahead of you is risky whether or not they said so.
+    People are sincere and still wrong about what gives things away.
+    """
+    ids = await setup_three(app_client)
+    mine = await add(app_client, S1)
+    await app_client.patch(f"/api/entries/{mine}", json={"progress": 9})
+    await send(app_client, [ids["bob"]], message="no spoilers, promise")
+
+    await login(app_client, B)
+    theirs = await add(app_client, S1)
+    await app_client.patch(f"/api/entries/{theirs}", json={"progress": 2})
+
+    inbox = (await app_client.get("/api/recommendations/inbox")).json()
+    assert inbox[0]["has_spoilers"] is False  # they declared it safe...
+    assert inbox[0]["sender_ahead"] is True  # ...and the progress says otherwise
+
+
+async def test_a_sender_level_or_behind_is_not_flagged(app_client):
+    ids = await setup_three(app_client)
+    mine = await add(app_client, S1)
+    await app_client.patch(f"/api/entries/{mine}", json={"progress": 3})
+    await send(app_client, [ids["bob"]])
+
+    await login(app_client, B)
+    theirs = await add(app_client, S1)
+    await app_client.patch(f"/api/entries/{theirs}", json={"progress": 3})
+    assert (await app_client.get("/api/recommendations/inbox")).json()[0]["sender_ahead"] is False
+
+
+async def test_a_recipient_who_does_not_track_it_counts_as_at_zero(app_client):
+    ids = await setup_three(app_client)
+    mine = await add(app_client, S1)
+    await app_client.patch(f"/api/entries/{mine}", json={"progress": 4})
+    await send(app_client, [ids["bob"]])
+
+    await login(app_client, B)
+    # Bob has never opened it, so anyone with progress is ahead of him.
+    assert (await app_client.get("/api/recommendations/inbox")).json()[0]["sender_ahead"] is True

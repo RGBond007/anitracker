@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 import httpx
@@ -35,6 +36,10 @@ _MEDIA_FIELDS = """
   coverImage { extraLarge large medium color }
   bannerImage
   relations { edges { relationType node { id type format } } }
+  # Episode titles, where a streaming site supplied them. Frequently absent, and
+  # frequently out of order or partial -- see `_episode_titles` for what is done
+  # about that.
+  streamingEpisodes { title episode }
 """
 
 SEARCH_QUERY = (
@@ -194,6 +199,36 @@ class AniListProvider(MediaProvider):
         except ValueError:  # the provider has published 2月30日 before now
             return None
 
+    @staticmethod
+    def _episode_titles(node: dict) -> list[str]:
+        """
+        Episode titles in episode order, as far as they can be trusted.
+
+        `streamingEpisodes` is supplied by streaming sites rather than by AniList,
+        so it arrives in whatever order and completeness they had. Entries look
+        like "Episode 5 - The Warrior", and the number in that prefix is the only
+        reliable index -- the array position is not, because a missing episode
+        silently shifts everything after it.
+
+        Anything without a parseable number is dropped rather than guessed at. A
+        title shown against the wrong episode is worse than no title at all, which
+        is the whole point of the feature it feeds.
+        """
+        found: dict[int, str] = {}
+        for item in node.get("streamingEpisodes") or []:
+            raw = (item or {}).get("title") or ""
+            match = re.match(r"\s*Episode\s+(\d+)\s*[-–—:]\s*(.+)", raw, re.IGNORECASE)
+            if not match:
+                continue
+            number, name = int(match.group(1)), match.group(2).strip()
+            if number >= 1 and name:
+                found.setdefault(number, name)
+        if not found:
+            return []
+        # Dense list indexed from episode 1; gaps become empty strings so position
+        # in the array is the episode number minus one, always.
+        return [found.get(n, "") for n in range(1, max(found) + 1)]
+
     def _to_record(self, node: dict) -> MediaRecord:
         media_type = (node.get("type") or "ANIME").lower()
         cover = node.get("coverImage") or {}
@@ -227,6 +262,7 @@ class AniListProvider(MediaProvider):
             sequel_id=sequel,
             related=related,
             genres=list(node.get("genres") or []),
+            episode_titles=self._episode_titles(node),
             average_score=node.get("averageScore"),
             duration=node.get("duration"),
         )

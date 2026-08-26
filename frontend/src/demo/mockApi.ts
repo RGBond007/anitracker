@@ -105,6 +105,9 @@ const media = (
   status: "FINISHED",
   season_year: year,
   genres: ["Adventure", "Drama"],
+  // Only one demo title carries these, because that is the honest picture: most
+  // shows have none and every provider but AniList returns none at all.
+  episode_titles: [],
   average_score: 84,
   duration: 24,
   start_date: `${year}-01-01`,
@@ -113,7 +116,20 @@ const media = (
 });
 
 const catalogue: Media[] = [
-  media("frieren", "Frieren: Beyond Journey's End", 2023, 28, ["#3d6266", "#aeb5a1"], { genres: ["Adventure", "Drama", "Fantasy"], average_score: 91 }),
+  media("frieren", "Frieren: Beyond Journey's End", 2023, 28, ["#3d6266", "#aeb5a1"], {
+    genres: ["Adventure", "Drama", "Fantasy"],
+    average_score: 91,
+    // Only this one, matching the real coverage picture: most titles have none.
+    episode_titles: [
+      "The Journey's End", "The Priest's Lie", "Blue Moonweed", "The Land Where Souls Rest",
+      "Corpse Warrior", "The Hero of the Village", "Like a Fairy Tale", "Frieren the Slayer",
+      "Aura the Guillotine", "A Powerful Mage", "Northern Magical Association", "A Real Hero",
+      "A Reason to Keep Going", "The Sage of Destruction", "Strongest Magic", "Long-Lived Friends",
+      "A Better Ending Than That", "Winter in the Northern Lands", "Privilege of the Young",
+      "Mock Exam", "Aversion to One's Own Kind", "The Height of Magic", "A Fun Game",
+      "The Land of Gold", "In Sight", "A Storm of Magic", "The Next Trial", "The Land Where the Sun Rises",
+    ],
+  }),
   media("vinland-saga", "Vinland Saga", 2019, 24, ["#723c2e", "#bd8d5e"], { genres: ["Action", "Adventure", "Drama"], average_score: 88 }),
   media("dungeon-meshi", "Delicious in Dungeon", 2024, 24, ["#3d6244", "#c6aa57"], { genres: ["Adventure", "Comedy", "Fantasy"], average_score: 86 }),
   media("pluto", "PLUTO", 2023, 8, ["#34485f", "#a76d65"], { format: "ONA", genres: ["Drama", "Mystery", "Sci-Fi"], average_score: 89 }),
@@ -157,6 +173,7 @@ const demoUser: User = {
   ui_language: "en",
   theme: "dark",
   profile_public: true,
+  spoiler_protection: true,
   must_change_password: false,
   avatar_url: null,
   created_at: "2026-08-01T10:00:00Z",
@@ -238,6 +255,10 @@ function seededRecommendations(): FriendRecommendation[] {
       provider_id: "mob-psycho",
       media_type: "anime",
       message: "Twelve episodes and the animation goes somewhere else entirely. No spoilers.",
+      has_spoilers: false,
+      // Mika has finished it and the visitor has not, so the app covers the
+      // message anyway — the label is not what decides this.
+      sender_ahead: true,
       state: "pending",
       created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
       media: catalogue.find((item) => item.provider_id === "mob-psycho") ?? null,
@@ -471,6 +492,8 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
       provider_id: String(input.provider_id ?? ""),
       media_type: (input.media_type as "anime" | "manga") ?? "anime",
       message: (String(input.message ?? "").trim() || null) as string | null,
+      has_spoilers: Boolean(input.has_spoilers),
+      sender_ahead: false,
       state: "pending",
       created_at: now(),
       media,
@@ -656,14 +679,28 @@ export async function demoRequest(rawPath: string, init: RequestInit = {}): Prom
   if (path === "/schedule") return json([] satisfies AiringEpisode[]);
   // Completed rather than mid-watch: completion reactions only appear on a finish,
   // and a demo feed with nothing finished would never show them.
-  if (path === "/feed") return json([{ user: friend, entry: makeEntry(90, "mob-psycho", "completed", 12, 9) }] satisfies FeedItem[]);
+  if (path === "/feed")
+    return json([
+      {
+        user: friend,
+        entry: {
+          ...makeEntry(90, "mob-psycho", "completed", 12, 9),
+          notes: "The fight in 11 is the whole reason to watch this.",
+          // Mika finished it and the visitor has not, so her note is covered.
+          author_ahead: true,
+        },
+      },
+    ] satisfies FeedItem[]);
   if (path === "/friends") return json({ friends: [{ id: 1, user: friend, state: "accepted", stats: { tracked: 42, mean_score: 8.4, in_common: 3 }, direction: "outgoing", created_at: "2026-07-01T10:00:00Z" }], incoming: [], outgoing: [] } satisfies Friends);
-  if (path === "/friends/watching") return json([{ user: friend, entry: makeEntry(91, "eizouken", "current", 4, 8) }]);
+  if (path === "/friends/watching")
+    return json([
+      { user: friend, entry: { ...makeEntry(91, "eizouken", "current", 4, 8), notes: null, author_ahead: false } },
+    ]);
   if (path === "/recommendations") return json({ featured: null, because: catalogue[0], personal: [] } satisfies Recommendations);
   if (path === "/discover") return json([{ user: friend, tracked: 42 }] satisfies DiscoverUser[]);
   if (path === "/leaderboard") return json({ rows: [{ user: { ...demoUser, username: demoUser.username }, is_self: true, episodes_watched: stats(entries, "anime").episodes_watched, chapters_read: 0, completed: entries.filter((entry) => entry.status === "completed").length, mean_score: stats(entries, "anime").mean_score }, { user: friend, is_self: false, episodes_watched: 311, chapters_read: 0, completed: 18, mean_score: 8.4 }] satisfies LeaderboardRow[] });
   if (path.startsWith("/users/search")) return json([friend]);
-  if (path === "/users/Mika") return json({ user: friend, relationship: "friends", visible: true, anime: stats([makeEntry(92, "mob-psycho", "completed", 12, 9)], "anime"), manga: stats([], "manga"), entries: [makeEntry(92, "mob-psycho", "completed", 12, 9)] } satisfies Profile);
+  if (path === "/users/Mika") return json({ user: friend, relationship: "friends", visible: true, anime: stats([makeEntry(92, "mob-psycho", "completed", 12, 9)], "anime"), manga: stats([], "manga"), entries: [{ ...makeEntry(92, "mob-psycho", "completed", 12, 9), notes: null, author_ahead: false }] } satisfies Profile);
   if (path === "/users/Mika/compare") return json({ user: friend, shared: [], only_theirs: [], both_scored: 0, mean_difference: null } satisfies Comparison);
   if (path === "/admin/users") return json([readUser()]);
   if (path === "/import/jobs") return json([]);

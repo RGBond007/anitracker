@@ -24,6 +24,7 @@ const entry = (overrides: Record<string, unknown> = {}): Entry => {
       type: "anime",
       synonyms: [],
       genres: [],
+      episode_titles: [],
       total_units: 24,
       duration: 24,
       ...media,

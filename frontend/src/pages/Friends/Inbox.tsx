@@ -15,6 +15,7 @@ import { Avatar } from "../../components/ui/Avatar";
 import { Button } from "../../components/ui/Button";
 import { Modal } from "../../components/ui/Modal";
 import { SectionHead } from "../../components/layout/Rail";
+import { Spoiler } from "../../components/ui/Spoiler";
 import { relativeTime } from "../../lib/time";
 import { cx } from "../../lib/cx";
 
@@ -137,12 +138,30 @@ function InboxCard({
         </button>
 
         {/* Rendered as text, never as markup: React escapes it, and the server caps
-            it at 280 characters so a card cannot be turned into a wall. */}
-        {row.message && (
-          <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-dim">
-            {row.message}
-          </p>
-        )}
+            it at 280 characters so a card cannot be turned into a wall.
+
+            Covered when the sender said it gives something away, *or* when they
+            are further into the title than you are — the second is what catches
+            the common case of somebody forgetting to tick the box. */}
+        {row.message &&
+          (row.has_spoilers || row.sender_ahead ? (
+            <Spoiler
+              className="mt-1"
+              reason={
+                row.has_spoilers
+                  ? t("recommend.spoilerDeclared")
+                  : t("recommend.spoilerAhead", { name: row.sender.username })
+              }
+            >
+              <span className="block whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-dim">
+                {row.message}
+              </span>
+            </Spoiler>
+          ) : (
+            <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-dim">
+              {row.message}
+            </p>
+          ))}
 
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <Button

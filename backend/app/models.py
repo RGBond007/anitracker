@@ -113,6 +113,13 @@ class User(Base):
     # Set when an admin creates the account with a one-time password. While true the
     # API serves nothing but /me and the password change, so the temporary secret
     # cannot be used to actually operate the account.
+    #: Hold back what the viewer has not reached yet, and make revealing it an
+    #: explicit act. Defaults to *on*: the cost of protection nobody wanted is one
+    #: extra tap, and the cost of missing protection somebody wanted is the story.
+    spoiler_protection: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    # Set when an admin creates the account with a one-time password. While true the
+    # API serves nothing but /me and the password change, so the temporary secret
+    # cannot be used to actually operate the account.
     must_change_password: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false"
     )
@@ -187,6 +194,11 @@ class MediaCache(Base):
     # the movie that follows it six months later share a year.
     start_date: Mapped[date | None] = mapped_column(Date)
     genres: Mapped[list[str]] = mapped_column(StringArray, default=list)
+    #: Per-episode titles in order, when the provider has any. Empty is the normal
+    #: case, not a failure: AniList only carries these where a streaming site
+    #: supplied them, and Jikan and Kitsu do not return them at all. The UI shows
+    #: a numbered episode either way and adds the title when there is one.
+    episode_titles: Mapped[list[str]] = mapped_column(StringArray, default=list)
     average_score: Mapped[int | None] = mapped_column(Integer)
     duration: Mapped[int | None] = mapped_column(Integer)  # minutes per episode
 
@@ -300,6 +312,10 @@ class FriendRecommendation(Base):
     media_type: Mapped[MediaType] = mapped_column(Enum(MediaType, name="media_type"))
     #: Capped in the schema as well; the column is the backstop, not the rule.
     message: Mapped[str | None] = mapped_column(String(280))
+    #: The sender's own declaration about their message. Believed when it says
+    #: "yes" and never trusted alone when it says "no" -- the reader's own progress
+    #: decides that, because people are wrong about what spoils things.
+    has_spoilers: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     state: Mapped[RecommendationState] = mapped_column(
         Enum(RecommendationState, name="recommendation_state"),
         default=RecommendationState.pending,

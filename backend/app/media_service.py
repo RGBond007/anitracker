@@ -117,6 +117,11 @@ def _apply(row: MediaCache, record: MediaRecord) -> MediaCache:
     row.parent_id = next((r.provider_id for r in record.related if r.is_series_parent), None)
     row.related_ids = [r.provider_id for r in record.related if r.is_series_extra]
     row.genres = record.genres
+    # Only overwrite when the provider actually returned some. A refetch that comes
+    # back without them -- a fallback provider, or a streaming site that dropped
+    # them -- must not wipe titles the cache already holds.
+    if record.episode_titles:
+        row.episode_titles = record.episode_titles
     row.average_score = record.average_score
     row.duration = record.duration
     row.last_synced_at = datetime.now(UTC)

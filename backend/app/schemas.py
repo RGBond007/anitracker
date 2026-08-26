@@ -32,6 +32,8 @@ class UserOut(ORM):
     ui_language: str
     theme: str
     profile_public: bool
+    #: On by default. See `User.spoiler_protection`.
+    spoiler_protection: bool
     must_change_password: bool
     #: None until one is uploaded; the client draws initials in that case.
     avatar_url: str | None = None
@@ -56,6 +58,7 @@ class UserUpdate(BaseModel):
     ui_language: str | None = Field(default=None, max_length=8)
     theme: str | None = Field(default=None, pattern="^(dark|light)$")
     profile_public: bool | None = None
+    spoiler_protection: bool | None = None
 
 
 class PasswordChange(BaseModel):
@@ -130,6 +133,10 @@ class MediaOut(ORM):
     #: cours of the same year in an arbitrary order.
     start_date: date | None = None
     genres: list[str] = []
+    #: Per-episode titles, position `n` being episode `n + 1`. Empty for most
+    #: titles and for every manga; an empty string means that one episode has no
+    #: known title while its neighbours do.
+    episode_titles: list[str] = []
     average_score: int | None = None
     duration: int | None = None
 
@@ -191,13 +198,20 @@ class PublicEntryOut(ORM):
     """
     Someone else's entry, as other people are allowed to see it.
 
-    `notes` is absent, and its absence is the entire reason this class exists.
-    Notes are where a person writes "the mentor dies in 19" -- they are private
-    working text, and shipping them through the feed made friend activity both a
-    spoiler vector and a quiet leak of something never meant to be shared.
+    `notes` is the delicate field here. It is where a person writes "the mentor
+    dies in 19", so it is both the most interesting thing a friend can read and
+    the most dangerous. Two rules keep it survivable, and both are enforced on the
+    server rather than left to the client:
 
-    Everything else stays: a score, a progress count and a status are the facts a
-    friend is looking at, and none of them says what happens.
+    * **Accepted friends only.** Never for a stranger browsing a public profile.
+      Opting your list into public view is not opting your notes into it.
+    * **Covered when the author is ahead.** `author_ahead` says whether the person
+      who wrote the note has seen more of this title than the reader has, which is
+      exactly when a note is likely to give something away. The client blurs it and
+      makes revealing an explicit act.
+
+    Absent -- not empty -- when either rule fails, so a client cannot render
+    something it was never sent.
     """
 
     id: int
@@ -207,6 +221,10 @@ class PublicEntryOut(ORM):
     rewatch_count: int
     start_date: date | None
     finish_date: date | None
+    #: Only ever populated for an accepted friend. See the class docstring.
+    notes: str | None = None
+    #: True when the note's author is further into this title than the reader.
+    author_ahead: bool = False
     updated_at: datetime
     media: MediaOut
 
@@ -469,6 +487,8 @@ class FriendRecommendationCreate(BaseModel):
     media_type: MediaType
     recipient_ids: list[int] = Field(min_length=1, max_length=25)
     message: str | None = Field(default=None, max_length=280)
+    #: The sender saying their own message gives something away.
+    has_spoilers: bool = False
 
 
 class FriendRecommendationOut(ORM):
@@ -480,6 +500,13 @@ class FriendRecommendationOut(ORM):
     provider_id: str
     media_type: MediaType
     message: str | None
+    #: What the sender declared.
+    has_spoilers: bool = False
+    #: Whether the *sender* is further into this title than the reader is. Computed
+    #: from both libraries, not claimed by anyone -- this is what lets the message
+    #: be treated as risky when someone forgot to tick the box, which is the common
+    #: case. The client covers a message when either this or `has_spoilers` is true.
+    sender_ahead: bool = False
     state: RecommendationState
     created_at: datetime
     #: The cached title, when the instance happens to hold one. Null is normal --

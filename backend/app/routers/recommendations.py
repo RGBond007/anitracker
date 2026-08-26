@@ -8,6 +8,7 @@ from app.models import (
     FriendRecommendation,
     Friendship,
     FriendshipState,
+    ListEntry,
     MediaCache,
     RecommendationState,
     User,
@@ -73,7 +74,12 @@ async def _cached_media(db, rows: list[FriendRecommendation]) -> dict[tuple[str,
     return {(m.provider, m.provider_id): m for m in found if (m.provider, m.provider_id) in keys}
 
 
-def _as_out(row: FriendRecommendation, media: MediaCache | None) -> FriendRecommendationOut:
+def _as_out(
+    row: FriendRecommendation,
+    media: MediaCache | None,
+    *,
+    sender_ahead: bool = False,
+) -> FriendRecommendationOut:
     return FriendRecommendationOut(
         id=row.id,
         sender=PublicUser.model_validate(row.sender),
@@ -82,15 +88,62 @@ def _as_out(row: FriendRecommendation, media: MediaCache | None) -> FriendRecomm
         provider_id=row.provider_id,
         media_type=row.media_type,
         message=row.message,
+        has_spoilers=row.has_spoilers,
+        sender_ahead=sender_ahead,
         state=row.state,
         created_at=row.created_at,
         media=MediaOut.model_validate(media) if media is not None else None,
     )
 
 
+async def _sender_ahead(db, rows: list[FriendRecommendation]) -> dict[int, bool]:
+    """
+    For each recommendation, whether the sender is further in than the recipient.
+
+    The point of the whole feature: a message is risky when the person writing it
+    has seen more than the person reading it, regardless of what either of them
+    declared. Somebody four episodes ahead saying "no spoilers" is being sincere
+    and is still the more likely source of one.
+
+    A recipient who does not track the title at all is treated as being at zero,
+    so any sender with progress counts as ahead.
+    """
+    if not rows:
+        return {}
+    keys = {(row.provider, row.provider_id) for row in rows}
+    people = {row.sender_id for row in rows} | {row.recipient_id for row in rows}
+    found = (
+        await db.execute(
+            select(
+                ListEntry.user_id, MediaCache.provider, MediaCache.provider_id, ListEntry.progress
+            )
+            .join(MediaCache, MediaCache.id == ListEntry.media_cache_id)
+            .where(ListEntry.user_id.in_(people))
+        )
+    ).all()
+    progress = {
+        (user_id, provider, provider_id): value
+        for user_id, provider, provider_id, value in found
+        if (provider, provider_id) in keys
+    }
+    return {
+        row.id: progress.get((row.sender_id, row.provider, row.provider_id), 0)
+        > progress.get((row.recipient_id, row.provider, row.provider_id), 0)
+        for row in rows
+    }
+
+
 async def _render(db, rows: list[FriendRecommendation]) -> list[FriendRecommendationOut]:
     cache = await _cached_media(db, rows)
-    return [_as_out(row, cache.get((row.provider, row.provider_id))) for row in rows]
+    ahead = await _sender_ahead(db, rows)
+    return [
+        _as_out(
+            row,
+            cache.get((row.provider, row.provider_id)),
+            sender_ahead=ahead.get(row.id, False),
+        )
+        for row in rows
+    ]
 
 
 @router.post("", response_model=SendResult, status_code=status.HTTP_201_CREATED)
@@ -163,6 +216,7 @@ async def send(
             provider_id=payload.provider_id,
             media_type=payload.media_type,
             message=message,
+            has_spoilers=payload.has_spoilers,
         )
         for recipient_id in requested
         if recipient_id not in pending
@@ -274,7 +328,12 @@ async def set_state(
         )
     ).scalar_one()
     cache = await _cached_media(db, [refreshed])
-    return _as_out(refreshed, cache.get((refreshed.provider, refreshed.provider_id)))
+    ahead = await _sender_ahead(db, [refreshed])
+    return _as_out(
+        refreshed,
+        cache.get((refreshed.provider, refreshed.provider_id)),
+        sender_ahead=ahead.get(refreshed.id, False),
+    )
 
 
 @router.get("/for/{provider}/{provider_id}", response_model=list[PublicUser])

@@ -6,6 +6,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] — 2026-08-26
+
+Holds back what you have not reached yet, and decides what that is from your own
+progress rather than from labels.
+
+> **Upgrading from 2.3.0 runs two migrations (`0013`, `0014`).** Both add columns
+> with defaults; nothing is backfilled. **Spoiler protection defaults to on**, which
+> does change behaviour for existing accounts: seasons past the one you are on ask
+> before opening, and a friend's message can arrive covered. It is one switch in
+> Settings — protection nobody wanted costs a tap to undo, protection somebody
+> wanted but did not get costs them the story.
+
+### Added
+- **A global spoiler-protection preference**, in Settings. Not visible to anyone
+  else: it is a setting about the reader, not a fact about them.
+- **Per-episode titles**, from AniList where a streaming site supplied them. They
+  arrive partial and out of order, so each is indexed by the number inside its own
+  title and anything unparseable is dropped — a title against the wrong episode is
+  worse than none. Jikan and Kitsu return none, and empty is the ordinary answer.
+- **An episode list** on a title's page, with everything past your progress covered.
+- **A warning before opening a season you have not reached**, decided by whether the
+  season before it is finished. Not owning an earlier season counts as unfinished.
+- **Recommendation messages can be marked as giving something away** — and the label
+  alone is never trusted. The server computes whether the sender is further into the
+  title than the reader, so a sincere "no spoilers" from someone four episodes ahead
+  still arrives covered.
+- **Friend notes are visible again, covered when their author is ahead of you.**
+  Accepted friends only — making a list public does not publish its notes.
+- Revealing anything protected is always an explicit act, through one control.
+
+### Security
+- Notes reach accepted friends only, never a stranger browsing a public profile.
+  Every social surface now goes through a single function that decides this, so
+  there is one place to get it right rather than four.
+
 ## [2.3.0] — 2026-08-26
 
 Watching one show with a few friends, at roughly the same pace.
@@ -257,7 +292,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/RGBond007/anitracker/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/RGBond007/anitracker/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/RGBond007/anitracker/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.1

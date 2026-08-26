@@ -42,6 +42,8 @@ export interface Media {
   /** ISO date. Orders two cours of the same year, which `season_year` cannot. */
   start_date?: string | null;
   genres: string[];
+  /** Position n is episode n+1. Empty for most titles; "" means that one is unknown. */
+  episode_titles: string[];
   average_score?: number | null;
   duration?: number | null;
 }
@@ -67,7 +69,18 @@ export interface Entry {
  * them from the feed, profiles, comparisons and friends-watching. Typing those as
  * a full `Entry` claimed a field that never arrives.
  */
-export type PublicEntry = Omit<Entry, "notes">;
+export type PublicEntry = Omit<Entry, "notes"> & {
+  /** Present only for an accepted friend; null otherwise. */
+  notes: string | null;
+  /**
+   * True when the author is further into this title than you are.
+   *
+   * Optional in the type though the server always sends it, so a component that
+   * only reads progress — a poster, a rail — accepts your own `Entry` as well as
+   * a friend's without either side pretending to be the other.
+   */
+  author_ahead?: boolean;
+};
 
 /** What a member of a series is. Only a `season` carries a season number. */
 export type SeasonKind = "season" | "movie" | "ova" | "special" | "other";
@@ -123,6 +136,8 @@ export interface User {
   ui_language: string;
   theme: "dark" | "light";
   profile_public: boolean;
+  /** On by default: hold back what the reader has not reached yet. */
+  spoiler_protection: boolean;
   /** True until an admin-issued one-time password has been replaced. */
   must_change_password: boolean;
   /** Null until a picture is uploaded; the UI draws initials in that case. */
@@ -291,6 +306,10 @@ export interface FriendRecommendation {
   provider_id: string;
   media_type: MediaType;
   message: string | null;
+  /** What the sender declared about their own message. */
+  has_spoilers: boolean;
+  /** Computed from both libraries — the reason a label alone is not trusted. */
+  sender_ahead: boolean;
   state: "pending" | "viewed" | "accepted" | "dismissed";
   created_at: string;
   /** Null when the instance has never cached the title; the client then fetches it. */
@@ -523,6 +542,7 @@ export const api = {
     media_type: MediaType;
     recipient_ids: number[];
     message?: string | null;
+    has_spoilers?: boolean;
   }) => request<SendRecommendationResult>("/recommendations", { method: "POST", body: body(input) }),
   recommendSetState: (id: number, state: "viewed" | "accepted" | "dismissed") =>
     request<FriendRecommendation>(`/recommendations/${id}`, {

@@ -9,6 +9,7 @@ import { CoverImage } from "../../components/media/CoverImage";
 import { mediaHref } from "../../components/media/Poster";
 import { Button, Chip } from "../../components/ui/Button";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
+import { Spoiler } from "../../components/ui/Spoiler";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { displayTitle } from "../../lib/titles";
 import { relativeTime } from "../../lib/time";
@@ -69,6 +70,25 @@ export function ActivityFeed() {
                   {item.entry.score ? `${t("feed.scored", { score: item.entry.score })} · ` : ""}
                   {relativeTime(item.entry.updated_at, t)}
                 </p>
+
+                {/* Their note, if they wrote one and we are allowed it. Covered
+                    when they are further into the title than we are, which is
+                    exactly when a note is likely to say what happens. */}
+                {item.entry.notes &&
+                  (item.entry.author_ahead ? (
+                    <Spoiler
+                      className="mt-1"
+                      reason={t("feed.noteAhead", { name: item.user.username })}
+                    >
+                      <span className="block whitespace-pre-wrap break-words text-[12px] leading-relaxed text-text-dim">
+                        {item.entry.notes}
+                      </span>
+                    </Spoiler>
+                  ) : (
+                    <p className="mt-1 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-text-dim">
+                      {item.entry.notes}
+                    </p>
+                  ))}
               </div>
             </Link>
           </li>

@@ -19,6 +19,12 @@
     "seeAll": "Alle anzeigen",
     "close": "Schließen"
   },
+  "spoiler": {
+    "reveal": "Trotzdem anzeigen",
+    "seasonTitle": "Eine Staffel öffnen, bei der du noch nicht bist?",
+    "seasonBody": "Du hast die Staffel davor noch nicht beendet. Schon ein Poster und eine Episodenzahl verraten, wie sie ausgeht.",
+    "seasonConfirm": "Staffel {{n}} öffnen"
+  },
   "status": {
     "current_anime": "Am Schauen",
     "current_manga": "Am Lesen",
@@ -237,6 +243,13 @@
     "loadFailed": "Dieser Titel konnte nicht vom Anbieter geladen werden.",
     "moreTitles": "+{{count}} weitere"
   },
+  "episodes": {
+    "heading": "Episoden",
+    "range": "{{from}}–{{to}} von {{total}}",
+    "hidden": "Titel, bei denen du noch nicht bist, sind verdeckt.",
+    "untitled": "Kein Titel bekannt",
+    "notReached": "du bist noch nicht so weit"
+  },
   "list": {
     "statusTabs": "Listenstatus",
     "sort": "Sortieren nach",
@@ -454,7 +467,11 @@
     "link_source": "Quellcode",
     "link_licence": "Lizenz (AGPL-3.0)",
     "revokeOthers": "Überall sonst abmelden",
-    "roleUser": "Benutzer"
+    "roleUser": "Benutzer",
+    "spoilers": "Spoilerschutz",
+    "spoilersHint": "Hält zurück, wo du noch nicht bist — die Nachricht eines Freundes, eine Staffel, bei der du noch nicht angekommen bist. Anzeigen geht immer mit einem Tipp.",
+    "spoilersOn": "An",
+    "spoilersOff": "Aus"
   },
   "hero": {
     "updateProgress": "Fortschritt aktualisieren",
@@ -541,7 +558,11 @@
     "shelveTitle": "{{name}} in ein Regal legen?",
     "shelveBody": "Der Titel steht auf deiner Liste. Ein Regal ist optional.",
     "noShelves": "Du hast noch keine Regale — leg eines über das Menü eines Titels an.",
-    "skipShelf": "Später"
+    "skipShelf": "Später",
+    "spoilerFlag": "Diese Nachricht verrät etwas",
+    "spoilerFlagHint": "Sie kommt verdeckt an, bis sie gelesen werden will. Ihre App verdeckt sie auch, wenn du weiter bist als sie.",
+    "spoilerDeclared": "so markiert",
+    "spoilerAhead": "{{name}} ist weiter als du"
   },
   "moments": {
     "friendsHeading": "Freunde, die das haben",
@@ -621,7 +642,8 @@
     "watchingNoTotal": "ist bei {{unit}} {{progress}} von",
     "scored": "bewertet mit {{score}}",
     "ep": "Ep.",
-    "ch": "Kap."
+    "ch": "Kap.",
+    "noteAhead": "{{name}} ist weiter als du"
   },
   "leaderboard": {
     "episodes_watched": "Episoden",

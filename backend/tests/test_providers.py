@@ -134,3 +134,42 @@ async def test_registry_detail_lookup_is_pinned_to_owning_provider():
     with pytest.raises(ProviderError, match="unknown provider"):
         await registry.get_by_id("nope", "1", "anime")
     await registry.aclose()
+
+
+def test_anilist_episode_titles_are_indexed_by_their_own_number():
+    """
+    Streaming sites supply these, so they arrive partial and out of order. The
+    number inside the title is the only trustworthy index — array position is not,
+    because one missing episode shifts everything after it.
+    """
+    from app.providers.anilist import AniListProvider
+
+    parse = AniListProvider._episode_titles
+    node = {
+        "streamingEpisodes": [
+            {"title": "Episode 3 - The Third"},
+            {"title": "Episode 1 - The First"},
+            {"title": "Episode 5 - The Fifth"},
+        ]
+    }
+    # Gaps become empty strings, so index n is always episode n + 1.
+    assert parse(node) == ["The First", "", "The Third", "", "The Fifth"]
+
+
+def test_anilist_episode_titles_drop_what_cannot_be_placed():
+    from app.providers.anilist import AniListProvider
+
+    parse = AniListProvider._episode_titles
+    # A title shown against the wrong episode is worse than none at all.
+    assert parse({"streamingEpisodes": [{"title": "The Warrior"}]}) == []
+    assert parse({"streamingEpisodes": [{"title": "Episode 2 -   "}]}) == []
+    assert parse({"streamingEpisodes": []}) == []
+    assert parse({}) == []
+
+
+def test_anilist_episode_titles_accept_the_dash_variants_sites_use():
+    from app.providers.anilist import AniListProvider
+
+    parse = AniListProvider._episode_titles
+    assert parse({"streamingEpisodes": [{"title": "Episode 1 – En Dash"}]}) == ["En Dash"]
+    assert parse({"streamingEpisodes": [{"title": "episode 1: Colon"}]}) == ["Colon"]

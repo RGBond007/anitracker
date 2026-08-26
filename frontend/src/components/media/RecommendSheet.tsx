@@ -31,6 +31,7 @@ export function RecommendSheet({ media, onClose }: { media: Media; onClose: () =
 
   const [chosen, setChosen] = useState<number[]>([]);
   const [message, setMessage] = useState("");
+  const [hasSpoilers, setHasSpoilers] = useState(false);
 
   const list = friends.data?.friends ?? [];
   const toggle = (id: number) =>
@@ -46,6 +47,7 @@ export function RecommendSheet({ media, onClose }: { media: Media; onClose: () =
         media_type: media.type,
         recipient_ids: chosen,
         message: message.trim() || null,
+        has_spoilers: hasSpoilers,
       },
       {
         onSuccess: (result) => {
@@ -127,6 +129,24 @@ export function RecommendSheet({ media, onClose }: { media: Media; onClose: () =
             <p className="tabular mt-1 text-right text-[11px] text-text-faint">
               {message.length}/{MAX_MESSAGE}
             </p>
+
+            {/* A declaration, not a guarantee. The recipient's app covers the
+                message anyway when the sender is further into the title — people
+                are sincere and still wrong about what gives things away. */}
+            <label className="mt-1 flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={hasSpoilers}
+                onChange={(e) => setHasSpoilers(e.target.checked)}
+                className="mt-[3px] h-[15px] w-[15px] shrink-0 accent-[var(--stamp)]"
+              />
+              <span className="min-w-0">
+                <span className="block text-[13px]">{t("recommend.spoilerFlag")}</span>
+                <span className="block text-[11.5px] text-text-faint">
+                  {t("recommend.spoilerFlagHint")}
+                </span>
+              </span>
+            </label>
           </div>
 
           <div className="mt-3 flex justify-end gap-2">

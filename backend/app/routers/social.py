@@ -39,6 +39,7 @@ from app.schemas import (
     LeaderboardRow,
     MediaOut,
     ProfileOut,
+    PublicEntryOut,
     PublicUser,
     Recommendation,
     RecommendationsOut,
@@ -338,6 +339,48 @@ async def search_users(
     return list(rows)
 
 
+async def _my_progress(db, user_id: int) -> dict[tuple[str, str], int]:
+    """The viewer's own position on everything they track, keyed by provider pair."""
+    rows = (
+        await db.execute(
+            select(MediaCache.provider, MediaCache.provider_id, ListEntry.progress)
+            .join(MediaCache, MediaCache.id == ListEntry.media_cache_id)
+            .where(ListEntry.user_id == user_id)
+        )
+    ).all()
+    return {(provider, provider_id): progress for provider, provider_id, progress in rows}
+
+
+def _public(entry, *, mine: dict[tuple[str, str], int], friend: bool) -> PublicEntryOut:
+    """
+    Someone else's entry, with their notes handled.
+
+    Pydantic reads `notes` straight off the ORM row, so *not* stripping it here is
+    the leak. Every social surface goes through this function for that reason:
+    there is one place that decides, and it decides deny-by-default.
+
+    Notes reach accepted friends only. A public profile widens who may browse a
+    list; it does not publish the owner's working notes to the whole instance.
+    """
+    out = PublicEntryOut.model_validate(entry)
+    if not friend:
+        out.notes = None
+        out.author_ahead = False
+        return out
+    seen = mine.get((entry.media.provider, entry.media.provider_id), 0)
+    out.author_ahead = entry.progress > seen
+    return out
+
+
+async def _visible_entries(db, viewer, target, relationship: str, visible: bool):
+    """Their list as this viewer may see it. Hoisted so the progress map is read once."""
+    if not visible:
+        return []
+    mine = await _my_progress(db, viewer.id)
+    friend = relationship == "friends"
+    return [_public(entry, mine=mine, friend=friend) for entry in await _entries_of(db, target.id)]
+
+
 @router.get("/users/{username}", response_model=ProfileOut)
 async def user_profile(username: str, user: CurrentUser, db: DbSession) -> ProfileOut:
     target = await _by_username(db, username)
@@ -349,7 +392,7 @@ async def user_profile(username: str, user: CurrentUser, db: DbSession) -> Profi
         visible=visible,
         anime=await type_stats(db, target.id, MediaType.anime) if visible else _EMPTY_STATS,
         manga=await type_stats(db, target.id, MediaType.manga) if visible else _EMPTY_STATS,
-        entries=await _entries_of(db, target.id) if visible else [],
+        entries=await _visible_entries(db, user, target, relationship, visible),
     )
 
 
@@ -358,10 +401,14 @@ async def compare_lists(username: str, user: CurrentUser, db: DbSession) -> Comp
     target = await _by_username(db, username)
     if target.id == user.id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Nothing to compare against yourself")
-    _, visible = await _visibility(db, user, target)
+    relationship, visible = await _visibility(db, user, target)
     if not visible:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "That list is private")
 
+    # `visible` is also true for a stranger browsing a public profile, so notes
+    # hang on the relationship rather than on visibility.
+    friend = relationship == "friends"
+    my_progress = await _my_progress(db, user.id)
     mine = {e.media_cache_id: e for e in await _entries_of(db, user.id)}
     theirs = {e.media_cache_id: e for e in await _entries_of(db, target.id)}
 
@@ -371,12 +418,18 @@ async def compare_lists(username: str, user: CurrentUser, db: DbSession) -> Comp
         my_entry = mine.get(media_id)
         if my_entry is None:
             continue
-        shared.append(ComparisonRow(media=their_entry.media, mine=my_entry, theirs=their_entry))
+        shared.append(
+            ComparisonRow(
+                media=their_entry.media,
+                mine=my_entry,
+                theirs=_public(their_entry, mine=my_progress, friend=friend),
+            )
+        )
         if my_entry.score and their_entry.score:
             diffs.append(my_entry.score - their_entry.score)
 
     only_theirs = [
-        ComparisonRow(media=e.media, mine=None, theirs=e)
+        ComparisonRow(media=e.media, mine=None, theirs=_public(e, mine=my_progress, friend=friend))
         for media_id, e in theirs.items()
         if media_id not in mine
     ]
@@ -415,7 +468,14 @@ async def friend_feed(user: CurrentUser, db: DbSession) -> list[FeedItem]:
             )
         ).all()
     )
-    return [FeedItem(user=PublicUser.model_validate(owner), entry=entry) for entry, owner in rows]
+    mine = await _my_progress(db, user.id)
+    # The feed is friends-only by construction, so every row here is a friend's.
+    return [
+        FeedItem(
+            user=PublicUser.model_validate(owner), entry=_public(entry, mine=mine, friend=True)
+        )
+        for entry, owner in rows
+    ]
 
 
 # --- Discovery and leaderboard -------------------------------------------
@@ -625,13 +685,19 @@ async def friends_watching(user: CurrentUser, db: DbSession) -> list[WatchingIte
         ).all()
     )
 
+    mine = await _my_progress(db, user.id)
     out: list[WatchingItem] = []
     seen: set[int] = set()
     for entry, owner in rows:
         if owner.id in seen or _is_adult(entry.media):
             continue
         seen.add(owner.id)
-        out.append(WatchingItem(user=PublicUser.model_validate(owner), entry=entry))
+        out.append(
+            WatchingItem(
+                user=PublicUser.model_validate(owner),
+                entry=_public(entry, mine=mine, friend=True),
+            )
+        )
         if len(out) >= WATCHING_LIMIT:
             break
     return out

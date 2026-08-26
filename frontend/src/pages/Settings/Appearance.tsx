@@ -119,6 +119,27 @@ export function AppearanceSection({ me }: { me: User }) {
             ]}
           />
         </SettingRow>
+
+        <SettingRow
+          label={t("settings.spoilers")}
+          description={t("settings.spoilersHint")}
+          status={status("spoiler_protection")}
+        >
+          <Segmented
+            name="spoilers"
+            value={me.spoiler_protection ? "on" : "off"}
+            onChange={(v) =>
+              update.mutate(
+                { spoiler_protection: v === "on" },
+                { onSuccess: () => flashSaved("spoiler_protection") },
+              )
+            }
+            options={[
+              { value: "on", label: t("settings.spoilersOn") },
+              { value: "off", label: t("settings.spoilersOff") },
+            ]}
+          />
+        </SettingRow>
       </SettingRows>
 
       {update.error && (

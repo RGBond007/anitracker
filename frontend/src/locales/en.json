@@ -19,6 +19,12 @@
     "seeAll": "See all",
     "close": "Close"
   },
+  "spoiler": {
+    "reveal": "Show anyway",
+    "seasonTitle": "Open a season you haven't reached?",
+    "seasonBody": "You haven't finished the season before this one. Even a poster and an episode count can say how it ends.",
+    "seasonConfirm": "Open season {{n}}"
+  },
   "status": {
     "current_anime": "Watching",
     "current_manga": "Reading",
@@ -237,6 +243,13 @@
     "loadFailed": "Couldn't load this title from its provider.",
     "moreTitles": "+{{count}} more"
   },
+  "episodes": {
+    "heading": "Episodes",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "hidden": "Titles you haven't reached are hidden.",
+    "untitled": "No title known",
+    "notReached": "you haven't reached it"
+  },
   "list": {
     "statusTabs": "List status",
     "sort": "Sort by",
@@ -454,7 +467,11 @@
     "link_source": "Source code",
     "link_licence": "Licence (AGPL-3.0)",
     "revokeOthers": "Sign out everywhere else",
-    "roleUser": "User"
+    "roleUser": "User",
+    "spoilers": "Spoiler protection",
+    "spoilersHint": "Hold back what you haven't reached — a friend's message, a season you're not up to. Revealing is always one tap.",
+    "spoilersOn": "On",
+    "spoilersOff": "Off"
   },
   "hero": {
     "updateProgress": "Update progress",
@@ -541,7 +558,11 @@
     "shelveTitle": "Put {{name}} on a shelf?",
     "shelveBody": "It is on your plan-to-watch list. A shelf is optional.",
     "noShelves": "You have no shelves yet — make one from a title's menu.",
-    "skipShelf": "Not now"
+    "skipShelf": "Not now",
+    "spoilerFlag": "This message gives something away",
+    "spoilerFlagHint": "It arrives covered until they choose to read it. Their app also covers it if you're further in than they are.",
+    "spoilerDeclared": "they marked it",
+    "spoilerAhead": "{{name}} is further in than you"
   },
   "moments": {
     "friendsHeading": "Friends who have this",
@@ -621,7 +642,8 @@
     "watchingNoTotal": "is on {{unit}} {{progress}} of",
     "scored": "scored {{score}}",
     "ep": "ep",
-    "ch": "ch"
+    "ch": "ch",
+    "noteAhead": "{{name}} is further in than you"
   },
   "leaderboard": {
     "episodes_watched": "Episodes",
