@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] — 2026-08-26
+
+### Fixed
+- **Release images build again.** The frontend stage was being run under QEMU for
+  the arm64 half of the multi-arch build, emulating an `npm ci` that produces
+  static JavaScript and CSS — output with no architecture at all. It turned the
+  2.1.1 release build into a six-hour job that was cancelled without publishing
+  anything. The stage is now pinned to `$BUILDPLATFORM`, so it runs natively once
+  and its output is copied into both images.
+
 ## [2.5.0] — 2026-08-26
 
 A journal: what you thought, episode by episode.
@@ -323,7 +333,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.1...HEAD
+[2.5.1]: https://github.com/RGBond007/anitracker/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/RGBond007/anitracker/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/RGBond007/anitracker/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/RGBond007/anitracker/compare/v2.2.0...v2.3.0

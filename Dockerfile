@@ -2,10 +2,17 @@
 
 # ---------- Stage 1: build the React bundle ----------
 # Node exists only here. The runtime image ships static files, not a Node process.
-FROM node:22-alpine AS frontend
+# Pinned to the *build* platform, not the target. The output of this stage is
+# static JavaScript and CSS, which has no architecture -- so running it under QEMU
+# for the arm64 half of a multi-arch build buys nothing and costs everything. That
+# emulated `npm ci` is what turned the 2.1.1 release build into a six-hour job that
+# published nothing.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend
 WORKDIR /build
 
 COPY frontend/package.json frontend/package-lock.json* ./
+# devDependencies are required here: `npm run build` is `tsc -b && vite build`, and
+# both live there. Omitting them breaks the build outright.
 RUN npm ci --no-audit --no-fund
 
 COPY frontend/ ./
