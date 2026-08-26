@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.5] — 2026-08-26
+
+### Fixed
+- **A title page survives a reload again.** Opening `/media/anilist/21` directly —
+  a refresh, a bookmark, a link someone sent you — answered with
+  `{"detail":"Not Found"}` instead of the app. The SPA fallback excluded the whole
+  of `/media`, which was written for the avatar files served at `/media/avatars/…`
+  but also happens to be the client's own route for a title. The exclusion now
+  names the avatar directory it always meant, and matches on path segments rather
+  than on letters, so a provider whose name merely starts with `avatars` is still
+  a title. Broken since 2026-08-18 and shipped in every release from 2.0.1 on.
+- **The decision is now reachable from a test.** The fallback is registered inside
+  `if STATIC_DIR.is_dir()`, and `app/static` exists only inside the built image —
+  so from a source checkout the whole block is skipped and nothing a test could
+  send would ever hit it. That is why this went out eight days ago untested. The
+  routing rule is its own function now, with `tests/test_spa_routing.py` covering
+  every client route and every path that must keep reading as a miss: the API, the
+  hashed bundle, and an avatar that does not exist.
+
 ## [2.5.4] — 2026-08-26
 
 ### Changed
@@ -458,7 +477,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.4...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.5...HEAD
+[2.5.5]: https://github.com/RGBond007/anitracker/compare/v2.5.4...v2.5.5
 [2.5.4]: https://github.com/RGBond007/anitracker/compare/v2.5.3...v2.5.4
 [2.5.3]: https://github.com/RGBond007/anitracker/compare/v2.5.2...v2.5.3
 [2.5.2]: https://github.com/RGBond007/anitracker/compare/v2.5.1...v2.5.2

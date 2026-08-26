@@ -117,6 +117,39 @@ async def avatar_file(filename: str) -> FileResponse:
 # The React bundle is copied into app/static at image build time. Serving it from
 # the backend removes an entire nginx container from the compose file.
 
+#: Prefixes served by something other than the client router.
+#:
+#: A miss under any of these has to read as a miss. `/assets` and the avatar
+#: directory are files a browser asked for by type -- answering an `<img>` or a
+#: `<script>` with a page of HTML gives a blank screen or a broken picture rather
+#: than the 404 the client can recover from -- and `/api` is the API's own.
+NON_CLIENT_PREFIXES = ("/api", "/assets", "/media/avatars")
+
+
+def is_client_route(path: str) -> bool:
+    """
+    Whether an unmatched GET should be answered with `index.html`.
+
+    This exists as its own function because it got the answer wrong for eight
+    days and nothing could catch it: the exclusion was once the whole of
+    `/media`, written for the avatar files served at `/media/avatars/...` -- but
+    `/media/{provider}/{id}` is *also* the client's route for a title. So every
+    detail page in the app returned `{"detail":"Not Found"}` on reload, and every
+    link to one opened on a page of JSON. The prefix is now the avatar directory
+    it was always meant to name.
+
+    The whole fallback lives behind `if STATIC_DIR.is_dir()`, which is false in a
+    source checkout, so no test running from the repository could ever reach it.
+    Pulled out here, the decision is reachable whether or not a bundle was built.
+
+    Matching is on path segments rather than raw prefixes: `/apiary` is not the
+    API, and a title from a provider called `avatarsomething` is not an upload.
+    """
+    return not any(
+        path == prefix or path.startswith(f"{prefix}/") for prefix in NON_CLIENT_PREFIXES
+    )
+
+
 if STATIC_DIR.is_dir():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
@@ -130,20 +163,7 @@ if STATIC_DIR.is_dir():
         """Unknown non-API GET paths return index.html so client-side routing works."""
         from fastapi.responses import JSONResponse
 
-        if (
-            exc.status_code == 404
-            and request.method == "GET"
-            and not request.url.path.startswith("/api")
-            # A miss under /assets is a stale bundle reference, not a client route.
-            # Answering it with index.html hands the browser HTML where it expects
-            # JavaScript, and the module fails to parse — a blank page instead of a
-            # 404 the client could recover from.
-            and not request.url.path.startswith("/assets")
-            # Same reasoning for uploads: a missing avatar must read as missing, so
-            # the browser draws its broken-image state and the client falls back to
-            # initials, rather than being handed a page of HTML for an <img>.
-            and not request.url.path.startswith("/media")
-        ):
+        if exc.status_code == 404 and request.method == "GET" and is_client_route(request.url.path):
             return FileResponse(STATIC_DIR / "index.html", headers=INDEX_HEADERS)
         # `exc.headers` carries things the client needs to act on — `Retry-After` on
         # a 429, `WWW-Authenticate` on a 401. Rebuilding the response without them

@@ -1,6 +1,6 @@
 [project]
 name = "anitrack"
-version = "2.5.4"
+version = "2.5.5"
 description = "Self-hosted anime & manga tracker"
 license = "AGPL-3.0-only"
 requires-python = ">=3.12"
