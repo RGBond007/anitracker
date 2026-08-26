@@ -15,6 +15,7 @@ import { groupByFranchise } from "../../lib/franchise";
 import { Hero } from "../../components/media/Hero";
 import { Reactions } from "../../components/media/Reactions";
 import { NextUp } from "../../components/media/NextUp";
+import { Tonight } from "../../components/media/Tonight";
 import { Schedule, useSchedule } from "../../components/media/Schedule";
 import { Button, Chip } from "../../components/ui/Button";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
@@ -171,6 +172,10 @@ export function DashboardPage() {
         {/* Numbers sit directly under the hero so the three artwork sections below
             run together instead of being split in half by a band of figures. */}
         <StatStrip items={stats} />
+
+        {/* The question a full library still leaves open, asked before anything
+            is listed: what, of all this, is tonight actually for? */}
+        {everything.data && <Tonight entries={everything.data} lang={lang} />}
 
         {/* Directly under the figures: it answers the question they raise. */}
         {everything.data && <NextUp entries={everything.data} lang={lang} />}

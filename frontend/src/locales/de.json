@@ -16,7 +16,8 @@
     "cancel": "Abbrechen",
     "back": "Zurück",
     "loading": "Lädt",
-    "seeAll": "Alle anzeigen"
+    "seeAll": "Alle anzeigen",
+    "close": "Schließen"
   },
   "status": {
     "current_anime": "Am Schauen",
@@ -171,6 +172,50 @@
       "heading": "Auf deiner Liste vergessen",
       "reason": "Seit {{days}} Tagen unberührt",
       "reasonManga": "Seit {{days}} Tagen unberührt"
+    }
+  },
+  "tonight": {
+    "ask": "Was soll ich heute Abend schauen?",
+    "hint": "Drei Vorschläge aus deiner eigenen Bibliothek, mit Begründung.",
+    "title": "Heute Abend",
+    "time": "Wie viel Zeit hast du?",
+    "minutes": "{{count}} Min.",
+    "what": "Weiterschauen oder etwas Neues?",
+    "continue": "Etwas fortsetzen",
+    "fresh": "Etwas Neues anfangen",
+    "medium": "Anime oder Manga?",
+    "anime": "Anime",
+    "manga": "Manga",
+    "mood": "Lust auf …",
+    "anyGenre": "Egal",
+    "company": "Wer schaut mit?",
+    "alone": "Nur ich",
+    "withFriends": "Mit Freunden",
+    "build": "Queue bauen",
+    "adjust": "Antworten ändern",
+    "empty": "Nichts in deiner Bibliothek passt zu diesen Antworten. Versuch einen längeren Abend oder den anderen Modus.",
+    "allDismissed": "Alles verworfen. Ändere die Antworten — oder mach früh Schluss.",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "replace": "Gegen den nächsten Vorschlag tauschen",
+    "dismiss": "Heute nicht",
+    "reason": {
+      "fitEpisodes_one": "1 Episode · {{minutes}} Min.",
+      "fitEpisodes_other": "{{count}} Episoden · {{minutes}} Min.",
+      "fitChapters_one": "etwa 1 Kapitel",
+      "fitChapters_other": "etwa {{count}} Kapitel",
+      "fitMovie": "ein Film · {{minutes}} Min.",
+      "finishable_one": "heute Abend wärst du durch — 1 übrig",
+      "finishable_other": "heute Abend wärst du durch — {{count}} übrig",
+      "progressOf": "du bist bei Episode {{progress}} von {{total}}",
+      "progress": "du bist bei Episode {{progress}}",
+      "onHold_one": "seit gestern pausiert",
+      "onHold_other": "seit {{count}} Tagen pausiert",
+      "untouched_one": "wartet seit einem Tag auf deiner Liste",
+      "untouched_other": "wartet seit {{count}} Tagen auf deiner Liste",
+      "friendWatching": "{{name}} schaut es auch gerade",
+      "friendSent": "{{name}} hat dir das geschickt",
+      "friendLoved": "{{name}} hat es mit 9+ bewertet"
     }
   },
   "mediaStatus": {

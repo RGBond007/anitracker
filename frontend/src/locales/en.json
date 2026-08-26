@@ -16,7 +16,8 @@
     "cancel": "Cancel",
     "back": "Back",
     "loading": "Loading",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "close": "Close"
   },
   "status": {
     "current_anime": "Watching",
@@ -171,6 +172,50 @@
       "heading": "Forgotten on your list",
       "reason": "Untouched for {{days}} days",
       "reasonManga": "Untouched for {{days}} days"
+    }
+  },
+  "tonight": {
+    "ask": "What should I watch tonight?",
+    "hint": "Three picks from your own library, argued for.",
+    "title": "Tonight",
+    "time": "How long have you got?",
+    "minutes": "{{count}} min",
+    "what": "Continue, or start fresh?",
+    "continue": "Continue something",
+    "fresh": "Start something new",
+    "medium": "Anime or manga?",
+    "anime": "Anime",
+    "manga": "Manga",
+    "mood": "In the mood for…",
+    "anyGenre": "Anything",
+    "company": "Who's watching?",
+    "alone": "Just me",
+    "withFriends": "With friends",
+    "build": "Build my queue",
+    "adjust": "Change the answers",
+    "empty": "Nothing in your library fits those answers. Try a longer evening, or the other mode.",
+    "allDismissed": "All dismissed. Change the answers, or call it an early night.",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "replace": "Swap for the next pick",
+    "dismiss": "Not tonight",
+    "reason": {
+      "fitEpisodes_one": "1 episode · {{minutes}} min",
+      "fitEpisodes_other": "{{count}} episodes · {{minutes}} min",
+      "fitChapters_one": "about 1 chapter",
+      "fitChapters_other": "about {{count}} chapters",
+      "fitMovie": "a film · {{minutes}} min",
+      "finishable_one": "you'd finish it tonight — 1 left",
+      "finishable_other": "you'd finish it tonight — {{count}} left",
+      "progressOf": "you're on episode {{progress}} of {{total}}",
+      "progress": "you're on episode {{progress}}",
+      "onHold_one": "on hold since yesterday",
+      "onHold_other": "on hold for {{count}} days",
+      "untouched_one": "waiting a day on your list",
+      "untouched_other": "waiting {{count}} days on your list",
+      "friendWatching": "{{name}} is watching it too",
+      "friendSent": "{{name}} sent you this",
+      "friendLoved": "{{name}} rated it 9+"
     }
   },
   "mediaStatus": {

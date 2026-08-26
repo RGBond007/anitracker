@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-08-26
+
+Answers "what should I watch tonight?" from your own library.
+
+### Added
+- **A queue for one evening.** Say how long you have (25, 50 or 90 minutes), whether
+  to carry on with something or start fresh, anime or manga, a mood, and whether you
+  are watching alone — and get three titles back, each with the reason it was chosen.
+  Fit is real arithmetic against episode duration, so a 110-minute film honestly does
+  not fit a 90-minute evening and is left out. Manga carries no duration, so time maps
+  to an approximate chapter count and says "about".
+- Finishing something tonight outranks everything else, and "with friends" is a
+  preference that floats titles up rather than a filter that hides the rest.
+- The three picks are replaceable, dismissable and reorderable; replacing pulls the
+  next-best candidate off the same ranking rather than reshuffling.
+
 ## [2.1.1] — 2026-08-25
 
 Adds shelves, discovery and direct recommendations between friends, and closes a
@@ -215,7 +231,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/RGBond007/anitracker/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/RGBond007/anitracker/compare/v2.0.1...v2.1.1
 [2.0.1]: https://github.com/RGBond007/anitracker/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/RGBond007/anitracker/compare/v1.0.0...v2.0.0
