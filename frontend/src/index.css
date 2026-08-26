@@ -195,6 +195,37 @@
     }
   }
 
+  /**
+   * The startup indicator. A cold boot waits on one request, so there is no
+   * progress to measure and nothing honest to fill; this is a token that work is
+   * happening, not a percentage. It moves on its own and blocks nothing — the
+   * app replaces the whole screen the moment the response lands.
+   *
+   * With reduced motion the segment stops where it starts and still reads as a
+   * bar, rather than disappearing and taking the last visual cue with it.
+   */
+  .startup-progress {
+    animation: startup-progress 1.5s ease-in-out infinite;
+  }
+
+  /* The segment is a third of the track, so it clears the track entirely past
+     ±100% of its own width. Held inside that, a little of it is always on
+     screen — a bar that empties itself every cycle looks like it stopped. */
+  @keyframes startup-progress {
+    from {
+      transform: translateX(-70%);
+    }
+    to {
+      transform: translateX(270%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .startup-progress {
+      animation: none;
+    }
+  }
+
   /* Horizontal rails hide the scrollbar but stay scrollable and keyboard-reachable. */
   .rail {
     scrollbar-width: none;

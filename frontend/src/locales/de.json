@@ -20,6 +20,10 @@
     "seeAll": "Alle anzeigen",
     "close": "Schließen"
   },
+  "startup": {
+    "loading": "{{name}} wird geladen",
+    "slow": "Das dauert länger als erwartet."
+  },
   "spoiler": {
     "reveal": "Trotzdem anzeigen",
     "seasonTitle": "Eine Staffel öffnen, bei der du noch nicht bist?",

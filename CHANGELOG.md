@@ -6,6 +6,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.2] — 2026-08-26
+
+### Changed
+- **The app says it is starting instead of showing nothing.** While the instance
+  and the current user are being fetched — the two answers that decide which
+  route can be drawn at all — the router used to return an empty full-height
+  div. Against a local server that is a flicker; on a NAS, a Raspberry Pi, a
+  database still waking up or a phone on bad signal it is several seconds of
+  blank page, which is indistinguishable from a broken deployment and is exactly
+  when someone starts restarting healthy containers. There is now a startup
+  screen: the instance's mark, a thin indeterminate rule, and a line naming what
+  is being loaded. Nothing about it blocks — the moment the answers land, the
+  real route replaces it.
+- **The startup screen knows which instance it belongs to.** It is drawn before
+  `/instance` answers, so it has nothing to go on — it now reuses the name, logo
+  and accent colour the last successful load saw, kept in `localStorage`. An
+  instance called something other than AniTracker no longer spends its slowest
+  seconds wearing the built-in brand, and one with its own accent never shows a
+  frame of the default gold before switching: the colour is applied before the
+  first paint, not after it. A browser that has never loaded the app, or one that
+  refuses storage, falls back to the bundled artwork as before.
+- **The served accent is the authority in both directions.** Applying it was a
+  one-way `setProperty`, which was harmless while nothing set the colour before
+  the response arrived. Now that the startup screen does, an instance whose
+  accent resolves to empty — `ACCENT_COLOR=` with no value in `.env` — would
+  have kept wearing the remembered colour for the rest of the session. An empty
+  value now clears the override instead of being ignored.
+
+### Accessibility
+- **Loading is announced, once.** The startup screen carries a single polite
+  live region holding one sentence at a time: "Loading <instance>", replaced
+  after eight seconds by "This is taking longer than expected." — so a delayed
+  request reads as a slow server rather than a crash. Both messages are visible
+  text as well, and the indicator stops moving under `prefers-reduced-motion`
+  while still reading as a bar.
+
 ## [2.5.1] — 2026-08-26
 
 ### Fixed
@@ -333,7 +369,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.2...HEAD
+[2.5.2]: https://github.com/RGBond007/anitracker/compare/v2.5.1...v2.5.2
 [2.5.1]: https://github.com/RGBond007/anitracker/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/RGBond007/anitracker/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/RGBond007/anitracker/compare/v2.3.0...v2.4.0

@@ -20,6 +20,10 @@
     "seeAll": "See all",
     "close": "Close"
   },
+  "startup": {
+    "loading": "Loading {{name}}",
+    "slow": "This is taking longer than expected."
+  },
   "spoiler": {
     "reveal": "Show anyway",
     "seasonTitle": "Open a season you haven't reached?",

@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "../components/layout/AppShell";
+import { StartupScreen } from "../components/layout/StartupScreen";
 import { useInstance } from "../features/instance/useInstance";
 import { useMe } from "../features/auth/useAuth";
+import { applyAccent } from "../lib/accent";
+import { cacheBrand } from "../lib/brandCache";
 import { ChangePasswordPage } from "../pages/ChangePassword";
 import { DashboardPage } from "../pages/Dashboard";
 import { FriendsPage } from "../pages/Friends";
@@ -25,14 +28,21 @@ export function Router() {
 
   // The instance accent is admin-configurable; feed it into the token layer so
   // every `stamp` usage picks it up without a single component knowing about it.
+  // The served value is the authority — including when it is empty, which has to
+  // clear the accent the startup screen applied from the last load rather than
+  // leave the instance wearing a colour it no longer has.
   useEffect(() => {
-    if (instance.data?.accent_color) {
-      document.documentElement.style.setProperty("--stamp", instance.data.accent_color);
-    }
-    if (instance.data?.instance_name) document.title = instance.data.instance_name;
+    if (!instance.data) return;
+    applyAccent(instance.data.accent_color);
+    if (instance.data.instance_name) document.title = instance.data.instance_name;
+    // Remembered so the *next* cold start can paint this instance's own brand
+    // while `/instance` is still in flight, instead of the built-in one.
+    cacheBrand(instance.data);
   }, [instance.data]);
 
-  if (instance.isLoading || me.isLoading) return <div className="min-h-dvh" />;
+  // Not a blank page: on a slow instance this is the only thing on screen for
+  // long enough that an empty one reads as a broken deployment.
+  if (instance.isLoading || me.isLoading) return <StartupScreen />;
 
   // A fresh instance goes straight to the wizard; there is no account to log into.
   if (instance.data && !instance.data.setup_complete) {
