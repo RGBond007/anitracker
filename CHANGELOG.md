@@ -6,6 +6,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.6] — 2026-08-28
+
+### Accessibility
+- **A skip link, first in the tab order on every route behind a session.** The
+  header was a toll gate: five nav links, a badge, search, logout and the avatar
+  menu standing in front of the page anyone actually asked for, paid again on
+  every navigation by whoever cannot skip it by looking. The first Tab now reveals
+  "Skip to main content", and activating it puts focus on `<main>`.
+- **Focus follows a navigation.** A skip link only helps on the tab pass that
+  starts at the top of the document. Follow a nav link and focus stays on the link
+  that was pressed, with the rest of the header still ahead of the content and the
+  skip link now *behind* focus — measured at eight tab stops between the "Journal"
+  link and the first control on the journal page. The shell now hands focus to the
+  new page itself. Two cases are deliberately left alone: the first render, or a
+  fresh load would land past the skip link before anyone could reach it, and a
+  `REPLACE` navigation, which is a page rewriting its own address rather than
+  going somewhere new — switching season on a title does exactly that, and moving
+  focus would take the keyboard out of the switcher still under the user's hand.
+- The link is invisible until focused and drawn against both themes: surface on
+  ground in dark, white on paper in light, with the instance accent as its ring.
+
+### Notes
+- `/search` is the one route where the first Tab does not reveal the link, because
+  the page autofocuses its search field — which is *inside* the main content, so
+  the header is bypassed there anyway and by a shorter road. The link is still in
+  the DOM and still reachable backwards. Deleting the autofocus to make the rule
+  uniform would have made that page worse for the same people.
+- The focus target is `<main>`, and its own focus ring is suppressed: the region
+  runs the full width of the viewport, so the ring draws as two gold rules across
+  the page with its side edges off-screen, reading as decoration rather than as
+  focus. WCAG 2.4.7 covers what a Tab can stop on, and `tabindex="-1"` is the
+  opposite of that. Everything in the tab sequence keeps its ring.
+
 ## [2.5.5] — 2026-08-26
 
 ### Fixed
@@ -477,7 +510,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.5...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.6...HEAD
+[2.5.6]: https://github.com/RGBond007/anitracker/compare/v2.5.5...v2.5.6
 [2.5.5]: https://github.com/RGBond007/anitracker/compare/v2.5.4...v2.5.5
 [2.5.4]: https://github.com/RGBond007/anitracker/compare/v2.5.3...v2.5.4
 [2.5.3]: https://github.com/RGBond007/anitracker/compare/v2.5.2...v2.5.3
