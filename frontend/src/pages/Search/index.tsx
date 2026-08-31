@@ -6,7 +6,7 @@ import type { MediaType } from "../../lib/api-client";
 import { useSearch } from "../../features/media/useMedia";
 import { useUiStore } from "../../stores/uiStore";
 import { groupSearchResults } from "../../lib/searchGroups";
-import { PosterGrid, SectionHead } from "../../components/layout/Rail";
+import { PageHead, PosterGrid } from "../../components/layout/Rail";
 import { Poster } from "../../components/media/Poster";
 import { Button, Chip } from "../../components/ui/Button";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
@@ -113,7 +113,7 @@ export function SearchPage() {
 
   return (
     <div className="wrap py-8">
-      <SectionHead>{t("search.title")}</SectionHead>
+      <PageHead title={t("search.pageTitle")}>{t("search.pageHint")}</PageHead>
 
       {/* One row: the field, what it found, and the way to narrow it. The count
           drops below the field before the button ever wraps away from it. */}

@@ -8,7 +8,7 @@ import { useShelves } from "../../features/shelves/useShelves";
 import { useSeasonSelections } from "../../features/media/useSeasons";
 import { useUiStore } from "../../stores/uiStore";
 import { useStatusLabel } from "../../components/media/statusLabels";
-import { PosterGrid, SectionHead } from "../../components/layout/Rail";
+import { PageHead, PosterGrid } from "../../components/layout/Rail";
 import { Button, Chip } from "../../components/ui/Button";
 import { PosterRow } from "../../components/media/PosterRow";
 import { FranchiseCard } from "../../components/media/FranchiseCard";
@@ -46,7 +46,7 @@ export function ListViewPage() {
 
   return (
     <div className="wrap py-8">
-      <SectionHead>{t("nav.library")}</SectionHead>
+      <PageHead title={t("list.pageTitle")}>{t("list.pageHint")}</PageHead>
 
       {/* Statuses scroll rather than wrap: five chips plus a type toggle plus a
           sort control wrapped to three ragged rows on a phone, which cost ~200px

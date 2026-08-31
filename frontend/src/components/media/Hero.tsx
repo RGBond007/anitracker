@@ -52,9 +52,11 @@ export function Hero({
           {t("dashboard.continue")}
         </p>
 
-        <h1 className="font-display mb-3 max-w-[600px] text-[32px] font-bold leading-[1.05] tracking-[-0.02em] sm:text-[44px]">
+        {/* `h2`, not `h1`: this is the page's lead item, not the page. As an `h1` it
+            made the dashboard announce itself as whatever was playing. */}
+        <h2 className="font-display mb-3 max-w-[600px] text-[32px] font-bold leading-[1.05] tracking-[-0.02em] sm:text-[44px]">
           {title}
-        </h1>
+        </h2>
 
         <p className="mb-6 flex flex-wrap gap-x-4 text-sm text-text-dim">
           <span>

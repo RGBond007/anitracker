@@ -6,7 +6,6 @@ import type { Suggestion } from "../../features/dashboard/recap";
 import { monthRecap, suggestions } from "../../features/dashboard/recap";
 import { displayTitle } from "../../lib/titles";
 import { relativeTime } from "../../lib/time";
-import { SectionHead } from "../layout/Rail";
 import { CoverImage } from "./CoverImage";
 import { mediaHref } from "./Poster";
 
@@ -27,11 +26,14 @@ export function NextUp({ entries, lang }: { entries: Entry[]; lang: TitleLanguag
   if (!recap && picked.length === 0) return null;
 
   return (
-    <section className="mb-8 sm:mb-14">
-      <SectionHead>{t("recap.heading")}</SectionHead>
-
+    /* No heading and no section of its own any more: the dashboard wraps this and
+       the "what should I watch tonight" prompt in one decision area under a single
+       heading. Two headings asking the same question read as two questions — and
+       this one could render its heading over nothing at all, because the recap
+       line survives when the suggestions do not. */
+    <>
       {recap && (
-        <p className="mb-5 text-[13.5px] leading-relaxed text-text-dim">
+        <p className="mb-4 text-[13.5px] leading-relaxed text-text-dim">
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-faint">
             {new Intl.DateTimeFormat(i18n.language, { month: "long" }).format(recap.month)}
           </span>{" "}
@@ -52,7 +54,7 @@ export function NextUp({ entries, lang }: { entries: Entry[]; lang: TitleLanguag
           ))}
         </ul>
       )}
-    </section>
+    </>
   );
 }
 

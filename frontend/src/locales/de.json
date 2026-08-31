@@ -121,14 +121,16 @@
     "emptyCta": "Titel suchen",
     "loadFailed": "Die Übersicht konnte nicht geladen werden. Die Instanz startet möglicherweise noch.",
     "stats": "Zahlen",
-    "library": "Deine Bibliothek",
     "days": "Tage",
     "timeWatched": "Zeit geschaut",
-    "filter_all": "Alle",
-    "filter_anime": "Anime",
-    "filter_manga": "Manga",
-    "filter_completed": "Abgeschlossen",
-    "friendActivity": "Freunde-Aktivität"
+    "pageTitle": "Übersicht",
+    "pageHint": "Was du jetzt weiterschauen kannst — und was sich für heute Abend lohnt.",
+    "friendsFinished": "Was Freunde zuletzt beendet haben",
+    "hideSection": "Abschnitt „{{name}}“ ausblenden",
+    "statsLabel": "Statistik",
+    "customised": "Deine Übersicht ist angepasst.",
+    "resetArrangement": "Auf Standard zurücksetzen",
+    "customise": "Anpassen"
   },
   "recap": {
     "heading": "Als Nächstes",
@@ -154,7 +156,6 @@
     }
   },
   "search": {
-    "title": "Suche",
     "label": "Anime und Manga suchen",
     "placeholder": "Anime oder Manga suchen",
     "clear": "Suche leeren",
@@ -192,7 +193,9 @@
     "chooseEntry": "{{count}} Einträge",
     "chooseHint": "Wähle die Staffel, den Film oder das Special für deine Liste.",
     "addThis": "Hinzufügen",
-    "onYourList": "Auf deiner Liste"
+    "onYourList": "Auf deiner Liste",
+    "pageTitle": "Suche",
+    "pageHint": "Etwas Neues finden — oder einen Titel, den du dir vorgenommen hattest."
   },
   "discover": {
     "dismiss": "Kein Interesse",
@@ -353,7 +356,9 @@
     "empty": "Diese Liste ist noch leer — suche einen Titel zum Hinzufügen.",
     "emptyCta": "Titel suchen",
     "viewList": "Kompakte Liste",
-    "viewGrid": "Cover-Raster"
+    "viewGrid": "Cover-Raster",
+    "pageTitle": "Bibliothek",
+    "pageHint": "Alles, was du gespeichert hast — nach Status, auf Regalen, sortiert wie du magst."
   },
   "shelf": {
     "heading": "Regale",
@@ -502,7 +507,7 @@
     "revoked": "Alle anderen Sitzungen beendet",
     "passwordHint": "Mindestens 8 Zeichen.",
     "subtitle": "Dein Konto, diese Instanz und wie AniTracker aussieht.",
-    "sections": "Bereiche der Einstellungen",
+    "sections": "Abschnitte",
     "security": "Sicherheit",
     "saved": "Gespeichert",
     "saving": "Wird gespeichert…",
@@ -592,7 +597,19 @@
     "accentNoSafe": "Kein Ton dieser Farbe besteht alle Prüfungen. Versuche einen anderen Farbton.",
     "accentProblem_inkDark": "Im dunklen Design ist weder dunkler noch heller Text darauf lesbar — Beschriftungen und Zähler werden schwer erkennbar.",
     "accentProblem_inkLight": "Im hellen Design ist weder dunkler noch heller Text darauf lesbar — Beschriftungen und Zähler werden schwer erkennbar.",
-    "accentAdjusted": "Wird aufgehellt oder abgedunkelt dargestellt, wo sie sonst mit der Seite verschmelzen würde. Deine genaue Farbe bleibt für Tönungen und Ränder erhalten."
+    "accentAdjusted": "Wird aufgehellt oder abgedunkelt dargestellt, wo sie sonst mit der Seite verschmelzen würde. Deine genaue Farbe bleibt für Tönungen und Ränder erhalten.",
+    "dashboardTab": "Übersicht",
+    "dashboardTitle": "Übersicht",
+    "dashboardHint": "Was die Übersicht zeigt und in welcher Reihenfolge. Die Voreinstellung ist ein guter Anfang — ändere, was du nicht brauchst.",
+    "density": "Abstände",
+    "densityHint": "Wie viel Raum die Abschnitte einnehmen.",
+    "densityComfortable": "Luftig",
+    "densityCompact": "Kompakt",
+    "sectionsHint": "Abwählen zum Ausblenden. Der Weiterschauen-Bereich bleibt immer.",
+    "moveUp": "„{{name}}“ nach oben",
+    "moveDown": "„{{name}}“ nach unten",
+    "resetDashboard": "Auf Standard zurücksetzen",
+    "dashboardDefault": "Bereits die empfohlene Anordnung."
   },
   "hero": {
     "updateProgress": "Fortschritt aktualisieren",

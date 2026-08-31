@@ -32,7 +32,10 @@ export function Tonight({ entries, lang }: { entries: Entry[]; lang: TitleLangua
 
   return (
     <>
-      <div className="mb-8 sm:mb-14">
+      {/* No section spacing of its own: the dashboard nests this inside the
+          "what next" area, and a standalone bottom margin left the recap line
+          underneath looking orphaned rather than part of the same block. */}
+      <div>
         <button
           type="button"
           onClick={() => setOpen(true)}

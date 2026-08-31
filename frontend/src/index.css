@@ -269,6 +269,24 @@
     }
   }
 
+  /**
+   * Dashboard density, chosen per user in the appearance settings.
+   *
+   * One rule rather than a class on every section: a section added later inherits
+   * the reader's choice without having to know the setting exists. Comfortable is
+   * the shipped spacing, so an account that never touches this renders exactly as
+   * it always did.
+   */
+  [data-density="compact"] > section {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    [data-density="compact"] > section {
+      margin-bottom: 2.25rem;
+    }
+  }
+
   /* Horizontal rails hide the scrollbar but stay scrollable and keyboard-reachable. */
   .rail {
     scrollbar-width: none;

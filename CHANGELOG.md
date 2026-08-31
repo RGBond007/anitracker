@@ -6,6 +6,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.15] — 2026-08-31
+
+### Added
+- **The dashboard is yours to arrange.** A new settings tab: show or hide the
+  statistics, the "what next" area, the airing schedule, also-in-progress, recent
+  activity and what friends finished; move the body sections into whatever order
+  suits; choose comfortable or compact spacing; reset the lot.
+- **Nothing is mandatory and nothing is stored until it is changed.** An account
+  that never opens the tab gets exactly the curated arrangement it always had, and
+  a reset *removes* the stored preference rather than writing the defaults into it
+  — so a reset account is indistinguishable from one that never customised,
+  including after a release that changes what the recommended arrangement is.
+- The inline hide control on each section stays as the quick path. Settings is
+  where it is undone, and where the order and spacing live — a customisation panel
+  bolted to the top of the dashboard would be one more thing to scroll past, which
+  is the problem the last release was solving.
+
+### Notes
+- Preferences are per user, keyed on the account id. Two people sharing a laptop is
+  the ordinary case on a self-hosted instance, and one person's tidied dashboard
+  should not rearrange the other's.
+- The hero is not hideable and the figures are not moveable. The first is the page's
+  answer to the question the page exists to ask; the second is a thin band tied to
+  the hero above it, and nobody wants a row of numbers between two poster rails.
+- A stored order is repaired on read rather than trusted: known sections keep their
+  saved positions, anything unrecognised is dropped, and anything missing is
+  appended where the app recommends it. Without that, a release adding a section
+  would leave it permanently invisible to everybody who had ever customised
+  anything — their saved order simply would not mention it.
+- Spacing is one CSS rule driven by a `data-density` attribute rather than a class
+  per section, so a section added later inherits the reader's choice without having
+  to know the setting exists.
+- Checked at 360×640, 390×844, 768×1024 and 1280×900 with one customised
+  arrangement: same order, no overflow, nothing clipped. With every optional
+  section hidden the page is the heading, the hero and its button — 900px, no gaps.
+  The toggle rows were 20px tall on a phone before this shipped and are now 44px.
+
+### Changed
+- **The dashboard asks "what next" once, not twice.** The tonight prompt and the
+  month's suggestions answered the same question under two headings, and the second
+  one could render over nothing at all — the recap line survives when the
+  suggestions do not, so "Next up" was a heading above a sentence about last month.
+  They are one area now: the month for context, the suggestions, then the prompt as
+  the way out when those have not settled it.
+- **Every secondary section can be put away, and stays away.** Tonight, the airing
+  schedule, also-in-progress, recent activity and what friends finished each carry a
+  quiet control that hides them for good. All of it is useful to somebody and noise
+  to somebody else, and which is which is not knowable from here — so it is
+  answerable rather than guessed.
+- The preference is **per user, not per browser**. Two accounts sharing a laptop is
+  the ordinary case on a self-hosted instance, and one person's tidied dashboard
+  should not rearrange the other's.
+- **A way back, whenever anything is hidden.** A line at the foot of the page counts
+  what is put away and brings it all back. A preference that cannot be reversed is a
+  trap, and a control that only appears once something is hidden costs nothing the
+  rest of the time.
+
+### Notes
+- The hero is deliberately not hideable: it is the page's answer to the question the
+  page exists to ask, and a dashboard without it is a blank one.
+- Measured rather than judged by eye. The primary action sits at 496px, above the
+  fold on 390×844, 390×667 and 360×640 — the smallest phone still worth supporting.
+  With every hideable section put away the page goes from 2174px to **1006px** and
+  leaves no empty block behind: what remains is the heading, the hero, the figures
+  and the line offering them back.
+- Collapsing the rails after three or four items was considered and dropped. They
+  scroll sideways, so a fourth poster costs no height — the page's length comes from
+  the number of sections, which is what hiding addresses.
+
+### Changed
+- **Each route now says what it is for.** Dashboard and library are both "your
+  titles" to anybody who has not used the app before, and nothing on either page
+  said which was which. Every primary route now opens with its own heading and one
+  line naming the question it answers — *what to pick up now* on the dashboard,
+  *everything you've saved* in the library, *find something new* in search.
+- **The dashboard no longer carries a second library.** Its last section was a
+  filterable poster grid titled "Your Library", with its own all/anime/manga/completed
+  chips and the first eighteen titles — a truncated, less capable copy of `/list`,
+  which has five status filters, shelf filters, a sort, a view toggle and the whole
+  collection. It is gone. The rails above it answer "what do I continue", which is
+  the page's job; browsing the collection is the library's.
+- **The friends feed on the dashboard says what it is.** The same query appeared on
+  both pages under the same heading, "Friend activity", which reads as one section
+  rendered twice. On the dashboard it is *What friends finished lately* — a reason to
+  consider something tonight — and "See all" says where the feed itself lives.
+
+### Accessibility
+- **Three of the four primary routes had no `h1` at all.** Library, search and the
+  journal opened with a section heading, so their top-level heading was simply
+  missing. The dashboard's only `h1` was the *hero's* title, which meant the page
+  announced itself as whatever happened to be playing. Each route now has exactly
+  one `h1`, and the hero's title is the `h2` it always should have been.
+
+### Notes
+- What stayed, and why. **Also in progress** is the shortlist of things to continue
+  and carries the only "add a title" affordance on the page; it links to the library
+  rather than reproducing it. **Recent activity** is deliberately the titles that
+  moved and are *not* in progress — finished, planned, dropped — which is the one
+  view the library's status filters cannot compose. Both keep a "See all".
+
 ## [2.5.14] — 2026-08-31
 
 ### Added
@@ -845,7 +945,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.14...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.15...HEAD
+[2.5.15]: https://github.com/RGBond007/anitracker/compare/v2.5.14...v2.5.15
 [2.5.14]: https://github.com/RGBond007/anitracker/compare/v2.5.13...v2.5.14
 [2.5.13]: https://github.com/RGBond007/anitracker/compare/v2.5.12...v2.5.13
 [2.5.12]: https://github.com/RGBond007/anitracker/compare/v2.5.11...v2.5.12

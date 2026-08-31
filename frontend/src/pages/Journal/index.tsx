@@ -10,7 +10,7 @@ import { displayTitle } from "../../lib/titles";
 import { calendarDate } from "../../lib/time";
 import { Chip } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
-import { SectionHead } from "../../components/layout/Rail";
+import { PageHead } from "../../components/layout/Rail";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { Spoiler } from "../../components/ui/Spoiler";
 import { useDocumentTitle } from "../../lib/useDocumentTitle";
@@ -46,7 +46,7 @@ export function JournalPage() {
 
   return (
     <div className="wrap py-8">
-      <SectionHead>{t("journal.pageTitle")}</SectionHead>
+      <PageHead title={t("journal.pageTitle")}>{t("journal.pageHint")}</PageHead>
       <p className="-mt-3 mb-5 text-[13px] text-text-dim">{t("journal.pageHint")}</p>
 
       <div className="mb-6 flex gap-2">

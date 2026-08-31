@@ -41,6 +41,8 @@ export function useUnsavedGuard(dirty: boolean) {
 /** Stroke icons, drawn in the same 24px grid as the nav so weights match. */
 export const ICONS = {
   profile: "M20 21v-1.5a4.5 4.5 0 0 0-4.5-4.5h-7A4.5 4.5 0 0 0 4 19.5V21M12 11.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8",
+  // Three stacked bars: a page made of sections, which is what this tab arranges.
+  dashboard: "M4 5h16M4 12h16M4 19h9",
   appearance:
     "M12 3a9 9 0 1 0 0 18h1.6a2.4 2.4 0 0 0 0-4.8H13a2 2 0 0 1 0-4h3.9A4.1 4.1 0 0 0 21 8.1 5.1 5.1 0 0 0 15.9 3ZM7.5 12h.01M9 8.2h.01M14.4 7.4h.01",
   security: "M6 11h12v8.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5zM8.5 11V7.5a3.5 3.5 0 1 1 7 0V11",

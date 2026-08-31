@@ -121,14 +121,16 @@
     "emptyCta": "Search titles",
     "loadFailed": "Couldn't load your dashboard. The instance may still be starting up.",
     "stats": "Stats",
-    "library": "Your Library",
     "days": "days",
     "timeWatched": "Time watched",
-    "filter_all": "All",
-    "filter_anime": "Anime",
-    "filter_manga": "Manga",
-    "filter_completed": "Completed",
-    "friendActivity": "Friend activity"
+    "pageTitle": "Dashboard",
+    "pageHint": "What to pick up now, and what's worth a look tonight.",
+    "friendsFinished": "What friends finished lately",
+    "hideSection": "Hide the “{{name}}” section",
+    "statsLabel": "Statistics",
+    "customised": "Your dashboard is customised.",
+    "resetArrangement": "Reset to defaults",
+    "customise": "Customise"
   },
   "recap": {
     "heading": "Next up",
@@ -154,7 +156,6 @@
     }
   },
   "search": {
-    "title": "Search",
     "label": "Search anime and manga",
     "placeholder": "Search anime or manga",
     "clear": "Clear search",
@@ -192,7 +193,9 @@
     "chooseEntry": "{{count}} entries",
     "chooseHint": "Pick the season, movie or special you want on your list.",
     "addThis": "Add",
-    "onYourList": "On your list"
+    "onYourList": "On your list",
+    "pageTitle": "Search",
+    "pageHint": "Find something new to add, or a title you meant to get back to."
   },
   "discover": {
     "dismiss": "Not interested",
@@ -353,7 +356,9 @@
     "empty": "Nothing in this list yet — search to add a title.",
     "emptyCta": "Search titles",
     "viewList": "Compact list",
-    "viewGrid": "Cover grid"
+    "viewGrid": "Cover grid",
+    "pageTitle": "Library",
+    "pageHint": "Everything you've saved — by status, on shelves, sorted how you like."
   },
   "shelf": {
     "heading": "Shelves",
@@ -502,7 +507,7 @@
     "revoked": "All other sessions ended",
     "passwordHint": "At least 8 characters.",
     "subtitle": "Your account, this instance, and how AniTracker looks.",
-    "sections": "Settings sections",
+    "sections": "Sections",
     "security": "Security",
     "saved": "Saved",
     "saving": "Saving…",
@@ -592,7 +597,19 @@
     "accentNoSafe": "No shade of this colour passes every check. Try a different hue.",
     "accentProblem_inkDark": "In the dark theme, neither dark nor light text is readable on it — button labels and badge counts will be hard to make out.",
     "accentProblem_inkLight": "In the light theme, neither dark nor light text is readable on it — button labels and badge counts will be hard to make out.",
-    "accentAdjusted": "Shown lightened or darkened where it would otherwise disappear into the page. Your exact colour is kept for tints and borders."
+    "accentAdjusted": "Shown lightened or darkened where it would otherwise disappear into the page. Your exact colour is kept for tints and borders.",
+    "dashboardTab": "Dashboard",
+    "dashboardTitle": "Dashboard",
+    "dashboardHint": "What the dashboard shows, in what order. The defaults are a good starting point — change what you don't want.",
+    "density": "Spacing",
+    "densityHint": "How much room the sections take up.",
+    "densityComfortable": "Comfortable",
+    "densityCompact": "Compact",
+    "sectionsHint": "Untick to hide. The continue-watching hero always stays.",
+    "moveUp": "Move “{{name}}” up",
+    "moveDown": "Move “{{name}}” down",
+    "resetDashboard": "Reset to defaults",
+    "dashboardDefault": "Already the recommended arrangement."
   },
   "hero": {
     "updateProgress": "Update progress",

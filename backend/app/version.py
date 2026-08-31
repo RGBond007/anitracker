@@ -1,2 +1,2 @@
-VERSION = "2.5.14"
+VERSION = "2.5.15"
 LICENSE = "AGPL-3.0-only"

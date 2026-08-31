@@ -13,6 +13,7 @@ import { UsersSection } from "./Users";
 import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import { DirtyContext, ICONS, Icon } from "./parts";
 import { useDocumentTitle } from "../../lib/useDocumentTitle";
+import { DashboardSection } from "./Dashboard";
 
 /**
  * Settings, as one page showing one section at a time.
@@ -23,11 +24,21 @@ import { useDocumentTitle } from "../../lib/useDocumentTitle";
  * saving, so nothing here knows what a preference is.
  */
 
-export type SectionId = "profile" | "appearance" | "security" | "instance" | "users" | "about";
+export type SectionId =
+  | "profile"
+  | "appearance"
+  | "dashboard"
+  | "security"
+  | "instance"
+  | "users"
+  | "about";
 
 const SECTIONS: { id: SectionId; icon: string; adminOnly?: boolean }[] = [
   { id: "profile", icon: ICONS.profile },
   { id: "appearance", icon: ICONS.appearance },
+  // Next to appearance because it is the same kind of choice: how the app looks
+  // to this person, stored for this person.
+  { id: "dashboard", icon: ICONS.dashboard },
   { id: "security", icon: ICONS.security },
   { id: "instance", icon: ICONS.instance, adminOnly: true },
   { id: "users", icon: ICONS.users, adminOnly: true },
@@ -173,6 +184,7 @@ export function SettingsPage() {
 
   const labels: Record<SectionId, string> = {
     profile: t("settings.profile"),
+    dashboard: t("settings.dashboardTab"),
     appearance: t("settings.appearance"),
     security: t("settings.security"),
     instance: t("settings.instance"),
@@ -229,6 +241,7 @@ export function SettingsPage() {
           >
             {active === "profile" && <ProfileSection me={me} />}
             {active === "appearance" && <AppearanceSection me={me} />}
+            {active === "dashboard" && <DashboardSection />}
             {active === "security" && <SecuritySection />}
             {active === "instance" && isAdmin && <InstanceSection />}
             {active === "users" && isAdmin && <UsersSection me={me} />}
