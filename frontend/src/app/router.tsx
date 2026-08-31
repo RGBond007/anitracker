@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AppShell } from "../components/layout/AppShell";
 import { StartupScreen } from "../components/layout/StartupScreen";
@@ -20,6 +20,47 @@ import { SearchPage } from "../pages/Search";
 import { ShelfPage } from "../pages/Shelf";
 import { SettingsPage } from "../pages/Settings";
 import { SetupPage } from "../pages/Setup";
+import { DEFAULT_ROUTE, rememberReturnPath, takeReturnPath } from "../lib/returnTo";
+
+/**
+ * Sends an unauthenticated visitor to sign in, remembering where they were going.
+ *
+ * The destination rides in the history entry's state rather than in the URL. A
+ * `?next=` would be visible, editable and shareable — three ways for somebody
+ * else to choose where a fresh session lands — and it would survive being copied
+ * out of the address bar and handed to someone. State goes no further than this
+ * tab and disappears on its own once it has been used.
+ *
+ * `replace`, so the back button from the sign-in page does not walk into the
+ * protected route that just bounced them.
+ */
+function RedirectToLogin() {
+  const location = useLocation();
+  // Rebuilt rather than passed whole: the router's `location` object carries a
+  // `key` and a `state` of its own, and only the address is wanted here.
+  const from = `${location.pathname}${location.search}${location.hash}`;
+  rememberReturnPath(from);
+  return <Navigate to="/login" replace />;
+}
+
+/**
+ * Where a newly authenticated session actually lands.
+ *
+ * This is the authenticated tree's catch-all, which an address like `/login`
+ * falls into the moment signing in succeeds — the router swaps trees while the
+ * address has not moved yet. Sending it blindly to the dashboard is what threw
+ * away a shared link: somebody opened a title, was bounced to sign in, and
+ * arrived at the dashboard with no sign of what they had clicked.
+ *
+ * Also the landing place for a genuinely unknown address, which has nothing
+ * stored and goes to the dashboard as before.
+ */
+function AfterAuth() {
+  // Read once, at mount: `takeReturnPath` clears as it reads, and a re-render
+  // must not turn the answer into null half-way through the redirect.
+  const [to] = useState(() => takeReturnPath() ?? DEFAULT_ROUTE);
+  return <Navigate to={to} replace />;
+}
 
 /** No entrance animation anywhere (§6) — a utility app should just be painted. */
 export function Router() {
@@ -60,7 +101,7 @@ export function Router() {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<RedirectToLogin />} />
       </Routes>
     );
   }
@@ -89,7 +130,7 @@ export function Router() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/import" element={<ImportPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<AfterAuth />} />
     </Routes>
   );
 }

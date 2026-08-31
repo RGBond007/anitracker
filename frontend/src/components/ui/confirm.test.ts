@@ -22,7 +22,10 @@ describe("no destructive action falls back to the browser's dialog", () => {
 
   it("calls neither confirm() nor alert() anywhere in the app", () => {
     const offenders = Object.entries(sources)
-      .filter(([path]) => !path.endsWith("/ui/confirm.test.ts"))
+      // Test files are excluded rather than just this one: the concern is
+      // production code reaching for the browser dialog, and a test that
+      // names `alert(` in an XSS payload string is not that.
+      .filter(([path]) => !path.includes(".test."))
       // A bare call, not `setConfirming(` or `props.confirmLabel`: the leading
       // boundary is what separates `confirm(` from every identifier ending in it.
       .filter(([, body]) => /(?<![\w.])(?:window\.)?(?:confirm|alert)\s*\(/.test(body))

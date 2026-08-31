@@ -6,6 +6,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.13] — 2026-08-31
+
+### Added
+- **A shared link survives signing in.** Opening a link to a title or a profile
+  while logged out sent you to the sign-in page and threw the destination away —
+  you signed in, landed on the dashboard, and whatever somebody had sent you was
+  gone, along with the URL, which the redirect had already replaced in history.
+  The destination is remembered and returned to. The query string comes with it,
+  which matters: without `?type=anime` a title page cannot tell an anime from a
+  manga, so half a link is no better than none.
+- Signing in of your own accord still goes to the dashboard. Nothing is remembered
+  unless a redirect actually took something away from you.
+
+### Security
+- **The return path is validated, not trusted.** Anything that decides where a
+  freshly authenticated session lands is a redirect target, and an open one is a
+  phishing primitive: hand somebody a link, they sign in to the real instance, and
+  land on a copy of it asking for the password again. Only an absolute path on this
+  origin is accepted — everything else is refused rather than pattern-matched
+  against a list of known tricks. Absolute URLs, protocol-relative `//host`, the
+  backslash forms browsers normalise into slashes, `javascript:` and `data:` wearing
+  a path's clothes, and control characters smuggling a scheme past a check are all
+  rejected, in unit tests and again by injecting each one into live storage.
+- The destination is cleared as it is read, so it cannot send the *next* sign-in
+  somewhere nobody asked to go, and it is validated on the way out as well as in —
+  storing and using are two different acts, and only the second one moves a browser.
+- It is kept per tab rather than in the address, where a `?next=` would be visible,
+  editable and shareable: three more ways for somebody else to choose where a fresh
+  session lands.
+
+### Notes
+- The landing is decided by the router rather than by the sign-in page. Signing in
+  swaps the whole router over to its authenticated routes while the address is
+  still `/login`, and their catch-all redirect fires during that render — before
+  the page's own navigation can run, and winning the race every time. That was the
+  first attempt at this and it silently went to the dashboard.
+- Reading the destination is idempotent for the rest of the page load. React calls
+  the same code twice under StrictMode, and a plain read-and-clear answered the
+  destination the first time and `null` the second — the second being the one that
+  ends up on screen. That was the second attempt at this, and it failed the same
+  way as the first while being wrong for an entirely different reason.
+
 ## [2.5.12] — 2026-08-31
 
 ### Added
@@ -765,7 +807,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.12...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.13...HEAD
+[2.5.13]: https://github.com/RGBond007/anitracker/compare/v2.5.12...v2.5.13
 [2.5.12]: https://github.com/RGBond007/anitracker/compare/v2.5.11...v2.5.12
 [2.5.11]: https://github.com/RGBond007/anitracker/compare/v2.5.10...v2.5.11
 [2.5.10]: https://github.com/RGBond007/anitracker/compare/v2.5.9...v2.5.10

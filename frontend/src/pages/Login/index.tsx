@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { DEFAULT_INSTANCE_NAME, usesBuiltInBrand } from "../../lib/brand";
 
 import { useInstance } from "../../features/instance/useInstance";
@@ -16,7 +15,6 @@ export function LoginPage() {
   const { t } = useTranslation();
 
   const errorMessage = useErrorMessage();
-  const navigate = useNavigate();
   const { data: instance } = useInstance();
   const login = useLogin();
   const register = useRegister();
@@ -33,7 +31,11 @@ export function LoginPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const done = { onSuccess: () => navigate("/") };
+    // Nothing to navigate to here. A successful sign-in swaps the router over to
+    // its authenticated routes while the address is still `/login`, and their
+    // catch-all is what decides the landing — including honouring a remembered
+    // destination. Navigating from here as well only raced that and lost.
+    const done = {};
     if (mode === "login") {
       login.mutate({ identifier: form.identifier, password: form.password }, done);
     } else {
