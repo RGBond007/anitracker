@@ -835,5 +835,10 @@
     "entryAdded": "Added to your library",
     "entrySaved": "Changes saved",
     "entryRemoved": "Removed from your library"
+  },
+  "notFound": {
+    "kicker": "Not found",
+    "title": "This page could not be found.",
+    "body": "The address does not match anything here. It may have been mistyped, or it may point at something that has since been renamed or removed."
   }
 }

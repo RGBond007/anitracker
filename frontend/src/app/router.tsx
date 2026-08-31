@@ -18,6 +18,7 @@ import { MediaDetailPage } from "../pages/MediaDetail";
 import { ProfilePage } from "../pages/Profile";
 import { SearchPage } from "../pages/Search";
 import { ShelfPage } from "../pages/Shelf";
+import { NotFoundPage } from "../pages/NotFound";
 import { SettingsPage } from "../pages/Settings";
 import { SetupPage } from "../pages/Setup";
 import { DEFAULT_ROUTE, rememberReturnPath, takeReturnPath } from "../lib/returnTo";
@@ -55,11 +56,37 @@ function RedirectToLogin() {
  * Also the landing place for a genuinely unknown address, which has nothing
  * stored and goes to the dashboard as before.
  */
+/**
+ * The addresses a session can be sitting on at the moment it becomes authenticated.
+ *
+ * Signing in does not move the browser: the router swaps trees while the address
+ * is still the sign-in page, and this catch-all is what that lands in. Those two
+ * are a landing; anything else reaching the catch-all is an address that matches
+ * nothing, which is a different thing entirely and must not be redirected away.
+ */
+const POST_AUTH_PATHS = new Set(["/login", "/setup"]);
+
 function AfterAuth() {
-  // Read once, at mount: `takeReturnPath` clears as it reads, and a re-render
-  // must not turn the answer into null half-way through the redirect.
-  const [to] = useState(() => takeReturnPath() ?? DEFAULT_ROUTE);
-  return <Navigate to={to} replace />;
+  const location = useLocation();
+
+  /**
+   * A remembered destination is only ever consulted here, and only when this is
+   * genuinely a post-sign-in landing.
+   *
+   * The narrowing is not cosmetic. `takeReturnPath` answers the same value for
+   * the rest of the page load, so asking it from an unknown address — after a
+   * sign-in has already used one — would answer with that spent destination and
+   * silently send somebody back to a page they had already been sent to, instead
+   * of telling them their link is broken.
+   *
+   * Read once at mount, because it clears as it reads.
+   */
+  const [to] = useState(() =>
+    POST_AUTH_PATHS.has(location.pathname) ? (takeReturnPath() ?? DEFAULT_ROUTE) : null,
+  );
+
+  if (to) return <Navigate to={to} replace />;
+  return <NotFoundPage />;
 }
 
 /** No entrance animation anywhere (§6) — a utility app should just be painted. */
@@ -129,8 +156,13 @@ export function Router() {
         <Route path="/u/:username" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/import" element={<ImportPage />} />
+        {/* Inside the shell, not beside it: somebody who lands on a dead address
+            should keep the navigation that gets them out of it, and the not-found
+            page needs the same header, footer and skip-link target as every other
+            page. The post-sign-in redirect this also serves renders nothing, so
+            being wrapped costs it nothing. */}
+        <Route path="*" element={<AfterAuth />} />
       </Route>
-      <Route path="*" element={<AfterAuth />} />
     </Routes>
   );
 }

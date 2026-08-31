@@ -835,5 +835,10 @@
     "entryAdded": "Zur Bibliothek hinzugefügt",
     "entrySaved": "Änderungen gespeichert",
     "entryRemoved": "Aus der Bibliothek entfernt"
+  },
+  "notFound": {
+    "kicker": "Nicht gefunden",
+    "title": "Diese Seite konnte nicht gefunden werden.",
+    "body": "Die Adresse passt zu nichts hier. Vielleicht hat sich ein Tippfehler eingeschlichen, oder sie zeigt auf etwas, das inzwischen umbenannt oder entfernt wurde."
   }
 }

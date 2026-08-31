@@ -6,6 +6,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.14] — 2026-08-31
+
+### Added
+- **An unknown address says so.** Every mistyped or outdated link used to redirect
+  silently to the dashboard, which looks exactly like a link that worked — a stale
+  bookmark, a renamed route and a typo all read as "here is your library", and the
+  person never found out the thing they clicked was gone. There is a not-found page
+  now, with the way out on it: dashboard, library, search.
+- **It shows the address that failed**, which is usually the whole explanation —
+  one character wrong is obvious the moment you can see it. Only when the address
+  reads as a path, though, and only up to a length that stays a line of text: it is
+  the one piece of attacker-controlled writing on the page, and a page saying
+  "could not be found" is otherwise a fine place for a stranger to put "call this
+  number to fix your account".
+- The page lives inside the app shell, so somebody who lands on a dead address
+  keeps the navigation that gets them out of it, and it has the same header, footer
+  and skip-link target as everywhere else.
+
+### Notes
+- Private and missing look identical, which was already true and is now checked. A
+  shelf belonging to somebody else and a shelf that never existed both answer *That
+  shelf no longer exists* — the query filters by owner, so the server cannot tell
+  the difference either.
+- A private profile still reports itself as private rather than missing, and that
+  is deliberate rather than an oversight: usernames are already public on this
+  instance by design — `/users/search` is how you find somebody to befriend — so
+  hiding a private profile behind "no such user" would conceal nothing and break
+  the only route to sending a friend request.
+- The catch-all this replaces was also where a session lands the moment it signs in,
+  because signing in does not move the browser off `/login`. That case is kept
+  apart by name; losing the distinction would show "not found" to everybody who
+  signs in.
+- A remembered deep-link destination is consulted only on a genuine post-sign-in
+  landing. It answers the same value for the rest of the page load, so asking from
+  an unknown address after a sign-in had already used one would have sent somebody
+  back to a page they had just been sent to, instead of telling them their link was
+  broken.
+
 ## [2.5.13] — 2026-08-31
 
 ### Added
@@ -807,7 +845,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.13...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.14...HEAD
+[2.5.14]: https://github.com/RGBond007/anitracker/compare/v2.5.13...v2.5.14
 [2.5.13]: https://github.com/RGBond007/anitracker/compare/v2.5.12...v2.5.13
 [2.5.12]: https://github.com/RGBond007/anitracker/compare/v2.5.11...v2.5.12
 [2.5.11]: https://github.com/RGBond007/anitracker/compare/v2.5.10...v2.5.11
