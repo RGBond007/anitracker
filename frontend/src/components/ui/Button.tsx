@@ -13,7 +13,7 @@ type Variant = "primary" | "ghost" | "stamp" | "quiet";
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-text text-bg font-semibold hover:opacity-90",
   ghost: "border border-hairline text-text hover:border-hairline-strong",
-  stamp: "bg-stamp text-ink-950 font-semibold hover:brightness-110",
+  stamp: "bg-stamp text-stamp-ink font-semibold hover:brightness-110",
   quiet: "text-text-dim hover:text-text",
 };
 

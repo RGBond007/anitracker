@@ -87,7 +87,7 @@ export function BottomNav() {
                   {item.badge > 0 && (
                     <span
                       aria-hidden
-                      className="font-mono absolute right-[22%] top-1.5 rounded-pill bg-stamp px-1 text-[9px] font-medium leading-[14px] text-ink-950"
+                      className="font-mono absolute right-[22%] top-1.5 rounded-pill bg-stamp px-1 text-[9px] font-medium leading-[14px] text-stamp-ink"
                     >
                       {item.badge}
                     </span>

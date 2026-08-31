@@ -12,8 +12,16 @@
   --paper: #f1ece1;
   --paper-dim: #9c93aa;
   --paper-faint: #5e5670;
-  --stamp: #d4af37;
-  --stamp-text: #e4c158;
+  /**
+   * The accent, in the four jobs it is actually asked to do. `applyAccent` sets
+   * the `--stamp-*-dark` / `--stamp-*-light` pair for a configured accent and
+   * removes them for the default, which is what these fallbacks are.
+   */
+  --stamp-raw: #d4af37;
+  --stamp: var(--stamp-dark, #d4af37);
+  /* Text drawn *on* a `--stamp` fill: a primary button, a notification badge. */
+  --stamp-ink: var(--stamp-ink-dark, #0d0c10);
+  --stamp-text: var(--stamp-text-dark, #e4c158);
 
   --bg: var(--ink-950);
   --surface: var(--ink-800);
@@ -67,11 +75,19 @@
 [data-theme="light"] {
   --bg: var(--paper);
   --surface: #ffffff;
-  /* The gold that reads on ink is 1.7:1 on paper — invisible. Every use of it used
-     to be a hover state, where that was survivable; a label that simply sits there
-     is not. Darkened for light mode only, which clears AA on both the page and a
-     card (5.1:1 and 6.0:1) and keeps `--stamp` itself for fills and rules. */
-  --stamp-text: #7a5f14;
+  /* The gold that reads on ink is 1.78:1 on paper — invisible. Every use of it
+     used to be a hover state, where that was survivable; a label that simply sits
+     there is not. Darkened for light mode, which clears AA on both the page and a
+     card (5.1:1 and 6.0:1).
+
+     The fill is darkened too, which it was not before: `--stamp` stayed the raw
+     gold here, so a progress bar in light mode sat at 1.78:1 against the page and
+     1.47:1 against its own track — a graphical object conveying progress, drawn
+     in a colour you cannot see. 1.4.11 asks for 3:1 and this is the nearest gold
+     that reaches it. `--stamp-raw` keeps the submitted colour for decoration. */
+  --stamp: var(--stamp-light, #a18323);
+  --stamp-ink: var(--stamp-ink-light, #0d0c10);
+  --stamp-text: var(--stamp-text-light, #7a5f14);
   --line: #ded7c8;
   --text: var(--ink-950);
   --text-dim: var(--paper-faint);

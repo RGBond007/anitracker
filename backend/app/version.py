@@ -1,2 +1,2 @@
-VERSION = "2.5.8"
+VERSION = "2.5.9"
 LICENSE = "AGPL-3.0-only"

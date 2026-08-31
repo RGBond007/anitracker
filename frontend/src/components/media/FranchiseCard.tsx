@@ -98,7 +98,7 @@ export function FranchiseCard({
               complete_provider_id: media.provider_id,
             })
           }
-          className="mt-2 w-full rounded-control border border-stamp/50 px-2 py-1.5 text-[11px] text-stamp-text transition-colors hover:bg-stamp hover:text-ink-950"
+          className="mt-2 w-full rounded-control border border-stamp/50 px-2 py-1.5 text-[11px] text-stamp-text transition-colors hover:bg-stamp hover:text-stamp-ink"
         >
           {t("season.start", { n: (media.season_number ?? 1) + 1 })}
         </button>

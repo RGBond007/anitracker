@@ -98,7 +98,7 @@ export function FilterMenu({
         <Icon path={ICONS.sliders} size={15} />
         {t("search.filters")}
         {count > 0 && (
-          <span className="tabular rounded-pill bg-stamp px-1.5 text-[11px] font-semibold text-ink-950">
+          <span className="tabular rounded-pill bg-stamp px-1.5 text-[11px] font-semibold text-stamp-ink">
             {count}
           </span>
         )}

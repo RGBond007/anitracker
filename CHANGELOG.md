@@ -6,6 +6,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.9] — 2026-08-31
+
+### Fixed
+- **Text on the accent is no longer assumed to be dark.** Six components wrote
+  `text-ink-950` onto an accent fill by hand — the primary button, the two
+  notification badges, the filter count, the cropper's save button and a card's
+  hover state. That is correct for the default gold and paints near-black text on
+  a near-black button for anything else: an instance running `ACCENT_COLOR=#1a1a2e`
+  had a badge count at **1.14:1**, and `#0d0c10` had one at **1:1**. The foreground
+  is now derived from the accent — ink or paper, whichever can actually be read on
+  it — and measures 5.34:1 on that same navy.
+- **A progress bar in the light theme is visible again.** `--stamp` stayed the raw
+  gold there, so a bar sat at **1.78:1** against the page and **1.47:1** against
+  its own track: a graphical object conveying progress, drawn in a colour you
+  cannot see. The stylesheet already knew this for *text* and darkened it; fills
+  never got the same treatment. The light theme's fill is now the nearest gold
+  that clears 1.4.11's 3:1.
+
+### Added
+- **The accent is validated against both themes before it is saved.** An operator
+  picks a colour in whichever theme they happen to be using, and half their users
+  are in the other one. The instance settings now judge it against both and warn
+  when it cannot be made to work — with what is wrong, in the language they are
+  reading, rather than a red border.
+- **A live preview of the surfaces the accent actually lands on**, drawn twice, one
+  panel per theme: a filled button, a count badge, a selected chip, a progress bar,
+  an accent-coloured link and a focus ring, with the measured ratios under each.
+  The field used to show a single swatch, which is the one thing about a colour
+  that was never in doubt.
+- **The closest safe shade, offered by name.** Lightness only and searched outward
+  from where the operator put it, so the suggestion is recognisably the colour they
+  asked for. When no shade of that hue passes, it says so plainly rather than
+  answering with a colour nobody chose.
+- **The submitted colour is kept for decoration.** `--stamp-raw` carries it
+  untouched for tints, rims and borders; only the fill and its foreground are
+  moved, and only as far as they have to be. When a colour is adjusted the form
+  says so — that is a note, not a warning, because the colour works.
+
+### Notes
+- The focus ring is deliberately absent from all of this: it stopped being drawn
+  from the accent in 2.5.7, and the preview shows it precisely so that its
+  independence is visible.
+- Warnings never block a save. It is the operator's instance, and a rule they
+  cannot overrule is one they will work around by setting the colour in `.env`,
+  where nothing checks it at all.
+- The colour maths is its own module with no DOM, covered by 30 tests including a
+  check that the assumed page grounds still match `tokens.css` — the verdicts are
+  only honest while those are the colours actually behind the accent.
+
 ## [2.5.8] — 2026-08-31
 
 ### Accessibility
@@ -594,7 +643,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.8...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.9...HEAD
+[2.5.9]: https://github.com/RGBond007/anitracker/compare/v2.5.8...v2.5.9
 [2.5.8]: https://github.com/RGBond007/anitracker/compare/v2.5.7...v2.5.8
 [2.5.7]: https://github.com/RGBond007/anitracker/compare/v2.5.6...v2.5.7
 [2.5.6]: https://github.com/RGBond007/anitracker/compare/v2.5.5...v2.5.6

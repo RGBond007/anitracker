@@ -27,6 +27,8 @@
   --color-paper-dim: var(--paper-dim);
   --color-paper-faint: var(--paper-faint);
   --color-stamp: var(--stamp);
+  --color-stamp-raw: var(--stamp-raw);
+  --color-stamp-ink: var(--stamp-ink);
   --color-stamp-text: var(--stamp-text);
 
   /* Semantic aliases — components reach for these, so light mode works without

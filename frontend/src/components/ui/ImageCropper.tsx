@@ -184,7 +184,7 @@ export function ImageCropper({
           onClick={crop}
           disabled={busy}
           className={cx(
-            "rounded-control bg-stamp px-[18px] py-2.5 text-sm font-semibold text-ink-950",
+            "rounded-control bg-stamp px-[18px] py-2.5 text-sm font-semibold text-stamp-ink",
             "transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40",
           )}
         >

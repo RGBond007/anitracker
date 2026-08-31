@@ -26,6 +26,8 @@ export const cx = extendTailwindMerge({
         "paper-dim",
         "paper-faint",
         "stamp",
+        "stamp-raw",
+        "stamp-ink",
         "stamp-text",
         "bg",
         "surface",

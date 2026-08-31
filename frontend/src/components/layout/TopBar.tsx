@@ -41,7 +41,7 @@ function Badge({ count }: { count: number }) {
   return (
     <span
       aria-hidden
-      className="font-mono ml-1.5 rounded-pill bg-stamp px-1.5 py-0.5 text-[10px] font-medium text-ink-950"
+      className="font-mono ml-1.5 rounded-pill bg-stamp px-1.5 py-0.5 text-[10px] font-medium text-stamp-ink"
     >
       {count}
     </span>
