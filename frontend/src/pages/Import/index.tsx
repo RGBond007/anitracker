@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useImportJob, useStartImport } from "../../features/media/useImport";
 import { Button } from "../../components/ui/Button";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 export function ImportPage() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [jobId, setJobId] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -60,7 +62,7 @@ export function ImportPage() {
             </Button>
           </div>
 
-          {start.error && <p className="text-sm text-stamp-text">{String(start.error)}</p>}
+          {start.error && <p className="text-sm text-stamp-text">{errorMessage(start.error)}</p>}
         </div>
       </Panel>
 

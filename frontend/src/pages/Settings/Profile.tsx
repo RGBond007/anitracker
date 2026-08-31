@@ -6,13 +6,14 @@ import type { User } from "../../lib/api-client";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { AvatarField } from "./AvatarField";
-import { SaveRow, SectionHeading, errorMessage, useSavedFlag, useUnsavedGuard } from "./parts";
+import { SaveRow, SectionHeading, useErrorMessage, useSavedFlag, useUnsavedGuard } from "./parts";
 
 /** Loose on purpose — the server is the authority, this only catches typos. */
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ProfileSection({ me }: { me: User }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   // Silent: the confirmation belongs next to the fields that changed, not in a
   // toast at the other end of the screen.
   const update = useUpdateProfile({ silent: true });

@@ -39,7 +39,17 @@
     "details": "Technical details",
     "detailsHint": "Safe to paste into a bug report: the query string, session tokens and email addresses have been removed.",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "badRequest": "That didn't look right. Check the fields and try again.",
+    "unauthorized": "Your session has expired. Sign in again to continue.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "That isn't there any more — it may have been removed.",
+    "conflict": "That already exists.",
+    "tooLarge": "That file is too large.",
+    "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "server": "The server ran into a problem. Nothing was changed.",
+    "offline": "Couldn't reach the server. Check that it's running and that you're connected.",
+    "generic": "Something went wrong. Try again."
   },
   "confirm": {
     "affected": "Deleted with it",
@@ -588,7 +598,8 @@
     "hours": "{{count}}h ago",
     "yesterday": "yesterday",
     "days": "{{count}} days ago",
-    "months": "{{count}} months ago"
+    "months_one": "{{count}} month ago",
+    "months_other": "{{count}} months ago"
   },
   "footer": {
     "tagline": "{{name}} · self-hosted media tracker"
@@ -736,9 +747,10 @@
     "title": "Title",
     "you": "You",
     "them": "Them",
-    "sharedCount": "{{count}} titles you both track",
     "spread": "{{value}} average difference over {{count}} scored",
-    "onlyTheirs": "On {{name}}'s list, not yours"
+    "onlyTheirs": "On {{name}}'s list, not yours",
+    "sharedCount_one": "{{count}} title you both track",
+    "sharedCount_other": "{{count}} titles you both track"
   },
   "feed": {
     "finished": "finished",
@@ -804,5 +816,15 @@
     "kindShort_ova": "OVA",
     "kindShort_special": "SP",
     "kindShort_other": "REL"
+  },
+  "toast": {
+    "profileSaved": "Profile saved",
+    "passwordChanged": "Password changed",
+    "userUpdated": "User updated",
+    "userDeleted": "User deleted",
+    "instanceUpdated": "Instance updated",
+    "entryAdded": "Added to your library",
+    "entrySaved": "Changes saved",
+    "entryRemoved": "Removed from your library"
   }
 }

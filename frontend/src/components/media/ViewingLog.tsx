@@ -30,6 +30,7 @@ import { ProgressLedger } from "./ProgressLedger";
 import { declineSeasonPrompt, nextAfter } from "./SeasonActions";
 import { useSeasonLabels } from "./seasonLabels";
 import { useStatusLabel } from "./statusLabels";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 const STATUSES: EntryStatus[] = ["current", "completed", "on_hold", "dropped", "planned"];
 
@@ -69,6 +70,7 @@ export function ViewingLog({
   onView: (season: Season) => void;
 }) {
   const { t, i18n } = useTranslation();
+  const errorMessage = useErrorMessage();
   const statusLabel = useStatusLabel();
   const { name: seasonName } = useSeasonLabels();
 
@@ -435,7 +437,7 @@ export function ViewingLog({
           confirmLabel={t("entry.removeAction")}
           pendingLabel={t("confirm.removing")}
           pending={remove.isPending}
-          error={remove.error ? String(remove.error) : undefined}
+          error={errorMessage(remove.error)}
           onCancel={() => setConfirming(null)}
           onConfirm={() => remove.mutate(entry.id, { onSuccess: () => setConfirming(null) })}
         />

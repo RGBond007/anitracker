@@ -17,6 +17,7 @@ import { Modal } from "../ui/Modal";
 import { NumberInput, Textarea } from "../ui/Input";
 import { Spoiler } from "../ui/Spoiler";
 import { cx } from "../../lib/cx";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 const MOODS: Mood[] = ["loved", "moved", "tense", "funny", "lost", "dull"];
 const MAX_NOTE = 1000;
@@ -174,6 +175,7 @@ function WriteSheet({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const write = useWriteJournal();
   const remove = useDeleteJournal();
 
@@ -223,7 +225,7 @@ function WriteSheet({
         confirmLabel={t("journal.delete")}
         pendingLabel={t("confirm.deleting")}
         pending={remove.isPending}
-        error={remove.error ? String(remove.error) : undefined}
+        error={errorMessage(remove.error)}
         onCancel={() => setConfirmingDelete(false)}
         onConfirm={() => remove.mutate(existing.id, { onSuccess: onClose })}
       />

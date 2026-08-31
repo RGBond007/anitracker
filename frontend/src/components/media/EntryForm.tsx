@@ -13,6 +13,7 @@ import { ConfirmDestructive } from "../ui/ConfirmDestructive";
 import { Field } from "../ui/Field";
 import { NumberInput, Input, Select, Textarea } from "../ui/Input";
 import { useStatusLabel } from "./statusLabels";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 const STATUSES: EntryStatus[] = ["current", "completed", "on_hold", "dropped", "planned"];
 
@@ -31,6 +32,7 @@ export function EntryForm({
   submitLabel?: string;
 }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const statusLabel = useStatusLabel();
   const update = useUpdateEntry();
   const remove = useDeleteEntry();
@@ -112,7 +114,7 @@ export function EntryForm({
           <Textarea rows={3} {...register("notes")} />
         </Field>
 
-        {update.error && <p className="text-sm text-stamp-text">{String(update.error)}</p>}
+        {update.error && <p className="text-sm text-stamp-text">{errorMessage(update.error)}</p>}
 
         <div className="flex items-center justify-between gap-3 pt-1">
           {showRemove ? (
@@ -153,7 +155,7 @@ export function EntryForm({
           confirmLabel={t("entry.removeAction")}
           pendingLabel={t("confirm.removing")}
           pending={remove.isPending}
-          error={remove.error ? String(remove.error) : undefined}
+          error={errorMessage(remove.error)}
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             remove.mutate(entry.id, {

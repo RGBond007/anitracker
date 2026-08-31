@@ -39,7 +39,17 @@
     "details": "Technische Details",
     "detailsHint": "Kann bedenkenlos in einen Fehlerbericht kopiert werden: Query-String, Sitzungs-Token und E-Mail-Adressen sind entfernt.",
     "copy": "Kopieren",
-    "copied": "Kopiert"
+    "copied": "Kopiert",
+    "badRequest": "Das sah nicht richtig aus. Prüfe die Felder und versuche es erneut.",
+    "unauthorized": "Deine Sitzung ist abgelaufen. Melde dich erneut an.",
+    "forbidden": "Dazu fehlt dir die Berechtigung.",
+    "notFound": "Das gibt es nicht mehr — womöglich wurde es entfernt.",
+    "conflict": "Das existiert bereits.",
+    "tooLarge": "Diese Datei ist zu groß.",
+    "rateLimited": "Zu viele Versuche. Warte einen Moment und versuche es erneut.",
+    "server": "Auf dem Server ist ein Problem aufgetreten. Es wurde nichts geändert.",
+    "offline": "Der Server war nicht erreichbar. Prüfe, ob er läuft und du verbunden bist.",
+    "generic": "Etwas ist schiefgelaufen. Versuche es erneut."
   },
   "confirm": {
     "affected": "Wird mitgelöscht",
@@ -588,7 +598,8 @@
     "hours": "vor {{count}} Std.",
     "yesterday": "gestern",
     "days": "vor {{count}} Tagen",
-    "months": "vor {{count}} Monaten"
+    "months_one": "vor {{count}} Monat",
+    "months_other": "vor {{count}} Monaten"
   },
   "footer": {
     "tagline": "{{name}} · selbstgehosteter Medien-Tracker"
@@ -736,9 +747,10 @@
     "title": "Titel",
     "you": "Du",
     "them": "Sie",
-    "sharedCount": "{{count}} Titel, die ihr beide verfolgt",
     "spread": "{{value}} Durchschnittsdifferenz bei {{count}} bewerteten",
-    "onlyTheirs": "Auf der Liste von {{name}}, nicht auf deiner"
+    "onlyTheirs": "Auf der Liste von {{name}}, nicht auf deiner",
+    "sharedCount_one": "{{count}} Titel, den ihr beide verfolgt",
+    "sharedCount_other": "{{count}} Titel, die ihr beide verfolgt"
   },
   "feed": {
     "finished": "hat abgeschlossen",
@@ -804,5 +816,15 @@
     "kindShort_ova": "OVA",
     "kindShort_special": "SP",
     "kindShort_other": "VERW"
+  },
+  "toast": {
+    "profileSaved": "Profil gespeichert",
+    "passwordChanged": "Passwort geändert",
+    "userUpdated": "Benutzer aktualisiert",
+    "userDeleted": "Benutzer gelöscht",
+    "instanceUpdated": "Instanz aktualisiert",
+    "entryAdded": "Zur Bibliothek hinzugefügt",
+    "entrySaved": "Änderungen gespeichert",
+    "entryRemoved": "Aus der Bibliothek entfernt"
   }
 }

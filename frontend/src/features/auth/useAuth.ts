@@ -78,6 +78,7 @@ export function useLogout() {
  * message twice.
  */
 export function useUpdateProfile({ silent = false }: { silent?: boolean } = {}) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const sync = useSyncPreferences();
   const toast = useUiStore((s) => s.toast);
@@ -86,7 +87,7 @@ export function useUpdateProfile({ silent = false }: { silent?: boolean } = {}) 
     onSuccess: (user) => {
       sync(user);
       queryClient.setQueryData(queryKeys.me, user);
-      if (!silent) toast("Profile saved");
+      if (!silent) toast(t("toast.profileSaved"));
     },
   });
 }
@@ -122,6 +123,7 @@ export function useRemoveAvatar() {
 }
 
 export function useChangePassword() {
+  const { t } = useTranslation();
   const toast = useUiStore((s) => s.toast);
   const queryClient = useQueryClient();
   return useMutation({
@@ -131,7 +133,7 @@ export function useChangePassword() {
       // Clears `must_change_password`, which is what the router keys the forced
       // change screen off — without refetching `me` the user stays stuck on it.
       void queryClient.invalidateQueries({ queryKey: queryKeys.me });
-      toast("Password changed");
+      toast(t("toast.passwordChanged"));
     },
   });
 }
@@ -141,6 +143,7 @@ export function useUsers() {
 }
 
 export function useUserAdmin() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const toast = useUiStore((s) => s.toast);
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: queryKeys.users });
@@ -151,14 +154,14 @@ export function useUserAdmin() {
         api.updateUser(id, patch),
       onSuccess: () => {
         invalidate();
-        toast("User updated");
+        toast(t("toast.userUpdated"));
       },
     }),
     remove: useMutation({
       mutationFn: api.deleteUser,
       onSuccess: () => {
         invalidate();
-        toast("User deleted");
+        toast(t("toast.userDeleted"));
       },
     }),
   };

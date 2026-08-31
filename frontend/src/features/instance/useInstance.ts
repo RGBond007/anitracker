@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "../../lib/api-client";
@@ -14,13 +15,14 @@ export function useInstance() {
 
 /** `silent` leaves the confirmation to the caller — see `useUpdateProfile`. */
 export function useUpdateInstance({ silent = false }: { silent?: boolean } = {}) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
     mutationFn: api.updateInstance,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.instance });
-      if (!silent) toast("Instance updated");
+      if (!silent) toast(t("toast.instanceUpdated"));
     },
   });
 }

@@ -9,7 +9,7 @@ import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import {
   SavedNote,
   SectionHeading,
-  errorMessage,
+  useErrorMessage,
   useSavedFlag,
   useUnsavedGuard,
 } from "./parts";
@@ -25,6 +25,7 @@ const MIN_LENGTH = 8;
  */
 export function SecuritySection() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const password = useChangePassword();
   const revoke = useRevokeSessions();
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });

@@ -10,7 +10,7 @@ import {
   SectionHeading,
   SettingRow,
   SettingRows,
-  errorMessage,
+  useErrorMessage,
   useSavedFlag,
 } from "./parts";
 
@@ -21,6 +21,7 @@ import {
  */
 export function AppearanceSection({ me }: { me: User }) {
   const { t, i18n } = useTranslation();
+  const errorMessage = useErrorMessage();
   const update = useUpdateProfile({ silent: true });
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, type Entry, type EntryStatus, type MediaType } from "../../lib/api-client";
@@ -57,18 +58,20 @@ function useEntryInvalidation() {
 }
 
 export function useAddEntry() {
+  const { t } = useTranslation();
   const invalidate = useEntryInvalidation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
     mutationFn: api.addEntry,
     onSuccess: () => {
       invalidate();
-      toast("Entry added");
+      toast(t("toast.entryAdded"));
     },
   });
 }
 
 export function useUpdateEntry() {
+  const { t } = useTranslation();
   const invalidate = useEntryInvalidation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
@@ -76,7 +79,7 @@ export function useUpdateEntry() {
       api.updateEntry(id, patch),
     onSuccess: () => {
       invalidate();
-      toast("Entry saved");
+      toast(t("toast.entrySaved"));
     },
   });
 }
@@ -132,13 +135,14 @@ export function useIncrementEntry() {
 }
 
 export function useDeleteEntry() {
+  const { t } = useTranslation();
   const invalidate = useEntryInvalidation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
     mutationFn: api.deleteEntry,
     onSuccess: () => {
       invalidate();
-      toast("Entry removed");
+      toast(t("toast.entryRemoved"));
     },
   });
 }

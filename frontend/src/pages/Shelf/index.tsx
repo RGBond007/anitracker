@@ -15,6 +15,7 @@ import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import { Modal } from "../../components/ui/Modal";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { cx } from "../../lib/cx";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 /**
  * One shelf, in the order its owner arranged.
@@ -26,6 +27,7 @@ import { cx } from "../../lib/cx";
  */
 export function ShelfPage() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const shelfId = Number(id);
@@ -218,7 +220,7 @@ export function ShelfPage() {
           confirmLabel={t("shelf.delete")}
           pendingLabel={t("confirm.deleting")}
           pending={remove.isPending}
-          error={remove.error ? String(remove.error) : undefined}
+          error={errorMessage(remove.error)}
           onCancel={() => setConfirmDelete(false)}
           onConfirm={() => remove.mutate(shelf.id, { onSuccess: () => navigate("/list/current") })}
         />

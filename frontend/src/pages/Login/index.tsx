@@ -9,9 +9,11 @@ import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Panel } from "../../components/ui/Panel";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 export function LoginPage() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const { data: instance } = useInstance();
   const login = useLogin();
@@ -95,7 +97,7 @@ export function LoginPage() {
             />
           </Field>
 
-          {error && <p className="text-sm text-stamp-text">{String(error)}</p>}
+          {error && <p className="text-sm text-stamp-text">{errorMessage(error)}</p>}
 
           <Button type="submit" variant="primary" className="w-full" disabled={pending}>
             {mode === "login" ? t("auth.login") : t("auth.createAccount")}

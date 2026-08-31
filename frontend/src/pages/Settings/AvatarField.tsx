@@ -7,7 +7,7 @@ import { Avatar } from "../../components/ui/Avatar";
 import { Button } from "../../components/ui/Button";
 import { ImageCropper } from "../../components/ui/ImageCropper";
 import { Modal } from "../../components/ui/Modal";
-import { errorMessage, useSavedFlag } from "./parts";
+import { useErrorMessage, useSavedFlag } from "./parts";
 
 /** What the server accepts. Checked here only so the answer is instant. */
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
@@ -23,6 +23,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
  */
 export function AvatarField({ me }: { me: User }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const upload = useUploadAvatar();
   const remove = useRemoveAvatar();
   const [saved, flashSaved] = useSavedFlag();

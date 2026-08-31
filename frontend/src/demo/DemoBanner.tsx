@@ -1,3 +1,13 @@
+/**
+ * Deliberately untranslated, all of it.
+ *
+ * This bar is scaffolding *around* the product rather than part of it: it exists
+ * only in the static Pages demo, and Vite drops the whole component from a real
+ * instance's bundle. Translating one attribute of an otherwise English bar would
+ * read as an oversight in the other direction, and there is no German-speaking
+ * audience for a banner that says "changes stay in this browser only" about a
+ * demo. If the demo is ever localised, this goes with it in one piece.
+ */
 export function DemoBanner() {
   if (import.meta.env.VITE_DEMO !== "true") return null;
 

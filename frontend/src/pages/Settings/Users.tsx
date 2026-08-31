@@ -10,7 +10,7 @@ import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
-import { ICONS, Icon, SectionHeading, errorMessage } from "./parts";
+import { ICONS, Icon, SectionHeading, useErrorMessage } from "./parts";
 
 /**
  * The people on this instance.
@@ -22,6 +22,7 @@ import { ICONS, Icon, SectionHeading, errorMessage } from "./parts";
  */
 export function UsersSection({ me }: { me: User }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const { data: users } = useUsers();
   const { update, remove } = useUserAdmin();
   const [query, setQuery] = useState("");
@@ -250,6 +251,7 @@ function RowMenu({
  */
 function CreateUserSheet({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const create = useCreateUser();
   const [form, setForm] = useState({ username: "", email: "" });
   const [copied, setCopied] = useState(false);

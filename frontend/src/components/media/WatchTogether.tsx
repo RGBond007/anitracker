@@ -22,6 +22,7 @@ import { Modal } from "../ui/Modal";
 import { NumberInput } from "../ui/Input";
 import { Field } from "../ui/Field";
 import { cx } from "../../lib/cx";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 /**
  * Watching one show with a few friends, at roughly the same pace.
@@ -128,6 +129,7 @@ function StartSheet({ media, onClose }: { media: Media; onClose: () => void }) {
 /** The roster, the target, and the ways out. */
 function GroupPanel({ group }: { group: WatchGroup }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const lang = useUiStore((s) => s.titleLanguage);
   // The group knows its title only once the instance has cached it; until then
   // the dialog says "this title" rather than naming an empty string.
@@ -358,11 +360,7 @@ function GroupPanel({ group }: { group: WatchGroup }) {
           confirmLabel={group.i_own_it ? t("watch.close") : t("watch.leave")}
           pendingLabel={group.i_own_it ? t("confirm.closing") : t("confirm.leaving")}
           pending={leave.isPending || closeGroup.isPending}
-          error={
-            (group.i_own_it ? closeGroup.error : leave.error)
-              ? String(group.i_own_it ? closeGroup.error : leave.error)
-              : undefined
-          }
+          error={errorMessage(group.i_own_it ? closeGroup.error : leave.error)}
           onCancel={() => setConfirmLeave(false)}
           onConfirm={() =>
             group.i_own_it

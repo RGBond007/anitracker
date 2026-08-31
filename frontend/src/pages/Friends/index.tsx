@@ -24,6 +24,7 @@ import { Skeleton } from "../../components/ui/Skeleton";
 import { Avatar } from "../../components/ui/Avatar";
 import { FriendsWatching, PersonalPicks, TrustedPick } from "./discovery";
 import { ActivityFeed, Discover, Leaderboard } from "./sections";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 function PersonRow({
   user,
@@ -169,6 +170,7 @@ function RequestList({
 
 export function FriendsPage() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const { data, isLoading, error, refetch } = useFriends();
   const { data: me } = useMe();
   const lang = useUiStore((s) => s.titleLanguage);
@@ -278,7 +280,7 @@ export function FriendsPage() {
           confirmLabel={t("friends.removeAction")}
           pendingLabel={t("confirm.removing")}
           pending={remove.isPending}
-          error={remove.error ? String(remove.error) : undefined}
+          error={errorMessage(remove.error)}
           onCancel={() => setUnfriending(null)}
           onConfirm={() =>
             remove.mutate(unfriending.id, { onSuccess: () => setUnfriending(null) })

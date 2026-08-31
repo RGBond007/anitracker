@@ -12,7 +12,7 @@ import {
   SectionHeading,
   SettingRow,
   SettingRows,
-  errorMessage,
+  useErrorMessage,
   useSavedFlag,
   useUnsavedGuard,
 } from "./parts";
@@ -33,6 +33,7 @@ export function InstanceSection() {
 
 function InstanceForm({ instance }: { instance: Instance }) {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const update = useUpdateInstance({ silent: true });
   const [saved, flashSaved] = useSavedFlag();
   const [draft, setDraft] = useState<Draft>({

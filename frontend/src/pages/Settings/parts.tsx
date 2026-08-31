@@ -83,10 +83,13 @@ export function Icon({
 }
 
 /** API errors arrive as `Error`; `String(err)` would print the "Error: " prefix. */
-export function errorMessage(error: unknown): string | undefined {
-  if (!error) return undefined;
-  return error instanceof Error ? error.message : String(error);
-}
+/**
+ * Re-exported so the settings sections keep their existing import while the
+ * mapping lives in one place. It used to return `error.message`, which is the
+ * server's `detail` — written in English in the Python source, and unchanged by
+ * switching the interface to German.
+ */
+export { useErrorMessage } from "../../lib/useErrorMessage";
 
 /**
  * A save confirmation that lives next to the control instead of over the page.

@@ -6,6 +6,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.10] — 2026-08-31
+
+### Fixed
+- **A failed request no longer answers in English, or in Java.** Every form printed
+  `String(error)`, and `ApiError` sets its `name`, so a failed save put
+  *"ApiError: Not Found"* in a red line under the field — a class name, followed by
+  the server's `detail`, which is written in English in the Python source and stays
+  English however the interface is set. The status now chooses a sentence and the
+  sentence comes from the locale, in twelve places that each had their own copy of
+  the mistake. A request that cannot reach the host at all says so, because on a
+  self-hosted instance that usually means the container is down and the fix is
+  somewhere else entirely.
+- **Both dialog close buttons are localised.** `aria-label="Close"` on the modal and
+  the sheet was read out in English to a German screen-reader user, on every dialog
+  in the app.
+- **Eight mutation toasts are localised.** "Entry added", "Profile saved",
+  "Instance updated" and the rest were string literals inside the hooks that fired
+  them, so the one message confirming an action was the one message still in
+  English.
+- **`{{count}} months ago` and `{{count}} titles you both track` had no singular.**
+  Both are reachable with one — the first the moment something is thirty days old —
+  and rendered "1 months ago" and, in German, the worse "vor 1 Monaten".
+- **The leaderboard's metric chips no longer push the page sideways in German.**
+  "Episoden · Durchschnitt · Abgeschlossen" is wider than its English equivalent
+  and ran 7px past a 390px phone, taking the whole page into a horizontal scroll.
+  The row scrolls on its own now, which is what the library and settings tabs
+  already do with a chip row that may not fit.
+
+### Notes
+- Two files are English on purpose and say so. The demo banner is scaffolding
+  around the product that Vite drops from a real instance's bundle, and
+  `diagnostics.ts` builds the crash screen's technical block, which is pasted into
+  a bug report — translating a stack trace's framing makes it harder to act on.
+- `search.resultCount` and `shelf.count` look unpluralised in German and are not:
+  *Treffer* and *Titel* are invariant, and forcing a difference would be wrong.
+- `season.kind_other` is a season *kind* named "other", not a plural form. The
+  collision with i18next's suffix is real and currently harmless — the key is only
+  ever looked up exactly, never with a count — and is called out where it would
+  otherwise look like an oversight.
+- Guarded by `locales.test.ts` (key parity, no empty strings, matching
+  interpolations, both plural forms, a message for every status the error mapping
+  can produce) and `hardcoded.test.ts`, which fails if an accessible name, a toast
+  or a raw error object is written into a component again.
+- German was walked end to end at 320px, 390px and 1280px across eight routes: no
+  page overflow, no clipped label, no English left in the interface.
+
 ## [2.5.9] — 2026-08-31
 
 ### Fixed
@@ -643,7 +689,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.9...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.10...HEAD
+[2.5.10]: https://github.com/RGBond007/anitracker/compare/v2.5.9...v2.5.10
 [2.5.9]: https://github.com/RGBond007/anitracker/compare/v2.5.8...v2.5.9
 [2.5.8]: https://github.com/RGBond007/anitracker/compare/v2.5.7...v2.5.8
 [2.5.7]: https://github.com/RGBond007/anitracker/compare/v2.5.6...v2.5.7

@@ -162,7 +162,12 @@ export function Leaderboard() {
     <Panel className="mb-8">
       <PanelHeader
         right={
-          <div className="flex gap-1.5">
+          // A scrolling row rather than a fixed one: these three labels fit in
+          // English and run 7px past a 390px phone in German ("Episoden ·
+          // Durchschnitt · Abgeschlossen"), taking the whole page into a
+          // horizontal scroll with them. `.rail` is what the library tabs and the
+          // settings tabs already do with a chip row that may not fit.
+          <div className="rail flex gap-1.5 overflow-x-auto">
             {(["episodes_watched", "mean_score", "completed"] as Metric[]).map((m) => (
               <Chip
                 key={m}

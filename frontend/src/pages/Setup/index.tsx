@@ -14,6 +14,7 @@ import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input, Select } from "../../components/ui/Input";
 import { Panel } from "../../components/ui/Panel";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 /** Mirrors the backend's `SetupIn` model — same names, same minimums. */
 const setupSchema = z.object({
@@ -36,6 +37,7 @@ const TITLE_SAMPLES: { value: TitleLanguage; label: string; sample: string }[] =
 
 export function SetupPage() {
   const { t, i18n } = useTranslation();
+  const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const setup = useSetup();
   const [step, setStep] = useState(1);
@@ -170,7 +172,7 @@ export function SetupPage() {
                 </Select>
               </Field>
 
-              {setup.error && <p className="text-sm text-stamp-text">{String(setup.error)}</p>}
+              {setup.error && <p className="text-sm text-stamp-text">{errorMessage(setup.error)}</p>}
 
               <div className="flex gap-2">
                 <Button type="button" variant="quiet" onClick={() => setStep(1)}>

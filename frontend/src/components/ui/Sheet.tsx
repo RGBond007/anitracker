@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),' +
@@ -24,6 +25,7 @@ export function Sheet({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   // Read through a ref so the effect below runs once, on open. Depending on
   // `onClose` directly would re-run it — and so re-take focus — on every render
@@ -102,7 +104,7 @@ export function Sheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="-mr-2 flex h-9 w-9 items-center justify-center rounded-control text-text-dim transition-colors hover:text-text pointer-coarse:min-w-[44px]"
           >
             <svg

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
+import { useTranslation } from "react-i18next";
 
 /** Escape closes, focus lands inside, background click closes. Nothing fancier. */
 export function Modal({
@@ -19,6 +20,7 @@ export function Modal({
   initialFocusRef?: RefObject<HTMLElement | null>;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function Modal({
           <h2 className="font-display text-[15px] font-bold tracking-[-0.01em]">{title}</h2>
           {/* A drawn cross, not the "✕" character: the glyph's weight and size
               come from whatever font the OS falls back to. */}
-          <button onClick={onClose} aria-label="Close" className="text-text-dim hover:text-text">
+          <button onClick={onClose} aria-label={t("common.close")} className="text-text-dim hover:text-text">
             <svg
               aria-hidden
               viewBox="0 0 24 24"
