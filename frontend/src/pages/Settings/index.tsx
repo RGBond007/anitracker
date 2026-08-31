@@ -83,7 +83,7 @@ function SectionNav({
       className={cx(
         vertical
           ? "flex flex-col gap-0.5"
-          : "rail -mx-5 flex gap-1 overflow-x-auto px-5 pb-1 sm:-mx-11 sm:px-11",
+          : "rail -mx-5 flex gap-1 overflow-x-auto px-5 sm:-mx-11 sm:px-11",
       )}
     >
       {sections.map((section) => {
@@ -222,7 +222,7 @@ export function SettingsPage() {
             role="tabpanel"
             aria-label={labels[active]}
             tabIndex={-1}
-            className="min-w-0 max-w-[660px] pb-10 outline-none"
+            className="min-w-0 max-w-[660px] pb-10 outline-none focus-visible:shadow-none"
           >
             {active === "profile" && <ProfileSection me={me} />}
             {active === "appearance" && <AppearanceSection me={me} />}

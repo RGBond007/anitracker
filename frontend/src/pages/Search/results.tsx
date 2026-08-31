@@ -104,7 +104,7 @@ export function FranchiseResult({
             </h4>
             {/* Scrolls rather than shrinking: eight seasons squeezed onto one
                 row would make every poster a thumbnail. */}
-            <div className="rail -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+            <div className="rail -mx-1 flex gap-3 overflow-x-auto px-1">
               {seasons.map((season, index) => (
                 <SeasonCell
                   key={season.provider_id}

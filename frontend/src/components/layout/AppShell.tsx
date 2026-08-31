@@ -58,7 +58,7 @@ export function AppShell() {
           which covers components in the tab sequence; `tabIndex={-1}` is exactly
           the opposite of that, a target reachable only on purpose. Everything a
           Tab can actually stop on keeps its ring, the skip link most of all. */}
-      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex-1 outline-none">
+      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex-1 outline-none focus-visible:shadow-none">
         <Outlet />
       </main>
       <footer className="wrap">

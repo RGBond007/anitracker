@@ -35,7 +35,7 @@ export function SectionHead({
  */
 export function Rail({ children }: { children: ReactNode }) {
   return (
-    <div className="rail flex gap-5 overflow-x-auto pb-1.5">
+    <div className="rail flex gap-5 overflow-x-auto">
       {children}
     </div>
   );

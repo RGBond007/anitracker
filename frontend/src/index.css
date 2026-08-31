@@ -73,9 +73,50 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :focus-visible {
-    outline: 2px solid var(--stamp);
+  /**
+   * One focus indicator for the whole app: a 2px ring held 2px off the element,
+   * with the gap filled by a halo in the opposite tone.
+   *
+   * `:focus-visible` rather than `:focus`, so a clicked button does not wear a
+   * ring the person who clicked it never needed.
+   *
+   * The halo is a `box-shadow` at exactly the outline's offset, so the two meet
+   * with no page showing between them. Outlines paint above box-shadows, so the
+   * order on screen is element, halo, ring — and against artwork of any colour at
+   * least one of the two has contrast. Both are fixed per theme rather than taken
+   * from the accent; see `--focus-ring` in tokens.css for why.
+   *
+   * Shadow rather than a second outline because an element gets only one outline,
+   * and rather than a border because a border would move the layout on focus.
+   */
+  :focus-visible,
+  /**
+   * A control whose real input is visually hidden and stretched across its label —
+   * the segmented radio group — wears the ring on the label instead. Left on the
+   * input, the ring is drawn around something with `opacity: 0` and no pixels of
+   * its own, and then clipped away by the label's truncation: a keyboard user
+   * tabbing into the group saw no indicator whatsoever. An element's own
+   * `overflow` never clips its own outline, so the label is a safe home for it.
+   */
+  .ring-on-label:has(input:focus-visible) {
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--focus-halo);
+  }
+
+  /**
+   * Scrolling rows clip what leaves them, and a ring sitting 4px outside its
+   * element is the first thing to go: every poster in a rail had its top edge cut
+   * off flat. The row is given that much room inside itself and pulled back out
+   * by the same amount, so the ring has somewhere to be drawn and nothing on the
+   * page moves.
+   */
+  .rail {
+    --focus-room: 6px;
+    padding-top: var(--focus-room);
+    padding-bottom: var(--focus-room);
+    margin-top: calc(var(--focus-room) * -1);
+    margin-bottom: calc(var(--focus-room) * -1);
   }
 
   ::selection {

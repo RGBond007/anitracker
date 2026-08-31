@@ -70,7 +70,7 @@ export function SeasonSwitcher({
     // first cover still lines up with the page column.
     <div
       ref={scroller}
-      className="rail -mx-5 flex gap-3.5 overflow-x-auto px-5 pb-1.5 sm:mx-0 sm:px-0"
+      className="rail -mx-5 flex gap-3.5 overflow-x-auto px-5 sm:mx-0 sm:px-0"
       role="list"
     >
       {seasons.map((season) => (
@@ -202,7 +202,7 @@ export function SeasonChips({
   const { scroller, active } = useCentreOnViewed(viewingProviderId);
 
   return (
-    <div ref={scroller} className="rail -mx-5 flex gap-1.5 overflow-x-auto px-5 py-0.5" role="list">
+    <div ref={scroller} className="rail -mx-5 flex gap-1.5 overflow-x-auto px-5" role="list">
       {seasons.map((season) => {
         const isViewing = season.media.provider_id === viewingProviderId;
         return (

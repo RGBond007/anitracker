@@ -39,6 +39,24 @@
   --scrim: 13 12 16;
   --shadow-poster: 0 10px 26px -12px rgb(0 0 0 / 0.7);
   --rim: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+
+  /**
+   * The keyboard focus indicator, in two tones.
+   *
+   * Deliberately *not* `--stamp`. The accent is operator-configurable, and the
+   * ring used to be drawn in it: an instance setting `ACCENT_COLOR=#1a1a2e` got a
+   * focus ring at 1.14:1 against its own page, and `#0d0c10` got one at exactly
+   * 1:1 — a keyboard user on that instance could not see where they were at all.
+   * A focus indicator is the one colour in the app that cannot be a matter of
+   * taste, so it is fixed per theme and the accent keeps meaning "progress".
+   *
+   * Two tones because one is never enough over artwork. A poster is any colour at
+   * all, and a single ring — however bright — disappears against the half of them
+   * that happen to match it. The pair is always visible: where the ring sinks
+   * into the background the halo stands out, and the other way round.
+   */
+  --focus-ring: var(--paper);
+  --focus-halo: var(--ink-950);
 }
 
 /**
@@ -65,6 +83,10 @@
   --scrim: 241 236 225;
   --shadow-poster: 0 10px 26px -14px rgb(13 12 16 / 0.35);
   --rim: inset 0 0 0 1px rgb(13 12 16 / 0.08);
+
+  /* Swapped, so the ring is the ink and the halo the paper. */
+  --focus-ring: var(--ink-950);
+  --focus-halo: var(--paper);
 }
 
 :root {

@@ -6,6 +6,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.7] — 2026-08-31
+
+### Accessibility
+- **The focus ring no longer depends on the instance accent.** It was
+  `2px solid var(--stamp)` — the colour the operator sets in `.env`. An instance
+  running `ACCENT_COLOR=#1a1a2e` had a focus ring at 1.14:1 against its own page,
+  and `#0d0c10` had one at exactly 1:1: invisible. The app looked perfect and was
+  unusable by keyboard, and no screenshot of the default gold would have shown it.
+  The indicator now has its own two tones, fixed per theme, and measures 16.55:1
+  against the page in both. The accent goes back to meaning "progress".
+- **Two tones, because one is never enough over artwork.** A poster is any colour
+  at all, and a single ring disappears against the half of them that happen to
+  match it. The ring is now paired with a halo in the opposite tone, filling the
+  gap the offset leaves: where the ring sinks into the background the halo stands
+  out, and the other way round. The pair is 16.55:1 against each other, so on any
+  cover at all one of the two is legible.
+- **Inputs answer a keyboard with more than a tinted border.** The shared input
+  base carried `outline-none` alongside `focus:border-stamp`, which left a
+  one-pixel colour change as the entire focus state for every text field, number
+  field, select and textarea in the app — hard to see on a poor display, and
+  nothing at all for anyone who cannot separate the two colours. The ring applies
+  to them now, and the border tint stays as a second cue rather than the only one.
+- **Rings are no longer clipped by scrolling rows.** A ring sits 4px outside its
+  element, and a horizontal rail clips whatever leaves it: every poster in every
+  rail had its top edge cut off flat. Rails now hold that much room inside
+  themselves and are pulled back out by the same amount, so nothing on the page
+  moved. `.rail` owns that spacing outright — a `pb-1.5` left in a component is a
+  utility, and it beats the rule and quietly takes the room away again.
+- **The segmented control shows focus at all.** Its real `<input type="radio">` is
+  invisible by design and stretched across its label, so the ring was drawn around
+  something with no pixels and then clipped away by the label's own truncation.
+  Tabbing into the anime/manga switch produced no indicator whatsoever. The ring
+  now sits on the label.
+
+### Notes
+- Everything is `:focus-visible`, so a clicked button does not wear a ring the
+  person who clicked it never needed. Text fields are the exception, and that is
+  the browser's own rule rather than this app's: an element expecting typed input
+  always matches `:focus-visible`, however it was reached.
+- `<main>` and the settings tab panel keep no ring. Both are `tabindex="-1"`
+  regions that exist as a scroll destination, they are not in the tab sequence
+  that WCAG 2.4.7 is about, and a ring around a full-width region reads as a
+  border rather than as focus.
+- Guarded by `src/styles/focus.test.ts`, which fails if the ring is pointed back
+  at the accent, if a component opts out of it again, or if a padding utility
+  reappears on a rail. The last of those found a sixth rail I had missed.
+
 ## [2.5.6] — 2026-08-28
 
 ### Accessibility
@@ -510,7 +557,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.6...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.7...HEAD
+[2.5.7]: https://github.com/RGBond007/anitracker/compare/v2.5.6...v2.5.7
 [2.5.6]: https://github.com/RGBond007/anitracker/compare/v2.5.5...v2.5.6
 [2.5.5]: https://github.com/RGBond007/anitracker/compare/v2.5.4...v2.5.5
 [2.5.4]: https://github.com/RGBond007/anitracker/compare/v2.5.3...v2.5.4

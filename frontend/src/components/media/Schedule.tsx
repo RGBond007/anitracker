@@ -49,7 +49,7 @@ export function Schedule({ items }: { items: AiringEpisode[] }) {
   const dayLabel = useDayLabel();
 
   return (
-    <div className="rail flex gap-3 overflow-x-auto pb-1.5">
+    <div className="rail flex gap-3 overflow-x-auto">
       {items.map((item) => {
         const when = new Date(item.airing_at);
         // `episode - 1` is what will exist once it airs; more than that unwatched

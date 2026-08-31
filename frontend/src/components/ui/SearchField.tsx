@@ -84,7 +84,7 @@ export function SearchField({
         enterKeyHint="search"
         className={cx(
           "w-full rounded-control border border-control-line bg-surface py-3 pl-11 pr-11",
-          "text-sm pointer-coarse:text-base text-text outline-none transition-colors",
+          "text-sm pointer-coarse:text-base text-text transition-colors",
           "placeholder:text-text-faint hover:border-text-dim focus:border-stamp",
           "[&::-webkit-search-cancel-button]:appearance-none",
         )}

@@ -10,10 +10,15 @@ import { cx } from "../../lib/cx";
 
 // `pointer-coarse:text-base` is the iOS zoom fix and has to live here as a
 // utility: the same rule in `@layer base` loses to `text-sm` every time.
+// `focus:border-stamp` stays as a *second* cue, not the only one: it used to sit
+// beside `outline-none`, which left a one-pixel colour change as the whole focus
+// state — invisible on a poor display, and gone entirely for anyone who cannot
+// tell the two colours apart. The global two-tone ring in index.css now does the
+// work, and the border tint rides along with it.
 const BASE =
   "w-full rounded-control border border-control-line bg-surface px-3 py-2.5 " +
   "text-sm pointer-coarse:text-base text-text " +
-  "outline-none transition-colors placeholder:text-text-faint hover:border-text-dim " +
+  "transition-colors placeholder:text-text-faint hover:border-text-dim " +
   "focus:border-stamp disabled:cursor-not-allowed disabled:opacity-50";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
@@ -112,7 +117,9 @@ export function Segmented<T extends string>({
               // the whole control twice as tall as its neighbours.
               // `min-h` on a coarse pointer: the label is the tap target, and a
               // radio's label is not covered by the button rule in index.css.
-              "relative min-w-0 flex-1 cursor-pointer truncate rounded-[6px] px-2 py-2",
+              // `ring-on-label`: the radio inside is invisible, so the ring goes
+              // here — see the rule in index.css.
+              "ring-on-label relative min-w-0 flex-1 cursor-pointer truncate rounded-[6px] px-2 py-2",
               "pointer-coarse:min-h-[44px] pointer-coarse:leading-[28px]",
               "text-center text-[13px] transition-colors select-none",
               active ? "bg-text font-semibold text-bg" : "text-text-dim hover:text-text",
