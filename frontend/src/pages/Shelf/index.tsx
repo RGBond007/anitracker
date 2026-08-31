@@ -184,7 +184,9 @@ export function ShelfPage() {
               </Button>
               <Button
                 variant="stamp"
-                disabled={!name.trim() || update.isPending}
+                disabled={!name.trim()}
+                pending={update.isPending}
+                pendingLabel={t("common.saving")}
                 onClick={() =>
                   update.mutate(
                     {

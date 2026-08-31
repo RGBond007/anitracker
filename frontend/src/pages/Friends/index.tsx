@@ -96,7 +96,8 @@ function AddFriend() {
                     <Button
                       variant="stamp"
                       className="px-3 py-1.5 text-xs"
-                      disabled={send.isPending}
+                      pending={send.isPending}
+                      pendingLabel={t("common.sending")}
                       onClick={() => send.mutate(u.username)}
                     >
                       {t("friends.addAction")}
@@ -139,7 +140,8 @@ function RequestList({
                 <Button
                   variant="stamp"
                   className="px-3 py-1.5 text-xs"
-                  disabled={accept.isPending}
+                  pending={accept.isPending}
+                  pendingLabel={t("common.adding")}
                   onClick={() => accept.mutate(r.id)}
                 >
                   {t("friends.accept")}

@@ -25,7 +25,16 @@
     "back": "Zurück",
     "loading": "Lädt",
     "seeAll": "Alle anzeigen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "saving": "Wird gespeichert…",
+    "adding": "Wird hinzugefügt…",
+    "sending": "Wird gesendet…",
+    "uploading": "Wird hochgeladen…",
+    "creating": "Wird erstellt…",
+    "joining": "Tritt bei…",
+    "starting": "Wird gestartet…",
+    "signingIn": "Anmeldung läuft…",
+    "importing": "Import läuft…"
   },
   "startup": {
     "loading": "{{name}} wird geladen",

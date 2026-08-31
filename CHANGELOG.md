@@ -6,6 +6,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.11] — 2026-08-31
+
+### Fixed
+- **A pending button could be pressed again.** Twenty-odd buttons were written as
+  `disabled={mutation.isPending}`, which looks like it stops a second press and
+  does not: the flag only turns true once React has re-rendered, and clicks
+  dispatched before that all get through. Measured against a slow write, three
+  clicks on Save sent the same request **three times**. The latch is a ref now, so
+  it is already closed by the time the second click asks — and it opens again when
+  the request finishes, however it finishes, because a failed save has to be
+  repeatable.
+- **Four mutation failures were shown but never announced.** Sign-in, the setup
+  wizard, the import starter and the entry form displayed their error as ordinary
+  text, so a screen-reader user pressed a button and got no signal at all that the
+  thing had not happened. All of them are alerts now, and they stay on screen until
+  the next attempt rather than timing out.
+- **Changing your password showed the server's raw message.** It reached for
+  `(error as Error).message` directly, which is the English `detail` string from
+  the Python source — the one place the previous release's error work missed.
+
+### Changed
+- **A button in flight says so.** `disabled` alone says "you cannot press this"
+  without saying why, and to assistive technology says less than nothing, because a
+  disabled control is skipped rather than described. The shared button now takes a
+  `pending` prop that disables it, marks it `aria-busy`, and swaps the label for
+  one that names what is happening — *Saving…*, *Adding…*, *Sending…* — so the
+  state travels in the accessible name instead of only in the styling.
+
+### Notes
+- Four controls keep `disabled` on purpose and are listed as exceptions: `+1`, the
+  reaction toggle, and the shelf's two reorder arrows. The first two are the
+  highest-frequency actions in the app — `+1` fires no toast for the same reason —
+  and the arrows are icon-only, so there is no label on a chevron to swap.
+- No new live regions. The toast viewport is already polite and fires once; a
+  failure is an alert because it needs interrupting for. Measured across one
+  mutation and every refetch it invalidates: exactly one announcement, and nothing
+  from the refetches. Skeletons stay `aria-hidden`, as they were.
+- Guarded by `pending.test.ts`, which fails if a mutation button goes back to
+  carrying only `disabled`, if the latch or the busy flag leaves the shared button,
+  or if an error display appears without an alert role. It found five buttons and
+  one silent error the first time it ran.
+- German was checked at 390px and 1280px with every button forced into its longest
+  pending label (*Wird gespeichert…*): no overflow, nothing clipped.
+
 ## [2.5.10] — 2026-08-31
 
 ### Fixed
@@ -689,7 +733,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.10...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.11...HEAD
+[2.5.11]: https://github.com/RGBond007/anitracker/compare/v2.5.10...v2.5.11
 [2.5.10]: https://github.com/RGBond007/anitracker/compare/v2.5.9...v2.5.10
 [2.5.9]: https://github.com/RGBond007/anitracker/compare/v2.5.8...v2.5.9
 [2.5.8]: https://github.com/RGBond007/anitracker/compare/v2.5.7...v2.5.8

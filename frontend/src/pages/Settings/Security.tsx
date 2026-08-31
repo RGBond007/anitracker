@@ -97,8 +97,14 @@ export function SecuritySection() {
         </Field>
 
         <div className="flex flex-wrap items-center gap-4">
-          <Button type="submit" variant={ready ? "primary" : "ghost"} disabled={!ready || password.isPending}>
-            {password.isPending ? t("settings.saving") : t("settings.changePassword")}
+          <Button
+            type="submit"
+            variant={ready ? "primary" : "ghost"}
+            disabled={!ready}
+            pending={password.isPending}
+            pendingLabel={t("settings.saving")}
+          >
+            {t("settings.changePassword")}
           </Button>
           {saved && <SavedNote />}
         </div>
@@ -118,7 +124,8 @@ export function SecuritySection() {
             recoverable — everyone signs back in. */}
         <Button
           className="mt-4 border-stamp-text/60 text-stamp-text hover:border-stamp-text"
-          disabled={revoke.isPending}
+          pending={revoke.isPending}
+          pendingLabel={t("confirm.signingOut")}
           onClick={() => setConfirming(true)}
         >
           {t("settings.revokeOthers")}

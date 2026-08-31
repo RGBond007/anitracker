@@ -52,7 +52,9 @@ function AddToPlan({ media, compact = false }: { media: Media; compact?: boolean
     <Button
       variant={compact ? "ghost" : "stamp"}
       className={compact ? "px-2.5 py-1.5 text-[12px]" : "px-4 py-2.5 text-[13px]"}
-      disabled={add.isPending || tracked.isLoading}
+      disabled={tracked.isLoading}
+      pending={add.isPending}
+      pendingLabel={t("common.adding")}
       onClick={() =>
         add.mutate(
           {

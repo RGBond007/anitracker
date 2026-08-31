@@ -167,7 +167,9 @@ function InboxCard({
           <Button
             variant="stamp"
             className="px-3 py-1.5 text-[12.5px]"
-            disabled={add.isPending || row.state === "accepted"}
+            disabled={row.state === "accepted"}
+            pending={add.isPending}
+            pendingLabel={t("common.adding")}
             onClick={() => setConfirming(true)}
           >
             {row.state === "accepted" ? t("recommend.added") : t("recommend.addToList")}
@@ -198,7 +200,12 @@ function InboxCard({
             <Button variant="quiet" onClick={() => setConfirming(false)}>
               {t("common.cancel")}
             </Button>
-            <Button variant="stamp" disabled={add.isPending} onClick={accept}>
+            <Button
+              variant="stamp"
+              pending={add.isPending}
+              pendingLabel={t("common.adding")}
+              onClick={accept}
+            >
               {t("recommend.confirmAdd")}
             </Button>
           </div>
@@ -241,6 +248,7 @@ function ShelfPrompt({
                 key={shelf.id}
                 type="button"
                 disabled={shelve.isPending}
+                aria-busy={shelve.isPending || undefined}
                 onClick={() =>
                   shelve.mutate({ id: shelf.id, entryId, on: true }, { onSuccess: onClose })
                 }

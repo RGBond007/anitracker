@@ -97,9 +97,19 @@ export function LoginPage() {
             />
           </Field>
 
-          {error && <p className="text-sm text-stamp-text">{errorMessage(error)}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-stamp-text">
+              {errorMessage(error)}
+            </p>
+          )}
 
-          <Button type="submit" variant="primary" className="w-full" disabled={pending}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+            pending={pending}
+            pendingLabel={t("common.signingIn")}
+          >
             {mode === "login" ? t("auth.login") : t("auth.createAccount")}
           </Button>
 

@@ -331,7 +331,13 @@ function CreateUserSheet({ onClose }: { onClose: () => void }) {
           <Button type="button" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button type="submit" variant="stamp" disabled={!valid || create.isPending}>
+          <Button
+            type="submit"
+            variant="stamp"
+            disabled={!valid}
+            pending={create.isPending}
+            pendingLabel={t("common.creating")}
+          >
             {create.isPending ? t("settings.saving") : t("settings.createUser")}
           </Button>
         </div>

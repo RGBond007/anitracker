@@ -122,7 +122,8 @@ export function SeasonActions({
           <Button
             variant="stamp"
             className="px-3 py-2 text-[12.5px]"
-            disabled={setCurrent.isPending}
+            pending={setCurrent.isPending}
+            pendingLabel={t("common.starting")}
             onClick={() => move(next, { start: true, complete: true })}
           >
             {t("season.startNamed", { name: name(next, series.title, lang) })}
@@ -156,7 +157,8 @@ export function SeasonActions({
       <Button
         variant="primary"
         className="px-4 py-2.5 text-[13px]"
-        disabled={setCurrent.isPending}
+        pending={setCurrent.isPending}
+        pendingLabel={t("common.starting")}
         onClick={() => move(viewed, { start: isUntracked })}
       >
         {isUntracked

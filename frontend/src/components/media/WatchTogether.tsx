@@ -106,7 +106,8 @@ function StartSheet({ media, onClose }: { media: Media; onClose: () => void }) {
         </Button>
         <Button
           variant="stamp"
-          disabled={create.isPending}
+          pending={create.isPending}
+            pendingLabel={t("common.creating")}
           onClick={() =>
             create.mutate(
               {
@@ -183,7 +184,8 @@ function GroupPanel({ group }: { group: WatchGroup }) {
             <Button
               variant="stamp"
               className="px-3 py-1.5 text-[12.5px]"
-              disabled={join.isPending}
+              pending={join.isPending}
+                pendingLabel={t("common.joining")}
               onClick={() => join.mutate(group.id)}
             >
               {t("watch.accept")}
@@ -304,7 +306,9 @@ function GroupPanel({ group }: { group: WatchGroup }) {
               </Button>
               <Button
                 variant="stamp"
-                disabled={!draft.trim() || setTarget.isPending}
+                disabled={!draft.trim()}
+                pending={setTarget.isPending}
+                pendingLabel={t("common.saving")}
                 onClick={() =>
                   setTarget.mutate(
                     { id: group.id, target: Number(draft) },
@@ -327,6 +331,7 @@ function GroupPanel({ group }: { group: WatchGroup }) {
                 <button
                   type="button"
                   disabled={inviteMore.isPending}
+                  aria-busy={inviteMore.isPending || undefined}
                   onClick={() =>
                     inviteMore.mutate(
                       { id: group.id, userIds: [f.user.id] },

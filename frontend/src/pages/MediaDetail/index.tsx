@@ -187,7 +187,8 @@ export function MediaDetailPage() {
             <Button
               variant="stamp"
               className="w-full"
-              disabled={add.isPending}
+              pending={add.isPending}
+              pendingLabel={t("common.adding")}
               onClick={() =>
                 add.mutate({
                   provider,

@@ -235,10 +235,12 @@ export function SaveRow({
         <Button
           type="button"
           variant={dirty ? "primary" : "ghost"}
-          disabled={!dirty || pending}
+          disabled={!dirty}
+          pending={pending}
+          pendingLabel={t("settings.saving")}
           onClick={onSave}
         >
-          {pending ? t("settings.saving") : label}
+          {label}
         </Button>
         {saved && !dirty && <SavedNote />}
         {dirty && !pending && <span className="text-xs text-text-faint">{t("settings.unsaved")}</span>}

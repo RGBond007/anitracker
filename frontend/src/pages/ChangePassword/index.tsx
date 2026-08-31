@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/Button";
 import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
+import { useErrorMessage } from "../../lib/useErrorMessage";
 
 /**
  * The only screen an account on a one-time password can reach.
@@ -16,6 +17,7 @@ import { Panel, PanelHeader } from "../../components/ui/Panel";
  */
 export function ChangePasswordPage() {
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const change = useChangePassword();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -79,14 +81,18 @@ export function ChangePasswordPage() {
             </Field>
 
             {change.error && (
-              <p className="text-sm text-stamp-text">{(change.error as Error).message}</p>
+              <p role="alert" className="text-sm text-stamp-text">
+                {errorMessage(change.error)}
+              </p>
             )}
 
             <Button
               type="submit"
               variant="primary"
               className="w-full"
-              disabled={!ready || change.isPending}
+              disabled={!ready}
+              pending={change.isPending}
+              pendingLabel={t("common.saving")}
             >
               {t("firstRun.submit")}
             </Button>

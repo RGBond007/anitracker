@@ -357,7 +357,12 @@ export function ViewingLog({
             >
               {t("season.notNow")}
             </Button>
-            <Button variant="stamp" disabled={setCurrent.isPending} onClick={startNext}>
+            <Button
+              variant="stamp"
+              pending={setCurrent.isPending}
+              pendingLabel={t("common.starting")}
+              onClick={startNext}
+            >
               {t("season.startNamed", { name: nextName })}
             </Button>
           </div>
@@ -404,7 +409,9 @@ export function ViewingLog({
             </Button>
             <Button
               variant="stamp"
-              disabled={!newShelf.trim() || createShelf.isPending}
+              disabled={!newShelf.trim()}
+              pending={createShelf.isPending}
+              pendingLabel={t("common.creating")}
               onClick={() =>
                 createShelf.mutate(
                   { name: newShelf.trim() },

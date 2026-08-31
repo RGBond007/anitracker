@@ -114,7 +114,11 @@ export function EntryForm({
           <Textarea rows={3} {...register("notes")} />
         </Field>
 
-        {update.error && <p className="text-sm text-stamp-text">{errorMessage(update.error)}</p>}
+        {update.error && (
+          <p role="alert" className="text-sm text-stamp-text">
+            {errorMessage(update.error)}
+          </p>
+        )}
 
         <div className="flex items-center justify-between gap-3 pt-1">
           {showRemove ? (
@@ -136,7 +140,13 @@ export function EntryForm({
               </Button>
             )}
             {/* The button names the action; the toast repeats the verb (§8). */}
-            <Button type="submit" variant="stamp" disabled={update.isPending || !isDirty}>
+            <Button
+            type="submit"
+            variant="stamp"
+            disabled={!isDirty}
+            pending={update.isPending}
+            pendingLabel={t("common.saving")}
+          >
               {submitLabel ?? t("entry.save")}
             </Button>
           </div>

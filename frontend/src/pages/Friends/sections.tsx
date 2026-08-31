@@ -127,7 +127,8 @@ export function Discover() {
             <Button
               variant="stamp"
               className="shrink-0 px-3 py-1.5 text-xs"
-              disabled={send.isPending}
+              pending={send.isPending}
+              pendingLabel={t("common.sending")}
               onClick={() => send.mutate(user.username)}
             >
               {t("friends.addAction")}

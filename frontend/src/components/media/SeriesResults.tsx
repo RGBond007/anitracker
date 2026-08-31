@@ -134,7 +134,8 @@ function ChoosableEntry({ media, lang }: { media: Media; lang: TitleLanguage }) 
         <Button
           variant="ghost"
           className="shrink-0 px-3 py-1.5 text-[12px]"
-          disabled={add.isPending}
+          pending={add.isPending}
+            pendingLabel={t("common.adding")}
           onClick={() =>
             add.mutate({
               provider: media.provider,

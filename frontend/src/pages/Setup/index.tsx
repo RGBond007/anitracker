@@ -172,7 +172,11 @@ export function SetupPage() {
                 </Select>
               </Field>
 
-              {setup.error && <p className="text-sm text-stamp-text">{errorMessage(setup.error)}</p>}
+              {setup.error && (
+                <p role="alert" className="text-sm text-stamp-text">
+                  {errorMessage(setup.error)}
+                </p>
+              )}
 
               <div className="flex gap-2">
                 <Button type="button" variant="quiet" onClick={() => setStep(1)}>
@@ -182,7 +186,8 @@ export function SetupPage() {
                   type="submit"
                   variant="primary"
                   className="flex-1"
-                  disabled={setup.isPending}
+                  pending={setup.isPending}
+                  pendingLabel={t("common.creating")}
                 >
                   {t("setup.finish")}
                 </Button>

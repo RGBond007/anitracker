@@ -155,7 +155,9 @@ export function RecommendSheet({ media, onClose }: { media: Media; onClose: () =
             </Button>
             <Button
               variant="stamp"
-              disabled={chosen.length === 0 || send.isPending}
+              disabled={chosen.length === 0}
+                pending={send.isPending}
+                pendingLabel={t("common.sending")}
               onClick={submit}
             >
               {t("recommend.send", { count: chosen.length })}

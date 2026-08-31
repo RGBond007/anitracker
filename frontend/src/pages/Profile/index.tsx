@@ -108,7 +108,8 @@ export function ProfilePage() {
         {p.relationship === "none" && (
           <Button
             variant="stamp"
-            disabled={send.isPending}
+            pending={send.isPending}
+            pendingLabel={t("common.sending")}
             onClick={() => send.mutate(p.user.username)}
           >
             {t("friends.addAction")}

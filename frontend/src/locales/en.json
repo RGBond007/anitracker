@@ -25,7 +25,16 @@
     "back": "Back",
     "loading": "Loading",
     "seeAll": "See all",
-    "close": "Close"
+    "close": "Close",
+    "saving": "Saving…",
+    "adding": "Adding…",
+    "sending": "Sending…",
+    "uploading": "Uploading…",
+    "creating": "Creating…",
+    "joining": "Joining…",
+    "starting": "Starting…",
+    "signingIn": "Signing in…",
+    "importing": "Importing…"
   },
   "startup": {
     "loading": "Loading {{name}}",

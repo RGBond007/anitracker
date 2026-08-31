@@ -81,7 +81,8 @@ export function AvatarField({ me }: { me: User }) {
           <Button
             variant="ghost"
             className="px-3.5 py-2 text-[13px]"
-            disabled={upload.isPending}
+            pending={upload.isPending}
+            pendingLabel={t("common.uploading")}
             onClick={() => fileRef.current?.click()}
           >
             {me.avatar_url ? t("settings.avatarChange") : t("settings.avatarUpload")}
@@ -91,7 +92,8 @@ export function AvatarField({ me }: { me: User }) {
             <Button
               variant="quiet"
               className="px-3 py-2 text-[13px]"
-              disabled={remove.isPending}
+              pending={remove.isPending}
+              pendingLabel={t("confirm.removing")}
               onClick={() => remove.mutate(undefined, { onSuccess: () => flashSaved() })}
             >
               {t("settings.avatarRemove")}

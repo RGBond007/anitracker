@@ -62,7 +62,11 @@ export function ImportPage() {
             </Button>
           </div>
 
-          {start.error && <p className="text-sm text-stamp-text">{errorMessage(start.error)}</p>}
+          {start.error && (
+            <p role="alert" className="text-sm text-stamp-text">
+              {errorMessage(start.error)}
+            </p>
+          )}
         </div>
       </Panel>
 

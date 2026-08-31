@@ -315,7 +315,9 @@ function WriteSheet({
           </Button>
           <Button
             variant="stamp"
-            disabled={!n.trim() || write.isPending}
+            disabled={!n.trim()}
+            pending={write.isPending}
+            pendingLabel={t("common.saving")}
             onClick={() =>
               write.mutate(
                 {

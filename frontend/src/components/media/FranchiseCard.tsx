@@ -86,6 +86,7 @@ export function FranchiseCard({
         <button
           type="button"
           disabled={setCurrent.isPending}
+          aria-busy={setCurrent.isPending || undefined}
           onClick={() =>
             // One call, not an add followed by a select: this both tracks the next
             // season and moves the user onto it, which is what the card is offering.
