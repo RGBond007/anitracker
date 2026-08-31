@@ -9,7 +9,13 @@
     "primary": "Primary",
     "search": "Search",
     "journal": "Journal",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "withPending": "{{label}}, {{pending}}",
+    "pendingJoin": "{{first}} and {{second}}",
+    "pendingRequests_one": "{{count}} friend request",
+    "pendingRequests_other": "{{count}} friend requests",
+    "pendingRecommendations_one": "{{count}} recommendation",
+    "pendingRecommendations_other": "{{count}} recommendations"
   },
   "common": {
     "anime": "Anime",

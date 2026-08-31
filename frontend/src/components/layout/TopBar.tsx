@@ -7,10 +7,9 @@ import { cx } from "../../lib/cx";
 import { DEFAULT_INSTANCE_NAME, usesBuiltInBrand } from "../../lib/brand";
 import { useInstance } from "../../features/instance/useInstance";
 import { useLogout, useMe } from "../../features/auth/useAuth";
-import { useFriends } from "../../features/social/useSocial";
-import { usePendingRecommendationCount } from "../../features/recommend/useRecommend";
 import { Avatar } from "../ui/Avatar";
 import { IconButton } from "../ui/Button";
+import { usePendingNav } from "./pendingNav";
 
 function SearchIcon() {
   return (
@@ -31,10 +30,19 @@ function LogoutIcon() {
   );
 }
 
-/** Small count beside a nav item. Never shown at zero. */
+/**
+ * Small count beside a nav item. Never shown at zero.
+ *
+ * `aria-hidden`: the same number is already spelled out in the link's accessible
+ * name, and read as well it came out as a bare "Friends 3" — a digit with nothing
+ * to say what it counted.
+ */
 function Badge({ count }: { count: number }) {
   return (
-    <span className="font-mono ml-1.5 rounded-pill bg-stamp px-1.5 py-0.5 text-[10px] font-medium text-ink-950">
+    <span
+      aria-hidden
+      className="font-mono ml-1.5 rounded-pill bg-stamp px-1.5 py-0.5 text-[10px] font-medium text-ink-950"
+    >
       {count}
     </span>
   );
@@ -55,13 +63,10 @@ export function TopBar() {
   const { data: user } = useMe();
   const logout = useLogout();
 
-  // Incoming requests are the one thing in the app that waits on you, so the
-  // count rides the nav rather than only existing on the page itself.
-  const { data: friends } = useFriends();
-  // Both kinds of thing waiting on you, on the one nav item that leads to them:
-  // a friend request to answer and a recommendation not yet opened.
-  const waitingRecommendations = usePendingRecommendationCount();
-  const pending = (friends?.incoming.length ?? 0) + waitingRecommendations;
+  // Incoming requests and unopened recommendations are the things in the app that
+  // wait on you, so the count rides the nav rather than only existing on the page
+  // it leads to. The phone bar reads the same hook, so the two cannot disagree.
+  const { pending, label: friendsLabel } = usePendingNav(t("nav.friends"));
   const instanceName = instance?.instance_name ?? DEFAULT_INSTANCE_NAME;
   const publicAsset = (name: string) => `${import.meta.env.BASE_URL}${name}`;
   const usesDefaultBrand = usesBuiltInBrand(instanceName, instance?.logo_url);
@@ -75,7 +80,8 @@ export function TopBar() {
     { to: "/", label: t("nav.dashboard"), end: true, badge: 0 },
     { to: "/list/current", label: t("nav.library"), end: false, badge: 0 },
     { to: "/journal", label: t("nav.journal"), end: false, badge: 0 },
-    { to: "/friends", label: t("nav.friends"), end: false, badge: pending },
+    // The count is spelled out in `name`; the badge beside the word stays visual.
+    { to: "/friends", label: t("nav.friends"), end: false, badge: pending.total, name: friendsLabel },
     { to: "/import", label: t("nav.import"), end: false, badge: 0 },
   ];
 
@@ -124,7 +130,7 @@ export function TopBar() {
 
         <nav className="hidden gap-[30px] sm:flex">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
+            <NavLink key={l.to} to={l.to} end={l.end} aria-label={l.name} className={linkClass}>
               {l.label}
               {l.badge > 0 && <Badge count={l.badge} />}
             </NavLink>

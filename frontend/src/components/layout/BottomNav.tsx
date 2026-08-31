@@ -2,8 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { cx } from "../../lib/cx";
-import { useFriends } from "../../features/social/useSocial";
-import { usePendingRecommendationCount } from "../../features/recommend/useRecommend";
+import { usePendingNav } from "./pendingNav";
 
 /**
  * Phone navigation. Hidden from `sm` up, where the top bar carries the links.
@@ -42,18 +41,19 @@ const ICONS = {
 
 export function BottomNav() {
   const { t } = useTranslation();
-  const { data: friends } = useFriends();
   // Both kinds of thing waiting on you, on the one nav item that leads to them:
-  // a friend request to answer and a recommendation not yet opened.
-  const waitingRecommendations = usePendingRecommendationCount();
-  const pending = (friends?.incoming.length ?? 0) + waitingRecommendations;
+  // a friend request to answer and a recommendation not yet opened. The desktop
+  // bar reads the same hook, so the two cannot drift apart.
+  const { pending, label: friendsLabel } = usePendingNav(t("nav.friends"));
 
   const items = [
-    { to: "/", end: true, label: t("nav.dashboard"), icon: ICONS.home, badge: 0 },
-    { to: "/list/current", end: false, label: t("nav.library"), icon: ICONS.library, badge: 0 },
-    { to: "/search", end: false, label: t("nav.search"), icon: ICONS.search, badge: 0 },
-    { to: "/friends", end: false, label: t("nav.friends"), icon: ICONS.friends, badge: pending },
-    { to: "/settings", end: false, label: t("nav.settings"), icon: ICONS.settings, badge: 0 },
+    { to: "/", end: true, label: t("nav.dashboard"), icon: ICONS.home, badge: 0, name: undefined },
+    { to: "/list/current", end: false, label: t("nav.library"), icon: ICONS.library, badge: 0, name: undefined },
+    { to: "/search", end: false, label: t("nav.search"), icon: ICONS.search, badge: 0, name: undefined },
+    // `name` overrides what is read out; the visible label stays the short one,
+    // because "Friends, 2 friend requests" does not fit under a 22px icon.
+    { to: "/friends", end: false, label: t("nav.friends"), icon: ICONS.friends, badge: pending.total, name: friendsLabel },
+    { to: "/settings", end: false, label: t("nav.settings"), icon: ICONS.settings, badge: 0, name: undefined },
   ];
 
   return (
@@ -72,6 +72,7 @@ export function BottomNav() {
             <NavLink
               to={item.to}
               end={item.end}
+              aria-label={item.name}
               className={({ isActive }) =>
                 cx(
                   "relative flex h-[56px] flex-col items-center justify-center gap-1 px-0.5",

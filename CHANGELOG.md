@@ -6,6 +6,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.8] — 2026-08-31
+
+### Accessibility
+- **The pending count is announced, and it says what it counts.** The phone
+  navigation's badge was `aria-hidden` with nothing else carrying the number, so a
+  screen-reader user heard "Friends" whether three people were waiting on them or
+  nobody was. The desktop badge was not hidden, which was wrong in its own way: it
+  read out as "Friends 3" — a digit with nothing to say what it counted. The count
+  now lives in the link's own accessible name: *Friends, 2 friend requests and 1
+  recommendation*.
+- **The two kinds are kept apart rather than summed.** A friend waiting on an
+  answer is a different errand from a title someone sent you, and "3 pending items"
+  hides which is which. It costs one clause to say.
+- **Nothing is announced when nothing is waiting.** The name stays exactly
+  "Friends" — an accessible name that grows a clause to report that nothing
+  happened is worse than the plain one, and that is the state on almost every
+  navigation.
+- **The visual badge is now hidden from screen readers on both bars**, so the
+  number is not read twice: once as a bare digit inside the link, and again in the
+  name that explains it.
+- **Both navigations read one source.** Each bar had its own copy of the
+  `incoming + recommendations` sum. They agreed, which was luck rather than design —
+  they lead to the same screen, so a disagreement would have meant one of them was
+  lying about it.
+
+### Notes
+- No live region, deliberately. Changing an `aria-label` on a link nobody is
+  focused on announces nothing at all, so the count can update as often as the
+  queries refetch without interrupting anyone. Wrapping the badge in `aria-live`
+  would have made every poll speak.
+- The destination page already separates incoming requests, outgoing requests and
+  the recommendation inbox into their own sections, so the count breaks down into
+  the same shape the page is in.
+- Verified through Chrome's accessibility tree — the string a screen reader is
+  actually handed — at both 1280px and 390px, in English and German, with nothing
+  pending, one kind pending, and both.
+
 ## [2.5.7] — 2026-08-31
 
 ### Accessibility
@@ -557,7 +594,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.7...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.8...HEAD
+[2.5.8]: https://github.com/RGBond007/anitracker/compare/v2.5.7...v2.5.8
 [2.5.7]: https://github.com/RGBond007/anitracker/compare/v2.5.6...v2.5.7
 [2.5.6]: https://github.com/RGBond007/anitracker/compare/v2.5.5...v2.5.6
 [2.5.5]: https://github.com/RGBond007/anitracker/compare/v2.5.4...v2.5.5
