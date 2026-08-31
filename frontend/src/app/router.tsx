@@ -34,7 +34,9 @@ export function Router() {
   useEffect(() => {
     if (!instance.data) return;
     applyAccent(instance.data.accent_color);
-    if (instance.data.instance_name) document.title = instance.data.instance_name;
+    // The document title is not set here any more: each page names itself through
+    // `useDocumentTitle`, which appends this instance's name. Setting it from both
+    // places made the winner depend on which effect happened to run last.
     // Remembered so the *next* cold start can paint this instance's own brand
     // while `/instance` is still in flight, instead of the built-in one.
     cacheBrand(instance.data);

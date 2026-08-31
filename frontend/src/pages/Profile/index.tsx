@@ -17,6 +17,7 @@ import { PosterGridSkeleton, Skeleton } from "../../components/ui/Skeleton";
 import { displayTitle } from "../../lib/titles";
 import { Avatar } from "../../components/ui/Avatar";
 import { SharedShelves } from "./SharedShelves";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /**
  * Score agreement, one row per shared title. A dash on either side means that
@@ -65,6 +66,8 @@ export function ProfilePage() {
   const { username = "" } = useParams();
   const lang = useUiStore((s) => s.titleLanguage);
   const profile = useProfile(username);
+  // The username comes from the URL, so it is right before the profile loads.
+  useDocumentTitle(username || undefined);
   const send = useSendFriendRequest();
 
   const visible = profile.data?.visible ?? false;

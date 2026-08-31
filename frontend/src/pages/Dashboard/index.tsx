@@ -21,6 +21,7 @@ import { Button, Chip } from "../../components/ui/Button";
 import { EmptyState, ErrorNote } from "../../components/ui/EmptyState";
 import { PosterGridSkeleton, Skeleton } from "../../components/ui/Skeleton";
 import { relativeTime } from "../../lib/time";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /** Inline figures divided by hairlines — a KPI box per number was too much chrome. */
 function StatStrip({
@@ -56,6 +57,8 @@ type LibraryFilter = "all" | "anime" | "manga" | "completed";
 
 export function DashboardPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("nav.dashboard"));
   const lang = useUiStore((s) => s.titleLanguage);
   const { data, isLoading, error, refetch } = useDashboard();
   const increment = useIncrementEntry();

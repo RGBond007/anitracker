@@ -13,6 +13,7 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { SectionHead } from "../../components/layout/Rail";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { Spoiler } from "../../components/ui/Spoiler";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /**
  * Everything you have written, newest first.
@@ -27,6 +28,7 @@ import { Spoiler } from "../../components/ui/Spoiler";
  */
 export function JournalPage() {
   const { t, i18n } = useTranslation();
+  useDocumentTitle(t("nav.journal"));
   const lang = useUiStore((s) => s.titleLanguage);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const { data, isLoading } = useJournalTimeline(favoritesOnly);

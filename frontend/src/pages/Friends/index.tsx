@@ -25,6 +25,7 @@ import { Avatar } from "../../components/ui/Avatar";
 import { FriendsWatching, PersonalPicks, TrustedPick } from "./discovery";
 import { ActivityFeed, Discover, Leaderboard } from "./sections";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 function PersonRow({
   user,
@@ -172,6 +173,8 @@ function RequestList({
 
 export function FriendsPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("nav.friends"));
   const errorMessage = useErrorMessage();
   const { data, isLoading, error, refetch } = useFriends();
   const { data: me } = useMe();

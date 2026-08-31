@@ -15,6 +15,7 @@ import { Field } from "../../components/ui/Field";
 import { Input, Select } from "../../components/ui/Input";
 import { Panel } from "../../components/ui/Panel";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /** Mirrors the backend's `SetupIn` model — same names, same minimums. */
 const setupSchema = z.object({
@@ -37,6 +38,9 @@ const TITLE_SAMPLES: { value: TitleLanguage; label: string; sample: string }[] =
 
 export function SetupPage() {
   const { t, i18n } = useTranslation();
+  // The wizard runs before any instance record exists, so the hook falls back to
+  // the built-in name rather than one nobody has chosen yet.
+  useDocumentTitle(t("setup.title"));
   const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const setup = useSetup();

@@ -10,9 +10,11 @@ import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Panel } from "../../components/ui/Panel";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 export function LoginPage() {
   const { t } = useTranslation();
+
   const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const { data: instance } = useInstance();
@@ -20,6 +22,8 @@ export function LoginPage() {
   const register = useRegister();
 
   const [mode, setMode] = useState<"login" | "register">("login");
+  // Named for the mode it is in: the same route is two different pages.
+  useDocumentTitle(t(mode === "login" ? "auth.login" : "auth.createAccount"));
   const [form, setForm] = useState({ identifier: "", email: "", username: "", password: "" });
 
   const pending = login.isPending || register.isPending;

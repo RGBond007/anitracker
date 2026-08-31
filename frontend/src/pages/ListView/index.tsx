@@ -16,6 +16,7 @@ import { groupByFranchise } from "../../lib/franchise";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { Segmented, Select } from "../../components/ui/Input";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 const STATUSES: EntryStatus[] = ["current", "completed", "on_hold", "dropped", "planned"];
 
@@ -33,6 +34,10 @@ export function ListViewPage() {
   const [sort, setSort] = useState("updated");
 
   useEffect(() => setListTab(status), [status, setListTab]);
+
+  // `/list/current` and `/list/completed` are different routes and get different
+  // titles: "Library" on both would defeat the point of having one.
+  useDocumentTitle(statusLabel(status as EntryStatus, type));
 
   const { data, isLoading } = useEntries({ type, status: status as EntryStatus, sort });
   const shelves = useShelves();

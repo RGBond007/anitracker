@@ -12,6 +12,7 @@ import { SecuritySection } from "./Security";
 import { UsersSection } from "./Users";
 import { ConfirmDestructive } from "../../components/ui/ConfirmDestructive";
 import { DirtyContext, ICONS, Icon } from "./parts";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /**
  * Settings, as one page showing one section at a time.
@@ -131,6 +132,8 @@ function SectionNav({
 
 export function SettingsPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("nav.settings"));
   const { data: me } = useMe();
   const [params, setParams] = useSearchParams();
   const [dirty, setDirty] = useState(false);

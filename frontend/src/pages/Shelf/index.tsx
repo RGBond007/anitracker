@@ -16,6 +16,7 @@ import { Modal } from "../../components/ui/Modal";
 import { PosterGridSkeleton } from "../../components/ui/Skeleton";
 import { cx } from "../../lib/cx";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /**
  * One shelf, in the order its owner arranged.
@@ -34,6 +35,9 @@ export function ShelfPage() {
   const lang = useUiStore((s) => s.titleLanguage);
 
   const { data: shelf, isLoading } = useShelf(Number.isFinite(shelfId) ? shelfId : null);
+  // Undefined until the shelf arrives, so the tab never carries the previous
+  // shelf's name while a different one is on screen.
+  useDocumentTitle(shelf?.name);
   const update = useUpdateShelf();
   const remove = useDeleteShelf();
   const reorder = useReorderShelf();

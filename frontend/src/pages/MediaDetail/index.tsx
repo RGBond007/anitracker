@@ -30,6 +30,7 @@ import { ViewingLog } from "../../components/media/ViewingLog";
 import { Button } from "../../components/ui/Button";
 import { ErrorNote } from "../../components/ui/EmptyState";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 function Fact({ label, value }: { label: string; value: string | number }) {
   return (
@@ -51,6 +52,17 @@ export function MediaDetailPage() {
   const labels = useSeasonLabels();
 
   const media = useMediaDetail(provider, id, type);
+
+  /**
+   * The title in the language this reader chose, which is the whole point of
+   * having the setting — a tab reading "Sousou no Frieren" to someone who set
+   * English is the same failure as the page reading it.
+   *
+   * Undefined while the fetch is in flight and when it fails, so a tab never
+   * keeps the last title it saw while a different title, or an error, is on
+   * screen. `displayTitle` cannot be reached before `media.data` exists anyway.
+   */
+  useDocumentTitle(media.data ? displayTitle(media.data, lang) : undefined);
   const entry = useEntryForMedia(provider, id);
   const series = useSeries(provider, id, type);
   const add = useAddEntry();

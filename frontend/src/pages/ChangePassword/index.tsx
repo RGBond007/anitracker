@@ -7,6 +7,7 @@ import { Field } from "../../components/ui/Field";
 import { Input } from "../../components/ui/Input";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 /**
  * The only screen an account on a one-time password can reach.
@@ -17,6 +18,8 @@ import { useErrorMessage } from "../../lib/useErrorMessage";
  */
 export function ChangePasswordPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("settings.changePassword"));
   const errorMessage = useErrorMessage();
   const change = useChangePassword();
   const [current, setCurrent] = useState("");

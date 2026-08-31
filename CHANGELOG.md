@@ -6,6 +6,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.12] — 2026-08-31
+
+### Added
+- **Every route names the tab it is in.** The title was set once, to the instance
+  name, and never again — so ten open tabs were ten identical labels, the back
+  button offered a history with nothing to tell its entries apart, a screen reader
+  announced the same word on arriving at every route, and an installed PWA had
+  nothing else to orient by. Each page now supplies its own half and the instance's
+  name is appended: *Dashboard · AniTracker*, *Watching · AniTracker*,
+  *Frieren: Beyond Journey's End · AniTracker*.
+- **A title says which page, not just which section.** `/list/current` and
+  `/list/completed` are different routes and get different titles, a shelf is named
+  after itself, and a profile after the person it belongs to.
+- **A title is in the language its reader chose.** A media page uses the same
+  `displayTitle` the heading does, so a tab reading "Sousou no Frieren" to someone
+  who set English is a failure this cannot have.
+
+### Notes
+- A page with nothing to say yet — a title still loading, or one whose request
+  failed — falls back to the instance name alone rather than keeping whatever was
+  there before. A tab still showing the last title while a different page is on
+  screen is worse than a generic one, because it is confidently wrong. Measured
+  against a deliberately slowed fetch: the tab drops to the bare instance name for
+  the whole load and takes the new title only when it arrives.
+- The router no longer sets the title either. Setting it from two places made the
+  winner depend on which effect happened to run last.
+- Guarded by `titles.test.ts`, which fails if a page forgets to name itself, if
+  anything other than the hook assigns `document.title`, or if the hook stops
+  appending the instance's own name. It earned its keep immediately: a `git
+  checkout` during a regression check quietly reverted two of these edits, and the
+  suite caught both before they could ship.
+
 ## [2.5.11] — 2026-08-31
 
 ### Fixed
@@ -733,7 +765,8 @@ First release.
   German, French or Italian titles. The `title_overrides` table ships now so per-locale overrides
   can be added without a schema migration.
 
-[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.11...HEAD
+[Unreleased]: https://github.com/RGBond007/anitracker/compare/v2.5.12...HEAD
+[2.5.12]: https://github.com/RGBond007/anitracker/compare/v2.5.11...v2.5.12
 [2.5.11]: https://github.com/RGBond007/anitracker/compare/v2.5.10...v2.5.11
 [2.5.10]: https://github.com/RGBond007/anitracker/compare/v2.5.9...v2.5.10
 [2.5.9]: https://github.com/RGBond007/anitracker/compare/v2.5.8...v2.5.9

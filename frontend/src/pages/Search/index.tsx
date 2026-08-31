@@ -26,9 +26,12 @@ import {
   type SearchFilters,
 } from "./filters";
 import { FranchiseResult, OtherMatches, useLibraryOverlay } from "./results";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 export function SearchPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("nav.search"));
   const [params, setParams] = useSearchParams();
   const lang = useUiStore((s) => s.titleLanguage);
 

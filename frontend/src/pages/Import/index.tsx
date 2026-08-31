@@ -5,9 +5,12 @@ import { useImportJob, useStartImport } from "../../features/media/useImport";
 import { Button } from "../../components/ui/Button";
 import { Panel, PanelHeader } from "../../components/ui/Panel";
 import { useErrorMessage } from "../../lib/useErrorMessage";
+import { useDocumentTitle } from "../../lib/useDocumentTitle";
 
 export function ImportPage() {
   const { t } = useTranslation();
+
+  useDocumentTitle(t("nav.import"));
   const errorMessage = useErrorMessage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [jobId, setJobId] = useState<number | null>(null);
