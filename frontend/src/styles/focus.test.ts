@@ -36,12 +36,21 @@ describe("the focus ring is independent of the instance accent", () => {
    * gold would ever have shown it.
    */
   it("draws the ring from its own tokens, never from --stamp", () => {
-    const css = indexCss;
-    const rule = css.slice(css.indexOf(":focus-visible {"), css.indexOf("}", css.indexOf(":focus-visible {")));
+    // Every rule whose selector mentions focus-visible, matched whether the CSS
+    // arrives formatted or minified. Slicing on a literal `":focus-visible {"`
+    // was the earlier version of this, and it silently matched nothing the moment
+    // a second selector joined the rule — passing locally against a cached build
+    // of the CSS from before that change, and failing on a clean checkout.
+    const rules = [...indexCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .map(([, selector, body]) => ({ selector: selector.trim(), body }))
+      .filter(({ selector }) => selector.includes("focus-visible"));
 
-    expect(rule).toContain("var(--focus-ring)");
-    expect(rule).toContain("var(--focus-halo)");
-    expect(rule).not.toContain("--stamp");
+    expect(rules.length).toBeGreaterThan(0);
+    for (const { selector, body } of rules) {
+      expect(body, selector).not.toContain("--stamp");
+    }
+    expect(rules.some(({ body }) => body.includes("var(--focus-ring)")), "a ring").toBe(true);
+    expect(rules.some(({ body }) => body.includes("var(--focus-halo)")), "a halo").toBe(true);
   });
 
   it("defines both tones in both themes", () => {
@@ -52,9 +61,8 @@ describe("the focus ring is independent of the instance accent", () => {
   });
 
   it("keeps the ring at two pixels, held off the element", () => {
-    const css = indexCss;
-    expect(css).toMatch(/outline:\s*2px solid var\(--focus-ring\)/);
-    expect(css).toMatch(/outline-offset:\s*2px/);
+    expect(indexCss).toMatch(/outline:\s*2px solid var\(--focus-ring\)/);
+    expect(indexCss).toMatch(/outline-offset:\s*2px/);
   });
 });
 
@@ -101,17 +109,18 @@ describe("scrolling rows leave room for the ring", () => {
    * first thing to go: every poster in every rail had its top edge cut off flat.
    */
   it("gives .rail its own focus room", () => {
-    const css = indexCss;
-    const rail = css.slice(css.indexOf("  .rail {"), css.indexOf("}", css.indexOf("  .rail {")));
-
-    expect(rail).toContain("--focus-room");
+    // Asserted against the whole stylesheet rather than a matched `.rail` block:
+    // Tailwind splits the class across layers and a media query, so block-matching
+    // finds only one of them. These four declarations exist for nothing else, so
+    // their presence is the rule and their absence is its removal.
+    expect(indexCss).toContain("--focus-room");
     // Both edges: a horizontal scroller clips top and bottom, and the first fix
     // covered only the top, which left the chip rows still cut off underneath.
-    expect(rail).toContain("padding-top");
-    expect(rail).toContain("padding-bottom");
+    expect(indexCss).toMatch(/padding-top:\s*var\(--focus-room\)/);
+    expect(indexCss).toMatch(/padding-bottom:\s*var\(--focus-room\)/);
     // Pulled back by the same amount, or every rail on the page moves.
-    expect(rail).toContain("margin-top");
-    expect(rail).toContain("margin-bottom");
+    expect(indexCss).toMatch(/margin-top:\s*calc\(var\(--focus-room\)/);
+    expect(indexCss).toMatch(/margin-bottom:\s*calc\(var\(--focus-room\)/);
   });
 
   /**
